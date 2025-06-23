@@ -1,0 +1,35 @@
+# Compiled source files
+*.pyc
+*.pyo
+__pycache__/
+
+# Temporary files
+*.swp
+*.swo
+
+# Log files
+*.log
+
+# Virtual environments
+venv/
+env/
+.env/
+.venv/
+
+# Pytest cache
+.pytest_cache/
+
+# Ide files
+.idea/
+.vscode/
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
