@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vue App</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
+</head>
+<body>
+  <div id="app">
+    <v-app>
+      <v-app-bar app color="primary">
+        <v-app-bar-title>Onboarding App</v-app-bar-title>
+        <v-spacer></v-spacer>
+        <v-btn to="/" variant="text" color="white">Home</v-btn>
+        <v-btn to="/about" variant="text" color="white">About</v-btn>
+      </v-app-bar>
+      <v-main>
+        <v-container fluid>
+          <router-view></router-view>
+        </v-container>
+      </v-main>
+    </v-app>
+  </div>
+
+  <script type="text/x-template" id="home-template">
+    <v-container fluid class="pa-0" style="height: calc(100vh - 64px);">
+      <v-row no-gutters style="height: 100%;">
+        <!-- Chatbot Section -->
+        <v-col cols="6" style="height: 100%; border-right: 1px solid #e0e0e0;">
+          <div style="height: 100%; display: flex; flex-direction: column;">
+            <v-card-title class="bg-primary text-white">AI Assistant</v-card-title>
+            <div style="flex: 1; overflow-y: auto; padding: 16px;">
+              <div v-for="message in chatMessages" :key="message.id" class="mb-3">
+                <v-card :color="message.isUser ? 'blue-lighten-4' : 'grey-lighten-4'" class="pa-3">
+                  <div class="text-body-2">{{ message.text }}</div>
+                </v-card>
+              </div>
+            </div>
+            <v-divider></v-divider>
+            <div class="pa-3">
+              <v-text-field
+                v-model="newMessage"
+                placeholder="Type your message..."
+                @keyup.enter="sendMessage"
+                append-inner-icon="mdi-send"
+                @click:append-inner="sendMessage"
+                variant="outlined"
+                density="compact"
+              ></v-text-field>
+            </div>
+          </div>
+        </v-col>
+        
+        <!-- Form Section -->
+        <v-col cols="6" style="height: 100%;">
+          <div style="height: 100%; overflow-y: auto; padding: 16px;">
+            <v-card>
+              <v-card-title>Customer Onboarding Form</v-card-title>
+              <v-card-text>
+                <v-form>
+                  <v-text-field label="Full Name" variant="outlined" class="mb-3"></v-text-field>
+                  <v-text-field label="Email" type="email" variant="outlined" class="mb-3"></v-text-field>
+                  <v-text-field label="Phone" variant="outlined" class="mb-3"></v-text-field>
+                  <v-text-field label="Company" variant="outlined" class="mb-3"></v-text-field>
+                  <v-text-field label="Job Title" variant="outlined" class="mb-3"></v-text-field>
+                  <v-textarea label="Address" variant="outlined" class="mb-3"></v-textarea>
+                  <v-select label="Industry" :items="industries" variant="outlined" class="mb-3"></v-select>
+                  <v-select label="Company Size" :items="companySizes" variant="outlined" class="mb-3"></v-select>
+                  <v-textarea label="Business Description" variant="outlined" class="mb-3"></v-textarea>
+                  <v-text-field label="Website" variant="outlined" class="mb-3"></v-text-field>
+                  <v-text-field label="Annual Revenue" variant="outlined" class="mb-3"></v-text-field>
+                  <v-select label="Preferred Contact Method" :items="contactMethods" variant="outlined" class="mb-3"></v-select>
+                  <v-textarea label="Specific Requirements" variant="outlined" class="mb-3"></v-textarea>
+                  <v-textarea label="Current Challenges" variant="outlined" class="mb-3"></v-textarea>
+                  <v-text-field label="Budget Range" variant="outlined" class="mb-3"></v-text-field>
+                  <v-text-field label="Timeline" variant="outlined" class="mb-3"></v-text-field>
+                  <v-textarea label="Additional Notes" variant="outlined" class="mb-3"></v-textarea>
+                  <v-checkbox label="I agree to the terms and conditions" class="mb-3"></v-checkbox>
+                  <v-checkbox label="Subscribe to newsletter" class="mb-3"></v-checkbox>
+                  <v-btn color="primary" size="large" block>Submit Application</v-btn>
+                </v-form>
+              </v-card-text>
+            </v-card>
+          </div>
+        </v-col>
+      </v-row>
+    </v-container>
+  </script>
+
+  <script type="text/x-template" id="about-template">
+    <v-container fluid>
+      <v-row>
+        <v-col cols="12">
+          <h1>About Page</h1>
+          <p>This is the about page.</p>
+        </v-col>
+      </v-row>
+    </v-container>
+  </script>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
+  <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.js"></script>
+
+  <script>
+    const { createApp } = Vue;
+    const { createRouter, createWebHashHistory } = VueRouter;
+    const { createVuetify } = Vuetify;
+
+    const Home = { 
+      template: '#home-template',
+      data() {
+        return {
+          chatMessages: [
+            { id: 1, text: 'Hello! I\'m here to help you with the onboarding process. How can I assist you today?', isUser: false }
+          ],
+          newMessage: '',
+          industries: ['Technology', 'Healthcare', 'Finance', 'Manufacturing', 'Retail', 'Education', 'Other'],
+          companySizes: ['1-10 employees', '11-50 employees', '51-200 employees', '201-1000 employees', '1000+ employees'],
+          contactMethods: ['Email', 'Phone', 'SMS', 'Video Call']
+        }
+      },
+      methods: {
+        sendMessage() {
+          if (this.newMessage.trim()) {
+            this.chatMessages.push({
+              id: Date.now(),
+              text: this.newMessage,
+              isUser: true
+            });
+            this.newMessage = '';
+            // Simulate AI response
+            setTimeout(() => {
+              this.chatMessages.push({
+                id: Date.now() + 1,
+                text: 'Thank you for your message. I\'ll help you with that right away!',
+                isUser: false
+              });
+            }, 1000);
+          }
+        }
+      }
+    };
+    const About = { template: '#about-template' };
+
+    const routes = [
+      { path: '/', component: Home },
+      { path: '/about', component: About }
+    ];
+
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes
+    });
+
+    const vuetify = createVuetify({
+      theme: {
+        defaultTheme: 'light'
+      }
+    });
+
+    createApp({})
+      .use(router)
+      .use(vuetify)
+      .mount('#app');
+  </script>
+</body>
+</html>

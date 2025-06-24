@@ -50,4 +50,5 @@ async def websocket_endpoint(websocket: WebSocket):
             connected_clients.remove(websocket)
 
 # Mount static files
-app.mount("/", StaticFiles(directory="client/dist", html=True), name="static")
+# app.mount("/", StaticFiles(directory="client/dist", html=True), name="static")
+app.mount("/", StaticFiles(directory="client1", html=True), name="static")
