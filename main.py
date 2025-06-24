@@ -3,6 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import json
 from agent import ask_agent
+import random
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -16,24 +17,37 @@ def ask_agent_endpoint(prompt: str):
     answer = ask_agent(prompt)
     return {"answer": answer}
 
-@app.post("/api/form-field")
+@app.get("/api/start-agent")
+def start_agent():
+    random_number = str(random.randint(10000000, 99999999))
+    print(random_number)
+    print(f"Starting agent with session ID: {random_number}")
+    answer = ask_agent("Start asking questions.", session_id=random_number)
+    return {"answer": answer}
+
+
+@app.post("/api/update-form-field")
 async def update_form_field(field_data: dict):
     # Update form data
     form_data[field_data["name"]] = field_data["value"]
     print(f"Form data updated: {form_data}")
+
+    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. What should user do next?")
+    return {"answer": answer}
+
     
-    # Notify all connected WebSocket clients
-    for client in connected_clients:
-        try:
-            await client.send_text(json.dumps({
-                "type": "field-updated",
-                "field": field_data,
-                "form_state": form_data
-            }))
-        except:
-            connected_clients.remove(client)
+    # # Notify all connected WebSocket clients
+    # for client in connected_clients:
+    #     try:
+    #         await client.send_text(json.dumps({
+    #             "type": "field-updated",
+    #             "field": field_data,
+    #             "form_state": form_data
+    #         }))
+    #     except:
+    #         connected_clients.remove(client)
     
-    return {"status": "success", "current_form": form_data}
+    # return {"status": "success", "current_form": form_data}
 
 
 # @app.get("/api/items")
