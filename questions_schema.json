@@ -1,0 +1,404 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "title": "File Transfer Onboarding Questionnaire",
+  "description": "Questions for onboarding users to a file transfer service",
+  "required": [
+    "flowName",
+    "sourceSystem",
+    "targetSystem",
+    "transferMethod",
+    "frequency",
+    "fileLocation",
+    "targetServiceDate",
+    "contactInformation",
+    "dataClassification"
+  ],
+  "properties": {
+    "flowName": {
+      "type": "string",
+      "title": "Flow Name",
+      "description": "What is the name of this file transfer flow?"
+    },
+    "sourceSystem": {
+      "type": "object",
+      "title": "Source System Information",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Source System Name",
+          "description": "What is the name of the source system?"
+        },
+        "environment": {
+          "type": "string",
+          "title": "Source Environment",
+          "description": "What environment is the source system in?",
+          "enum": [
+            "Development",
+            "Test",
+            "QA",
+            "UAT",
+            "Production",
+            "Other"
+          ],
+          "default": "Production"
+        },
+        "owner": {
+          "type": "string",
+          "title": "Source System Owner",
+          "description": "Who is the owner or responsible party for the source system?"
+        }
+      },
+      "required": [
+        "name",
+        "environment",
+        "owner"
+      ]
+    },
+    "targetSystem": {
+      "type": "object",
+      "title": "Target System Information",
+      "properties": {
+        "name": {
+          "type": "string",
+          "title": "Target System Name",
+          "description": "What is the name of the target system?"
+        },
+        "environment": {
+          "type": "string",
+          "title": "Target Environment",
+          "description": "What environment is the target system in?",
+          "enum": [
+            "Development",
+            "Test",
+            "QA",
+            "UAT",
+            "Production",
+            "Other"
+          ],
+          "default": "Production"
+        },
+        "owner": {
+          "type": "string",
+          "title": "Target System Owner",
+          "description": "Who is the owner or responsible party for the target system?"
+        }
+      },
+      "required": [
+        "name",
+        "environment",
+        "owner"
+      ]
+    },
+    "transferMethod": {
+      "type": "string",
+      "title": "Transfer Method",
+      "description": "Which transfer method would you like to use?",
+      "enum": [
+        "SFTP",
+        "FTP",
+        "API",
+        "Shared Directory",
+        "AWS S3",
+        "Azure Blob Storage",
+        "Other"
+      ],
+      "default": "SFTP"
+    },
+    "otherTransferMethod": {
+      "type": "string",
+      "title": "Other Transfer Method",
+      "description": "If 'Other' was selected for transfer method, please specify:"
+    },
+    "frequency": {
+      "type": "object",
+      "title": "Transfer Frequency",
+      "properties": {
+        "type": {
+          "type": "string",
+          "title": "Frequency Type",
+          "description": "How often should this file transfer occur?",
+          "enum": [
+            "One-time",
+            "On-demand",
+            "Hourly",
+            "Daily",
+            "Weekly",
+            "Monthly",
+            "Quarterly",
+            "Custom"
+          ],
+          "default": "Daily"
+        },
+        "customSchedule": {
+          "type": "string",
+          "title": "Custom Schedule",
+          "description": "If 'Custom' was selected for frequency, please specify the schedule (e.g., every 15 minutes, every 2 days, etc.):"
+        },
+        "specificTime": {
+          "type": "string",
+          "title": "Specific Time",
+          "description": "At what time should this transfer occur? (HH:MM in 24-hour format, and indicate timezone)",
+          "format": "time"
+        },
+        "dayOfWeek": {
+          "type": "string",
+          "title": "Day of Week",
+          "description": "For weekly transfers, which day of the week?",
+          "enum": [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday"
+          ]
+        },
+        "dayOfMonth": {
+          "type": "integer",
+          "title": "Day of Month",
+          "description": "For monthly transfers, which day of the month? (1-31)",
+          "minimum": 1,
+          "maximum": 31
+        }
+      },
+      "required": [
+        "type"
+      ]
+    },
+    "fileInformation": {
+      "type": "object",
+      "title": "File Information",
+      "properties": {
+        "fileFormat": {
+          "type": "string",
+          "title": "File Format",
+          "description": "What format are the files? (e.g., CSV, XML, JSON, etc.)"
+        },
+        "fileNamingConvention": {
+          "type": "string",
+          "title": "File Naming Convention",
+          "description": "What is the naming convention for the files? (e.g., FILENAME_YYYYMMDD.csv)"
+        },
+        "estimatedFileSize": {
+          "type": "string",
+          "title": "Estimated File Size",
+          "description": "What is the estimated average size of each file?"
+        },
+        "compressionFormat": {
+          "type": "string",
+          "title": "Compression Format",
+          "description": "Are the files compressed? If so, what format?",
+          "enum": [
+            "None",
+            "ZIP",
+            "GZIP",
+            "TAR",
+            "Other"
+          ],
+          "default": "None"
+        },
+        "encryptionRequired": {
+          "type": "boolean",
+          "title": "Encryption Required",
+          "description": "Does this file need to be encrypted during transfer?",
+          "default": false
+        },
+        "encryptionMethod": {
+          "type": "string",
+          "title": "Encryption Method",
+          "description": "If encryption is required, what encryption method should be used?",
+          "enum": [
+            "PGP",
+            "GPG",
+            "AES",
+            "Other"
+          ]
+        }
+      },
+      "required": [
+        "fileFormat",
+        "fileNamingConvention",
+        "estimatedFileSize",
+        "encryptionRequired"
+      ]
+    },
+    "fileLocation": {
+      "type": "object",
+      "title": "File Location",
+      "properties": {
+        "sourcePath": {
+          "type": "string",
+          "title": "Source File Path",
+          "description": "What is the full path where the file should be picked up from?"
+        },
+        "targetPath": {
+          "type": "string",
+          "title": "Target File Path",
+          "description": "What is the full path where the file should be delivered to?"
+        },
+        "credentials": {
+          "type": "object",
+          "title": "Access Credentials",
+          "properties": {
+            "username": {
+              "type": "string",
+              "title": "Username",
+              "description": "What username should be used for the transfer? (Note: Actual passwords should be shared securely, not through this form)"
+            },
+            "authenticationMethod": {
+              "type": "string",
+              "title": "Authentication Method",
+              "description": "What authentication method should be used?",
+              "enum": [
+                "Password",
+                "SSH Key",
+                "API Key",
+                "OAuth",
+                "Other"
+              ],
+              "default": "Password"
+            }
+          }
+        }
+      },
+      "required": [
+        "sourcePath",
+        "targetPath"
+      ]
+    },
+    "targetServiceDate": {
+      "type": "string",
+      "title": "Target Service Date",
+      "description": "By what date do you need this file transfer service to be operational?",
+      "format": "date"
+    },
+    "fileHandlingOptions": {
+      "type": "object",
+      "title": "File Handling Options",
+      "properties": {
+        "fileRetention": {
+          "type": "string",
+          "title": "File Retention",
+          "description": "How long should files be retained at the source after successful transfer?",
+          "enum": [
+            "Delete immediately",
+            "24 hours",
+            "7 days",
+            "30 days",
+            "90 days",
+            "Custom"
+          ],
+          "default": "7 days"
+        },
+        "customRetention": {
+          "type": "string",
+          "title": "Custom Retention",
+          "description": "If 'Custom' was selected for file retention, please specify:"
+        },
+        "failureHandling": {
+          "type": "string",
+          "title": "Failure Handling",
+          "description": "How should transfer failures be handled?",
+          "enum": [
+            "Retry immediately",
+            "Retry on schedule",
+            "Manual intervention",
+            "Alert only"
+          ],
+          "default": "Retry on schedule"
+        },
+        "maxRetries": {
+          "type": "integer",
+          "title": "Maximum Retries",
+          "description": "How many times should the system retry failed transfers?",
+          "minimum": 0,
+          "default": 3
+        }
+      },
+      "required": [
+        "fileRetention",
+        "failureHandling"
+      ]
+    },
+    "contactInformation": {
+      "type": "object",
+      "title": "Contact Information",
+      "properties": {
+        "requestorName": {
+          "type": "string",
+          "title": "Requestor Name",
+          "description": "Your full name"
+        },
+        "requestorEmail": {
+          "type": "string",
+          "title": "Requestor Email",
+          "description": "Your email address",
+          "format": "email"
+        },
+        "requestorPhone": {
+          "type": "string",
+          "title": "Requestor Phone",
+          "description": "Your phone number"
+        },
+        "technicalContact": {
+          "type": "string",
+          "title": "Technical Contact",
+          "description": "Name of the technical contact for this file transfer (if different)"
+        },
+        "technicalContactEmail": {
+          "type": "string",
+          "title": "Technical Contact Email",
+          "description": "Email of the technical contact",
+          "format": "email"
+        }
+      },
+      "required": [
+        "requestorName",
+        "requestorEmail"
+      ]
+    },
+    "dataClassification": {
+      "type": "string",
+      "title": "Data Classification",
+      "description": "What is the sensitivity classification of the data being transferred?",
+      "enum": [
+        "Public",
+        "Internal",
+        "Confidential",
+        "Restricted",
+        "Regulated"
+      ],
+      "default": "Internal"
+    },
+    "additionalRequirements": {
+      "type": "string",
+      "title": "Additional Requirements",
+      "description": "Please specify any additional requirements or considerations for this file transfer"
+    },
+    "approvals": {
+      "type": "object",
+      "title": "Required Approvals",
+      "properties": {
+        "managerName": {
+          "type": "string",
+          "title": "Manager Name",
+          "description": "Name of your manager who approves this request"
+        },
+        "managerEmail": {
+          "type": "string",
+          "title": "Manager Email",
+          "description": "Email of your manager",
+          "format": "email"
+        },
+        "securityApproved": {
+          "type": "boolean",
+          "title": "Security Team Approval",
+          "description": "Has the security team approved this file transfer?",
+          "default": false
+        }
+      }
+    }
+  }
+}

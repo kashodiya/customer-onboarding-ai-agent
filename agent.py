@@ -1,3 +1,4 @@
+from regex import template
 from langchain_aws import ChatBedrock
 from langgraph.graph import StateGraph, START, END
 from langgraph.checkpoint.memory import MemorySaver
@@ -5,6 +6,7 @@ from typing import TypedDict, Annotated
 from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 import json
 import logging
+from jinja2 import Environment, BaseLoader
 
 # Configure logging for debugging
 logging.basicConfig(level=logging.DEBUG)
@@ -39,7 +41,18 @@ def _create_agent():
         """Process the conversation with the LLM."""
         with open("SYSTEM_PROMPT.md", "r") as f:
             system_prompt = f.read().strip()
-        messages = [SystemMessage(content=system_prompt)] + state["messages"]
+        
+        with open("questions_schema.json", "r") as f:
+            questions_schema = f.read().strip()
+            
+        env = Environment(loader=BaseLoader)
+        template = env.from_string(system_prompt)
+
+        system_prompt_with_questions = template.render({"questions_schema": questions_schema})
+
+        print(f"system_prompt_with_questions = {system_prompt_with_questions}")
+
+        messages = [SystemMessage(content=system_prompt_with_questions)] + state["messages"]
         response = llm.invoke(messages)
         return {"messages": state["messages"] + [response]}
     
@@ -83,7 +96,7 @@ def debug_memory_state(session_id="default"):
         return None
 
 
-def ask_agent(prompt, session_id="default", debug=True):
+def ask_agent(prompt, session_id="default", debug=False):
     """Send a prompt to the agent and return the response."""
     try:
         app = get_agent()
