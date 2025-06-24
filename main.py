@@ -2,22 +2,19 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import json
+from agent import ask_bedrock
 
+# Initialize FastAPI application
 app = FastAPI()
 
-# Sample data
-items = []
+# items = []
 connected_clients = []
 form_data = {}
 
-@app.get("/api/items")
-def get_items():
-    return {"items": items}
-
-@app.post("/api/items")
-def create_item(item: dict):
-    items.append(item)
-    return {"message": "Item created", "item": item}
+@app.get("/api/ask-bedrock/{prompt}")
+def ask_bedrock_endpoint(prompt: str):
+    answer = ask_bedrock(prompt)
+    return {"answer": answer}
 
 @app.post("/api/form-field")
 async def update_form_field(field_data: dict):
@@ -38,6 +35,17 @@ async def update_form_field(field_data: dict):
     
     return {"status": "success", "current_form": form_data}
 
+
+# @app.get("/api/items")
+# def get_items():
+#     return {"items": items}
+
+# @app.post("/api/items")
+# def create_item(item: dict):
+#     items.append(item)
+#     return {"message": "Item created", "item": item}
+
+
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
@@ -48,6 +56,8 @@ async def websocket_endpoint(websocket: WebSocket):
     except:
         if websocket in connected_clients:
             connected_clients.remove(websocket)
+
+
 
 # Mount static files
 # app.mount("/", StaticFiles(directory="client/dist", html=True), name="static")

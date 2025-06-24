@@ -124,7 +124,15 @@
         }
       },
       methods: {
-        sendMessage() {
+        async sendMessage(){
+            await fetch('/api/form-field', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(fieldData)
+            });
+
+        },
+        sendMessage1() {
           if (this.newMessage.trim()) {
             this.chatMessages.push({
               id: Date.now(),
