@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import json
-from agent import ask_bedrock
+from agent import ask_agent
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -11,9 +11,9 @@ app = FastAPI()
 connected_clients = []
 form_data = {}
 
-@app.get("/api/ask-bedrock/{prompt}")
-def ask_bedrock_endpoint(prompt: str):
-    answer = ask_bedrock(prompt)
+@app.get("/api/ask-agent/{prompt}")
+def ask_agent_endpoint(prompt: str):
+    answer = ask_agent(prompt)
     return {"answer": answer}
 
 @app.post("/api/form-field")
