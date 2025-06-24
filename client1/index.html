@@ -142,6 +142,14 @@
           </div>
         </v-col>
       </v-row>
+      
+      <!-- Snackbar for notifications -->
+      <v-snackbar v-model="showSnackbar" :color="snackbarColor" timeout="4000">
+        {{ snackbarMessage }}
+        <template v-slot:actions>
+          <v-btn variant="text" @click="showSnackbar = false">Close</v-btn>
+        </template>
+      </v-snackbar>
     </v-container>
   </script>
 
@@ -196,10 +204,18 @@
                     encryptionMethods: ['PGP', 'GPG', 'AES', 'Other'],
                     authMethods: ['Password', 'SSH Key', 'API Key', 'OAuth', 'Other'],
                     dataClassifications: ['Public', 'Internal', 'Confidential', 'Restricted', 'Regulated'],
-                    previousValues: {}
+                    previousValues: {},
+                    showSnackbar: false,
+                    snackbarMessage: '',
+                    snackbarColor: 'success'
                 }
             },
             methods: {
+                showMessage(message, color = 'success') {
+                    this.snackbarMessage = message;
+                    this.snackbarColor = color;
+                    this.showSnackbar = true;
+                },
                 async sendMessage() {
                     try {
                         const response = await fetch(`/api/ask-agent/${this.newMessage}`, {
@@ -214,11 +230,11 @@
                             );
                             this.newMessage = '';
                         } else {
-                            alert('Error sending message to agent');
+                            this.showMessage('Error sending message to agent', 'error');
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Error sending message to agent');
+                        this.showMessage('Error sending message to agent', 'error');
                     }
                 },
                 async submitForm() {
@@ -229,13 +245,13 @@
                             body: JSON.stringify(this.formData)
                         });
                         if (response.ok) {
-                            alert('Form submitted successfully!');
+                            this.showMessage('Form submitted successfully!', 'success');
                         } else {
-                            alert('Error submitting form');
+                            this.showMessage('Error submitting form', 'error');
                         }
                     } catch (error) {
                         console.error('Error:', error);
-                        alert('Error submitting form');
+                        this.showMessage('Error submitting form', 'error');
                     }
                 },
                 sendMessage1() {
@@ -277,11 +293,11 @@
                                     { id: 1, text: agentResp.answer, isUser: false }
                                 );
                             } else {
-                                alert('Error sending update to agent');
+                                this.showMessage('Error sending update to agent', 'error');
                             }
                         } catch (error) {
                             console.error('Error:', error);
-                            alert('Error sending update to agent');
+                            this.showMessage('Error sending update to agent', 'error');
                         }
 
 
@@ -301,11 +317,11 @@
                             { id: 1, text: agentResp.answer, isUser: false }
                         );
                     } else {
-                        alert('Error asking agent to start asking questions');
+                        this.showMessage('Error asking agent to start asking questions', 'error');
                     }
                 } catch (error) {
                     console.error('Error:', error);
-                    alert('Error asking agent to start asking questions');
+                    this.showMessage('Error asking agent to start asking questions', 'error');
                 }
 
             }
