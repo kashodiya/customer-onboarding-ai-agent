@@ -11,18 +11,17 @@ app = FastAPI()
 # items = []
 connected_clients = []
 form_data = {}
+agent_session_id = str(random.randint(10000000, 99999999))
 
 @app.get("/api/ask-agent/{prompt}")
 def ask_agent_endpoint(prompt: str):
-    answer = ask_agent(prompt)
+    answer = ask_agent(prompt, session_id=agent_session_id)
     return {"answer": answer}
 
 @app.get("/api/start-agent")
 def start_agent():
-    random_number = str(random.randint(10000000, 99999999))
-    print(random_number)
-    print(f"Starting agent with session ID: {random_number}")
-    answer = ask_agent("Start asking questions.", session_id=random_number)
+    print(f"Starting agent with session ID: {agent_session_id}")
+    answer = ask_agent("Start asking questions.", session_id=agent_session_id)
     return {"answer": answer}
 
 
@@ -32,7 +31,7 @@ async def update_form_field(field_data: dict):
     form_data[field_data["name"]] = field_data["value"]
     print(f"Form data updated: {form_data}")
 
-    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. What should user do next?")
+    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. What should user do next?", session_id=agent_session_id)
     return {"answer": answer}
 
     

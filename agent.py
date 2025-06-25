@@ -9,7 +9,7 @@ import logging
 from jinja2 import Environment, BaseLoader
 
 # Configure logging for debugging
-logging.basicConfig(level=logging.DEBUG)
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 # Global agent instance
@@ -30,6 +30,20 @@ def get_agent():
 
 def _create_agent():
     """Create a LangGraph agent with Bedrock LLM and InMemorySaver."""
+    print("🔧 Creating new agent instance...")
+    
+    # Load and render system prompt once during agent creation
+    with open("SYSTEM_PROMPT.md", "r") as f:
+        system_prompt = f.read().strip()
+    
+    with open("questions_schema.json", "r") as f:
+        questions_schema = f.read().strip()
+        
+    env = Environment(loader=BaseLoader)
+    template = env.from_string(system_prompt)
+    system_prompt_with_questions = template.render({"questions_schema": questions_schema})
+    print("*** system_prompt_with_questions created")
+    
     # Initialize Bedrock LLM
     llm = ChatBedrock(
         model_id="anthropic.claude-3-haiku-20240307-v1:0",
@@ -39,19 +53,6 @@ def _create_agent():
     
     def chat_node(state: AgentState):
         """Process the conversation with the LLM."""
-        with open("SYSTEM_PROMPT.md", "r") as f:
-            system_prompt = f.read().strip()
-        
-        with open("questions_schema.json", "r") as f:
-            questions_schema = f.read().strip()
-            
-        env = Environment(loader=BaseLoader)
-        template = env.from_string(system_prompt)
-
-        system_prompt_with_questions = template.render({"questions_schema": questions_schema})
-
-        print(f"system_prompt_with_questions = {system_prompt_with_questions}")
-
         messages = [SystemMessage(content=system_prompt_with_questions)] + state["messages"]
         response = llm.invoke(messages)
         return {"messages": state["messages"] + [response]}
@@ -101,6 +102,9 @@ def ask_agent(prompt, session_id="default", debug=False):
     try:
         app = get_agent()
         config = {"configurable": {"thread_id": session_id}}
+
+
+        print(f"\n🔍 Asking agent in session '{session_id}': {prompt}")
         
         # Debug: Show state before processing
         if debug:
@@ -118,7 +122,8 @@ def ask_agent(prompt, session_id="default", debug=False):
             debug_memory_state(session_id)
         
         answer = result["messages"][-1].content
-        print(f"\nReceived answer: {answer[:100]}...")
+        # print(f"\nReceived answer: {answer[:100]}...")
+        print(f"\nReceived answer: {answer}")
         return answer
     except Exception as e:
         print(f"An error occurred: {e}")
