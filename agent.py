@@ -1,38 +1,30 @@
-from regex import template
 from langchain_aws import ChatBedrock
-from langgraph.graph import StateGraph, START, END
-from langgraph.checkpoint.memory import MemorySaver
-from typing import TypedDict, Annotated
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
-import json
-import logging
+from langchain.memory import ConversationBufferMemory
+from langchain.schema import SystemMessage
 from jinja2 import Environment, BaseLoader
 
-# Configure logging for debugging
-# logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
-# Global agent instance
-_agent_app = None
+# Global memory instances per session
+_memories = {}
 
 
-class AgentState(TypedDict):
-    messages: Annotated[list, "List of messages in the conversation"]
+def get_memory(session_id="default"):
+    """Get or create memory for a session."""
+    if session_id not in _memories:
+        _memories[session_id] = ConversationBufferMemory(return_messages=True)
+    return _memories[session_id]
 
 
-def get_agent():
-    """Get or create the global agent instance."""
-    global _agent_app
-    if _agent_app is None:
-        _agent_app = _create_agent()
-    return _agent_app
+def get_llm():
+    """Get the LLM instance."""
+    return ChatBedrock(
+        model_id="anthropic.claude-3-haiku-20240307-v1:0",
+        region_name="us-east-1",
+        model_kwargs={"max_tokens": 4096, "temperature": 0.5, "top_p": 0.9}
+    )
 
 
-def _create_agent():
-    """Create a LangGraph agent with Bedrock LLM and InMemorySaver."""
-    print("🔧 Creating new agent instance...")
-    
-    # Load and render system prompt once during agent creation
+def get_system_prompt():
+    """Load and render system prompt."""
     with open("SYSTEM_PROMPT.md", "r") as f:
         system_prompt = f.read().strip()
     
@@ -41,57 +33,22 @@ def _create_agent():
         
     env = Environment(loader=BaseLoader)
     template = env.from_string(system_prompt)
-    system_prompt_with_questions = template.render({"questions_schema": questions_schema})
-    print("*** system_prompt_with_questions created")
-    
-    # Initialize Bedrock LLM
-    llm = ChatBedrock(
-        model_id="anthropic.claude-3-haiku-20240307-v1:0",
-        region_name="us-east-1",
-        model_kwargs={"max_tokens": 4096, "temperature": 0.5, "top_p": 0.9}
-    )
-    
-    def chat_node(state: AgentState):
-        """Process the conversation with the LLM."""
-        messages = [SystemMessage(content=system_prompt_with_questions)] + state["messages"]
-        response = llm.invoke(messages)
-        return {"messages": state["messages"] + [response]}
-    
-    # Create the graph
-    workflow = StateGraph(AgentState)
-    workflow.add_node("chat", chat_node)
-    workflow.add_edge(START, "chat")
-    workflow.add_edge("chat", END)
-    
-    # Compile with memory saver
-    memory = MemorySaver()
-    app = workflow.compile(checkpointer=memory)
-    
-    return app
+    return template.render({"questions_schema": questions_schema})
 
 
 def debug_memory_state(session_id="default"):
     """Debug function to inspect memory state."""
     try:
-        app = get_agent()
-        config = {"configurable": {"thread_id": session_id}}
-        # Get current state from memory
-        current_state = app.get_state(config)
+        memory = get_memory(session_id)
+        messages = memory.chat_memory.messages
         print(f"\n=== DEBUG: Memory State for Session '{session_id}' ===")
-        print(f"State values: {current_state.values}")
-        print(f"Next actions: {current_state.next}")
-        print(f"Config: {current_state.config}")
-        
-        # Print message history
-        if 'messages' in current_state.values:
-            print(f"\nMessage History ({len(current_state.values['messages'])} messages):")
-            for i, msg in enumerate(current_state.values['messages']):
-                msg_type = type(msg).__name__
-                content_preview = msg.content[:50] + "..." if len(msg.content) > 50 else msg.content
-                print(f"  {i+1}. {msg_type}: {content_preview}")
+        print(f"Message History ({len(messages)} messages):")
+        for i, msg in enumerate(messages):
+            msg_type = type(msg).__name__
+            content_preview = msg.content[:50] + "..." if len(msg.content) > 50 else msg.content
+            print(f"  {i+1}. {msg_type}: {content_preview}")
         print("=" * 50)
-        
-        return current_state
+        return messages
     except Exception as e:
         print(f"Error debugging memory state: {e}")
         return None
@@ -100,31 +57,32 @@ def debug_memory_state(session_id="default"):
 def ask_agent(prompt, session_id="default", debug=False):
     """Send a prompt to the agent and return the response."""
     try:
-        app = get_agent()
-        config = {"configurable": {"thread_id": session_id}}
-
-
+        memory = get_memory(session_id)
+        llm = get_llm()
+        system_prompt = get_system_prompt()
+        
         print(f"\n🔍 Asking agent in session '{session_id}': {prompt}")
         
-        # Debug: Show state before processing
         if debug:
             print(f"\n--- BEFORE: Session '{session_id}' ---")
             debug_memory_state(session_id)
         
-        result = app.invoke(
-            {"messages": [HumanMessage(content=prompt)]},
-            config=config
-        )
+        # Build messages: system + conversation history + new prompt
+        messages = [SystemMessage(content=system_prompt)]
+        messages.extend(memory.chat_memory.messages)
+        messages.append({"role": "user", "content": prompt})
         
-        # Debug: Show state after processing
+        response = llm.invoke(messages)
+        
+        # Save to memory
+        memory.save_context({"input": prompt}, {"output": response.content})
+        
         if debug:
             print(f"\n--- AFTER: Session '{session_id}' ---")
             debug_memory_state(session_id)
         
-        answer = result["messages"][-1].content
-        # print(f"\nReceived answer: {answer[:100]}...")
-        print(f"\nReceived answer: {answer}")
-        return answer
+        print(f"\nReceived answer: {response.content}")
+        return response.content
     except Exception as e:
         print(f"An error occurred: {e}")
         return None
