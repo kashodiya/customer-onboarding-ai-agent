@@ -14,8 +14,27 @@ form_data = {}
 agent_session_id = str(random.randint(10000000, 99999999))
 
 @app.get("/api/ask-agent/{prompt}")
-def ask_agent_endpoint(prompt: str):
+async def ask_agent_endpoint(prompt: str):
     answer = ask_agent(prompt, session_id=agent_session_id)
+
+    # changed = ask_agent("Application is asking: What was users last answer to the onboarding question? Just return schema field name as 'name' and value as 'value' in JSON format. If nothings changed then return {}. The response must be in a valid JSON format.", session_id=agent_session_id)
+
+    changed = ask_agent("REPORT-LAST-ANSWER", session_id=agent_session_id)
+    
+    # , role="assistant"
+    print(f"Anything changed?\n {changed}")
+    
+    # Send WebSocket message if changed has a value
+    if changed and changed.strip() != "{}":
+        for client in connected_clients[:]:
+            try:
+                await client.send_text(json.dumps({
+                    "type": "update-form",
+                    "payload": changed
+                }))
+            except:
+                connected_clients.remove(client)
+
     return {"answer": answer}
 
 @app.get("/api/start-agent")
@@ -34,13 +53,8 @@ async def update_form_field(field_data: dict):
     answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. What should user do next?", session_id=agent_session_id)
     return {"answer": answer}
 
-    
-    # # Notify all connected WebSocket clients
-    # for client in connected_clients:
-    #     try:
-    #         await client.send_text(json.dumps({
-    #             "type": "field-updated",
-    #             "field": field_data,
+
+
     #             "form_state": form_data
     #         }))
     #     except:

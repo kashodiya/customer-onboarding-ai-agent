@@ -2,32 +2,32 @@
 <html>
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Vue App</title>
-    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Vue App</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@6.x/css/materialdesignicons.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.css" rel="stylesheet">
 </head>
 
 <body>
-    <div id="app">
-        <v-app>
-            <v-app-bar app color="primary">
-                <v-app-bar-title>Customer Onboarding App</v-app-bar-title>
-                <v-spacer></v-spacer>
-                <v-btn to="/" variant="text" color="white">Home</v-btn>
-                <v-btn to="/about" variant="text" color="white">About</v-btn>
-            </v-app-bar>
-            <v-main>
-                <v-container fluid>
-                    <router-view></router-view>
-                </v-container>
-            </v-main>
-        </v-app>
-    </div>
+  <div id="app">
+    <v-app>
+      <v-app-bar app color="primary">
+        <v-app-bar-title>Customer Onboarding App</v-app-bar-title>
+        <v-spacer></v-spacer>
+        <v-btn to="/" variant="text" color="white">Home</v-btn>
+        <v-btn to="/about" variant="text" color="white">About</v-btn>
+      </v-app-bar>
+      <v-main>
+        <v-container fluid>
+          <router-view></router-view>
+        </v-container>
+      </v-main>
+    </v-app>
+  </div>
 
-    <script type="text/x-template" id="home-template">
+  <script type="text/x-template" id="home-template">
     <v-container fluid class="pa-0" style="height: calc(100vh - 64px);">
       <v-row no-gutters style="height: 100%;">
         <!-- Chatbot Section -->
@@ -37,10 +37,11 @@
             <div ref="chatContainer" style="flex: 1; overflow-y: auto; padding: 16px;">
               <div v-for="message in chatMessages" :key="message.id" class="mb-3">
                 <v-card :color="message.isUser ? 'blue-lighten-4' : 'grey-lighten-4'" class="pa-3">
-                  <div class="text-body-2">{{ message.text }}</div>
+                  <div class="text-body-2" style="white-space: pre-wrap;">{{ message.text }}</div>
                 </v-card>
               </div>
             </div>
+            <v-progress-linear v-if="isLoading" indeterminate color="primary"></v-progress-linear>
             <v-divider></v-divider>
             <div class="pa-3">
               <v-text-field
@@ -153,7 +154,7 @@
     </v-container>
   </script>
 
-    <script type="text/x-template" id="about-template">
+  <script type="text/x-template" id="about-template">
     <v-container fluid>
       <v-row>
         <v-col cols="12">
@@ -164,196 +165,228 @@
     </v-container>
   </script>
 
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
-    <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.js"></script>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vuetify@3.4.0/dist/vuetify.min.js"></script>
+  <script src="https://unpkg.com/vue-router@4/dist/vue-router.global.js"></script>
 
-    <script>
-        const { createApp } = Vue;
-        const { createRouter, createWebHashHistory } = VueRouter;
-        const { createVuetify } = Vuetify;
+  <script>
+    const { createApp } = Vue;
+    const { createRouter, createWebHashHistory } = VueRouter;
+    const { createVuetify } = Vuetify;
 
-        const Home = {
-            template: '#home-template',
-            data() {
-                return {
-                    chatMessages: [
-                        { id: 1, text: 'Welcome!', isUser: false }
-                    ],
-                    newMessage: '',
-                    formValid: false,
-                    formData: {
-                        flowName: '',
-                        sourceSystem: { name: '', environment: 'Production', owner: '' },
-                        targetSystem: { name: '', environment: 'Production', owner: '' },
-                        transferMethod: 'SFTP',
-                        otherTransferMethod: '',
-                        frequency: { type: 'Daily', customSchedule: '', specificTime: '', dayOfWeek: '', dayOfMonth: null },
-                        fileInformation: { fileFormat: '', fileNamingConvention: '', estimatedFileSize: '', compressionFormat: 'None', encryptionRequired: false, encryptionMethod: '' },
-                        fileLocation: { sourcePath: '', targetPath: '', credentials: { username: '', authenticationMethod: 'Password' } },
-                        targetServiceDate: '',
-                        contactInformation: { requestorName: '', requestorEmail: '', requestorPhone: '', technicalContact: '', technicalContactEmail: '' },
-                        dataClassification: 'Internal',
-                        additionalRequirements: ''
-                    },
-                    environments: ['Development', 'Test', 'QA', 'UAT', 'Production', 'Other'],
-                    transferMethods: ['SFTP', 'FTP', 'API', 'Shared Directory', 'AWS S3', 'Azure Blob Storage', 'Other'],
-                    frequencyTypes: ['One-time', 'On-demand', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Quarterly', 'Custom'],
-                    daysOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-                    compressionFormats: ['None', 'ZIP', 'GZIP', 'TAR', 'Other'],
-                    encryptionMethods: ['PGP', 'GPG', 'AES', 'Other'],
-                    authMethods: ['Password', 'SSH Key', 'API Key', 'OAuth', 'Other'],
-                    dataClassifications: ['Public', 'Internal', 'Confidential', 'Restricted', 'Regulated'],
-                    previousValues: {},
-                    showSnackbar: false,
-                    snackbarMessage: '',
-                    snackbarColor: 'success'
-                }
-            },
-            methods: {
-                scrollToBottom() {
-                    this.$nextTick(() => {
-                        if (this.$refs.chatContainer) {
-                            this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
-                        }
-                    });
-                },
-                addAgentMessage(text) {
-                    this.chatMessages.push({ id: Date.now(), text, isUser: false });
-                    this.scrollToBottom();
-                },
-                showMessage(message, color = 'success') {
-                    this.snackbarMessage = message;
-                    this.snackbarColor = color;
-                    this.showSnackbar = true;
-                },
-                async sendMessage() {
-                    try {
-                        const response = await fetch(`/api/ask-agent/${this.newMessage}`, {
-                            method: 'GET',
-                            headers: { 'Content-Type': 'application/json' }
-                        });
-                        if (response.ok) {
-                            const agentResp = await response.json();
-                            console.log(agentResp);
-                            this.addAgentMessage(agentResp.answer);
-                            this.newMessage = '';
-                        } else {
-                            this.showMessage('Error sending message to agent', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.showMessage('Error sending message to agent', 'error');
-                    }
-                },
-                async submitForm() {
-                    try {
-                        const response = await fetch('/api/onboarding-request', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(this.formData)
-                        });
-                        if (response.ok) {
-                            this.showMessage('Form submitted successfully!', 'success');
-                        } else {
-                            this.showMessage('Error submitting form', 'error');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        this.showMessage('Error submitting form', 'error');
-                    }
-                },
-                sendMessage1() {
-                    if (this.newMessage.trim()) {
-                        this.chatMessages.push({
-                            id: Date.now(),
-                            text: this.newMessage,
-                            isUser: true
-                        });
-                        this.newMessage = '';
-                        // Simulate AI response
-                        setTimeout(() => {
-                            this.chatMessages.push({
-                                id: Date.now() + 1,
-                                text: 'Thank you for your message. I\'ll help you with that right away!',
-                                isUser: false
-                            });
-                        }, 1000);
-                    }
-                },
-                async onFieldChange(fieldName, fieldValue) {
-                    const oldValue = this.previousValues[fieldName] || '';
-                    this.previousValues[fieldName] = fieldValue;
-                    if(oldValue === fieldValue){
-                        console.log(`Field unchanged: ${fieldName} - Value: ${fieldValue}`);
-                    }else{
-                        console.log(`Field changed: ${fieldName} - Old: ${oldValue}, New: ${fieldValue}`);
-                        
-                        try {
-                            const response = await fetch('/api/update-form-field', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ name: fieldName, value: fieldValue })
-                            });
-                            if (response.ok) {
-                                const agentResp = await response.json();
-                                console.log(agentResp);
-                                this.addAgentMessage(agentResp.answer);
-                            } else {
-                                this.showMessage('Error sending update to agent', 'error');
-                            }
-                        } catch (error) {
-                            console.error('Error:', error);
-                            this.showMessage('Error sending update to agent', 'error');
-                        }
-
-
-                    }
-                }
-            },
-            async created(){
-                console.log('Home component created');
-                try {
-                    const response = await fetch('/api/start-agent', {
-                        method: 'GET',
-                    });
-                    if (response.ok) {
-                        const agentResp = await response.json();
-                        console.log(agentResp);
-                        this.addAgentMessage(agentResp.answer);
-                    } else {
-                        this.showMessage('Error asking agent to start asking questions', 'error');
-                    }
-                } catch (error) {
-                    console.error('Error:', error);
-                    this.showMessage('Error asking agent to start asking questions', 'error');
-                }
-
+    const Home = {
+      template: '#home-template',
+      data() {
+        return {
+          chatMessages: [
+            { id: 1, text: 'Welcome!', isUser: false }
+          ],
+          newMessage: '',
+          formValid: false,
+          formData: {
+            flowName: '',
+            sourceSystem: { name: '', environment: 'Production', owner: '' },
+            targetSystem: { name: '', environment: 'Production', owner: '' },
+            transferMethod: 'SFTP',
+            otherTransferMethod: '',
+            frequency: { type: 'Daily', customSchedule: '', specificTime: '', dayOfWeek: '', dayOfMonth: null },
+            fileInformation: { fileFormat: '', fileNamingConvention: '', estimatedFileSize: '', compressionFormat: 'None', encryptionRequired: false, encryptionMethod: '' },
+            fileLocation: { sourcePath: '', targetPath: '', credentials: { username: '', authenticationMethod: 'Password' } },
+            targetServiceDate: '',
+            contactInformation: { requestorName: '', requestorEmail: '', requestorPhone: '', technicalContact: '', technicalContactEmail: '' },
+            dataClassification: 'Internal',
+            additionalRequirements: ''
+          },
+          environments: ['Development', 'Test', 'QA', 'UAT', 'Production', 'Other'],
+          transferMethods: ['SFTP', 'FTP', 'API', 'Shared Directory', 'AWS S3', 'Azure Blob Storage', 'Other'],
+          frequencyTypes: ['One-time', 'On-demand', 'Hourly', 'Daily', 'Weekly', 'Monthly', 'Quarterly', 'Custom'],
+          daysOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+          compressionFormats: ['None', 'ZIP', 'GZIP', 'TAR', 'Other'],
+          encryptionMethods: ['PGP', 'GPG', 'AES', 'Other'],
+          authMethods: ['Password', 'SSH Key', 'API Key', 'OAuth', 'Other'],
+          dataClassifications: ['Public', 'Internal', 'Confidential', 'Restricted', 'Regulated'],
+          previousValues: {},
+          showSnackbar: false,
+          snackbarMessage: '',
+          snackbarColor: 'success',
+          isLoading: false
+        }
+      },
+      methods: {
+        scrollToBottom() {
+          this.$nextTick(() => {
+            if (this.$refs.chatContainer) {
+              this.$refs.chatContainer.scrollTop = this.$refs.chatContainer.scrollHeight;
             }
+          });
+        },
+        addAgentMessage(text, isUser = false) {
+          this.chatMessages.push({ id: Date.now(), text, isUser });
+          this.scrollToBottom();
+        },
+        showMessage(message, color = 'success') {
+          this.snackbarMessage = message;
+          this.snackbarColor = color;
+          this.showSnackbar = true;
+        },
+        async sendMessage() {
+          if (!this.newMessage.trim()) return;
+          this.isLoading = true;
+          this.addAgentMessage(this.newMessage, true);
+          try {
+            const response = await fetch(`/api/ask-agent/${this.newMessage}`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' }
+            });
+            if (response.ok) {
+              const agentResp = await response.json();
+              console.log(agentResp);
+              this.addAgentMessage(agentResp.answer);
+              this.newMessage = '';
+            } else {
+              this.showMessage('Error sending message to agent', 'error');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('Error sending message to agent', 'error');
+          } finally {
+            this.isLoading = false;
+          }
+        },
+        async submitForm() {
+          try {
+            const response = await fetch('/api/onboarding-request', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(this.formData)
+            });
+            if (response.ok) {
+              this.showMessage('Form submitted successfully!', 'success');
+            } else {
+              this.showMessage('Error submitting form', 'error');
+            }
+          } catch (error) {
+            console.error('Error:', error);
+            this.showMessage('Error submitting form', 'error');
+          }
+        },
+        sendMessage1() {
+          if (this.newMessage.trim()) {
+            this.chatMessages.push({
+              id: Date.now(),
+              text: this.newMessage,
+              isUser: true
+            });
+            this.newMessage = '';
+            // Simulate AI response
+            setTimeout(() => {
+              this.chatMessages.push({
+                id: Date.now() + 1,
+                text: 'Thank you for your message. I\'ll help you with that right away!',
+                isUser: false
+              });
+            }, 1000);
+          }
+        },
+        updateFormField(fieldName, fieldValue) {
+          console.log(`Updating field: ${fieldName} with value:`, fieldValue);
+          const keys = fieldName.split('.');
+          console.log('Field path keys:', keys);
+          let target = this.formData;
+          for (let i = 0; i < keys.length - 1; i++) {
+            target = target[keys[i]];
+            console.log(`Navigated to:`, target);
+          }
+          target[keys[keys.length - 1]] = fieldValue;
+          console.log('Form data updated:', this.formData);
+        },
+        async onFieldChange(fieldName, fieldValue) {
+          const oldValue = this.previousValues[fieldName] || '';
+          this.previousValues[fieldName] = fieldValue;
+          if (oldValue === fieldValue) {
+            console.log(`Field unchanged: ${fieldName} - Value: ${fieldValue}`);
+          } else {
+            console.log(`Field changed: ${fieldName} - Old: ${oldValue}, New: ${fieldValue}`);
+
+            try {
+              const response = await fetch('/api/update-form-field', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: fieldName, value: fieldValue })
+              });
+              if (response.ok) {
+                const agentResp = await response.json();
+                console.log(agentResp);
+                this.addAgentMessage(agentResp.answer);
+              } else {
+                this.showMessage('Error sending update to agent', 'error');
+              }
+            } catch (error) {
+              console.error('Error:', error);
+              this.showMessage('Error sending update to agent', 'error');
+            }
+
+
+          }
+        }
+      },
+      async created() {
+        console.log('Home component created');
+        
+        // WebSocket connection
+        this.ws = new WebSocket(`ws://${window.location.host}/ws`);
+        this.ws.onmessage = (event) => {
+          const data = JSON.parse(event.data);
+          if (data.type === 'update-form') {
+            console.log('Received form update:', data.payload);
+            const nameVal = JSON.parse(data.payload);
+            if (nameVal.name && nameVal.value !== undefined) {
+              this.updateFormField(nameVal.name, nameVal.value);
+            }
+          }
         };
-        const About = { template: '#about-template' };
+        
+        try {
+          const response = await fetch('/api/start-agent', {
+            method: 'GET',
+          });
+          if (response.ok) {
+            const agentResp = await response.json();
+            console.log(agentResp);
+            this.addAgentMessage(agentResp.answer);
+          } else {
+            this.showMessage('Error asking agent to start asking questions', 'error');
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          this.showMessage('Error asking agent to start asking questions', 'error');
+        }
 
-        const routes = [
-            { path: '/', component: Home },
-            { path: '/about', component: About }
-        ];
+      }
+    };
+    const About = { template: '#about-template' };
 
-        const router = createRouter({
-            history: createWebHashHistory(),
-            routes
-        });
+    const routes = [
+      { path: '/', component: Home },
+      { path: '/about', component: About }
+    ];
 
-        const vuetify = createVuetify({
-            theme: {
-                defaultTheme: 'light'
-            }
-        });
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes
+    });
 
-        createApp({})
-            .use(router)
-            .use(vuetify)
-            .mount('#app');
-    </script>
+    const vuetify = createVuetify({
+      theme: {
+        defaultTheme: 'light'
+      }
+    });
+
+    createApp({})
+      .use(router)
+      .use(vuetify)
+      .mount('#app');
+  </script>
 </body>
 
 </html>

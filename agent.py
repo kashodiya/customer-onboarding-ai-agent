@@ -54,7 +54,7 @@ def debug_memory_state(session_id="default"):
         return None
 
 
-def ask_agent(prompt, session_id="default", debug=False):
+def ask_agent(prompt, session_id="default", debug=False, role="user"):
     """Send a prompt to the agent and return the response."""
     try:
         memory = get_memory(session_id)
@@ -70,7 +70,7 @@ def ask_agent(prompt, session_id="default", debug=False):
         # Build messages: system + conversation history + new prompt
         messages = [SystemMessage(content=system_prompt)]
         messages.extend(memory.chat_memory.messages)
-        messages.append({"role": "user", "content": prompt})
+        messages.append({"role": role, "content": prompt})
         
         response = llm.invoke(messages)
         
@@ -81,7 +81,7 @@ def ask_agent(prompt, session_id="default", debug=False):
             print(f"\n--- AFTER: Session '{session_id}' ---")
             debug_memory_state(session_id)
         
-        print(f"\nReceived answer: {response.content}")
+        # print(f"\nReceived answer: {response.content}")
         return response.content
     except Exception as e:
         print(f"An error occurred: {e}")
