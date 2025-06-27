@@ -52,7 +52,7 @@ async def update_form_field(field_data: dict):
     form_data[field_data["name"]] = field_data["value"]
     print(f"Form data updated: {form_data}")
 
-    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. What should user do next?", session_id=agent_session_id)
+    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. Briefly confrm it in simple English. What should user do next?", session_id=agent_session_id)
     return {"answer": answer}
 
 
