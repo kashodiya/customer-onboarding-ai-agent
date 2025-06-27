@@ -64,77 +64,77 @@
               <v-card-title>File Transfer Onboarding Form</v-card-title>
               <v-card-text>
                 <v-form v-model="formValid">
-                  <v-text-field v-model="formData.flowName" label="Flow Name" variant="outlined" class="mb-3" required @blur="onFieldChange('flowName', formData.flowName)"></v-text-field>
+                  <v-text-field ref="flowName" v-model="formData.flowName" label="Flow Name" variant="outlined" class="mb-3" required @blur="onFieldChange('flowName', formData.flowName)"></v-text-field>
                   
                   <v-card class="mb-3" variant="outlined">
                     <v-card-title class="text-h6">Source System Information</v-card-title>
                     <v-card-text>
-                      <v-text-field v-model="formData.sourceSystem.name" label="Source System Name" variant="outlined" class="mb-3" required @blur="onFieldChange('sourceSystemName', formData.sourceSystem.name)"></v-text-field>
-                      <v-select v-model="formData.sourceSystem.environment" label="Source Environment" :items="environments" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('sourceEnvironment', formData.sourceSystem.environment)"></v-select>
-                      <v-text-field v-model="formData.sourceSystem.owner" label="Source System Owner" variant="outlined" class="mb-3" required @blur="onFieldChange('sourceSystemOwner', formData.sourceSystem.owner)"></v-text-field>
+                      <v-text-field ref="sourceSystem.name" v-model="formData.sourceSystem.name" label="Source System Name" variant="outlined" class="mb-3" required @blur="onFieldChange('sourceSystemName', formData.sourceSystem.name)"></v-text-field>
+                      <v-select ref="sourceSystem.environment" v-model="formData.sourceSystem.environment" label="Source Environment" :items="environments" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('sourceEnvironment', formData.sourceSystem.environment)"></v-select>
+                      <v-text-field ref="sourceSystem.owner" v-model="formData.sourceSystem.owner" label="Source System Owner" variant="outlined" class="mb-3" required @blur="onFieldChange('sourceSystemOwner', formData.sourceSystem.owner)"></v-text-field>
                     </v-card-text>
                   </v-card>
                   
                   <v-card class="mb-3" variant="outlined">
                     <v-card-title class="text-h6">Target System Information</v-card-title>
                     <v-card-text>
-                      <v-text-field v-model="formData.targetSystem.name" label="Target System Name" variant="outlined" class="mb-3" required @blur="onFieldChange('targetSystemName', formData.targetSystem.name)"></v-text-field>
-                      <v-select v-model="formData.targetSystem.environment" label="Target Environment" :items="environments" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('targetEnvironment', formData.targetSystem.environment)"></v-select>
-                      <v-text-field v-model="formData.targetSystem.owner" label="Target System Owner" variant="outlined" class="mb-3" required @blur="onFieldChange('targetSystemOwner', formData.targetSystem.owner)"></v-text-field>
+                      <v-text-field ref="targetSystem.name" v-model="formData.targetSystem.name" label="Target System Name" variant="outlined" class="mb-3" required @blur="onFieldChange('targetSystemName', formData.targetSystem.name)"></v-text-field>
+                      <v-select ref="targetSystem.environment" v-model="formData.targetSystem.environment" label="Target Environment" :items="environments" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('targetEnvironment', formData.targetSystem.environment)"></v-select>
+                      <v-text-field ref="targetSystem.owner" v-model="formData.targetSystem.owner" label="Target System Owner" variant="outlined" class="mb-3" required @blur="onFieldChange('targetSystemOwner', formData.targetSystem.owner)"></v-text-field>
                     </v-card-text>
                   </v-card>
                   
-                  <v-select v-model="formData.transferMethod" label="Transfer Method" :items="transferMethods" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('transferMethod', formData.transferMethod)"></v-select>
-                  <v-text-field v-if="formData.transferMethod === 'Other'" v-model="formData.otherTransferMethod" label="Other Transfer Method" variant="outlined" class="mb-3" @blur="onFieldChange('otherTransferMethod', formData.otherTransferMethod)"></v-text-field>
+                  <v-select ref="transferMethod" v-model="formData.transferMethod" label="Transfer Method" :items="transferMethods" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('transferMethod', formData.transferMethod)"></v-select>
+                  <v-text-field ref="otherTransferMethod" v-if="formData.transferMethod === 'Other'" v-model="formData.otherTransferMethod" label="Other Transfer Method" variant="outlined" class="mb-3" @blur="onFieldChange('otherTransferMethod', formData.otherTransferMethod)"></v-text-field>
                   
                   <v-card class="mb-3" variant="outlined">
                     <v-card-title class="text-h6">Transfer Frequency</v-card-title>
                     <v-card-text>
-                      <v-select v-model="formData.frequency.type" label="Frequency Type" :items="frequencyTypes" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('frequencyType', formData.frequency.type)"></v-select>
-                      <v-text-field v-if="formData.frequency.type === 'Custom'" v-model="formData.frequency.customSchedule" label="Custom Schedule" variant="outlined" class="mb-3" @blur="onFieldChange('customSchedule', formData.frequency.customSchedule)"></v-text-field>
-                      <v-text-field v-model="formData.frequency.specificTime" label="Specific Time (HH:MM)" type="time" variant="outlined" class="mb-3" @blur="onFieldChange('specificTime', formData.frequency.specificTime)"></v-text-field>
-                      <v-select v-if="formData.frequency.type === 'Weekly'" v-model="formData.frequency.dayOfWeek" label="Day of Week" :items="daysOfWeek" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('dayOfWeek', formData.frequency.dayOfWeek)"></v-select>
-                      <v-text-field v-if="formData.frequency.type === 'Monthly'" v-model="formData.frequency.dayOfMonth" label="Day of Month (1-31)" type="number" min="1" max="31" variant="outlined" class="mb-3" @blur="onFieldChange('dayOfMonth', formData.frequency.dayOfMonth)"></v-text-field>
+                      <v-select ref="frequency.type" v-model="formData.frequency.type" label="Frequency Type" :items="frequencyTypes" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('frequencyType', formData.frequency.type)"></v-select>
+                      <v-text-field ref="frequency.customSchedule" v-if="formData.frequency.type === 'Custom'" v-model="formData.frequency.customSchedule" label="Custom Schedule" variant="outlined" class="mb-3" @blur="onFieldChange('customSchedule', formData.frequency.customSchedule)"></v-text-field>
+                      <v-text-field ref="frequency.specificTime" v-model="formData.frequency.specificTime" label="Specific Time (HH:MM)" type="time" variant="outlined" class="mb-3" @blur="onFieldChange('specificTime', formData.frequency.specificTime)"></v-text-field>
+                      <v-select ref="frequency.dayOfWeek" v-if="formData.frequency.type === 'Weekly'" v-model="formData.frequency.dayOfWeek" label="Day of Week" :items="daysOfWeek" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('dayOfWeek', formData.frequency.dayOfWeek)"></v-select>
+                      <v-text-field ref="frequency.dayOfMonth" v-if="formData.frequency.type === 'Monthly'" v-model="formData.frequency.dayOfMonth" label="Day of Month (1-31)" type="number" min="1" max="31" variant="outlined" class="mb-3" @blur="onFieldChange('dayOfMonth', formData.frequency.dayOfMonth)"></v-text-field>
                     </v-card-text>
                   </v-card>
                   
                   <v-card class="mb-3" variant="outlined">
                     <v-card-title class="text-h6">File Information</v-card-title>
                     <v-card-text>
-                      <v-text-field v-model="formData.fileInformation.fileFormat" label="File Format" variant="outlined" class="mb-3" required @blur="onFieldChange('fileFormat', formData.fileInformation.fileFormat)"></v-text-field>
-                      <v-text-field v-model="formData.fileInformation.fileNamingConvention" label="File Naming Convention" variant="outlined" class="mb-3" required @blur="onFieldChange('fileNamingConvention', formData.fileInformation.fileNamingConvention)"></v-text-field>
-                      <v-text-field v-model="formData.fileInformation.estimatedFileSize" label="Estimated File Size" variant="outlined" class="mb-3" required @blur="onFieldChange('estimatedFileSize', formData.fileInformation.estimatedFileSize)"></v-text-field>
-                      <v-select v-model="formData.fileInformation.compressionFormat" label="Compression Format" :items="compressionFormats" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('compressionFormat', formData.fileInformation.compressionFormat)"></v-select>
-                      <v-checkbox v-model="formData.fileInformation.encryptionRequired" label="Encryption Required" class="mb-3" @update:modelValue="onFieldChange('encryptionRequired', formData.fileInformation.encryptionRequired)"></v-checkbox>
-                      <v-select v-if="formData.fileInformation.encryptionRequired" v-model="formData.fileInformation.encryptionMethod" label="Encryption Method" :items="encryptionMethods" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('encryptionMethod', formData.fileInformation.encryptionMethod)"></v-select>
+                      <v-text-field ref="fileInformation.fileFormat" v-model="formData.fileInformation.fileFormat" label="File Format" variant="outlined" class="mb-3" required @blur="onFieldChange('fileFormat', formData.fileInformation.fileFormat)"></v-text-field>
+                      <v-text-field ref="fileInformation.fileNamingConvention" v-model="formData.fileInformation.fileNamingConvention" label="File Naming Convention" variant="outlined" class="mb-3" required @blur="onFieldChange('fileNamingConvention', formData.fileInformation.fileNamingConvention)"></v-text-field>
+                      <v-text-field ref="fileInformation.estimatedFileSize" v-model="formData.fileInformation.estimatedFileSize" label="Estimated File Size" variant="outlined" class="mb-3" required @blur="onFieldChange('estimatedFileSize', formData.fileInformation.estimatedFileSize)"></v-text-field>
+                      <v-select ref="fileInformation.compressionFormat" v-model="formData.fileInformation.compressionFormat" label="Compression Format" :items="compressionFormats" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('compressionFormat', formData.fileInformation.compressionFormat)"></v-select>
+                      <v-checkbox ref="fileInformation.encryptionRequired" v-model="formData.fileInformation.encryptionRequired" label="Encryption Required" class="mb-3" @update:modelValue="onFieldChange('encryptionRequired', formData.fileInformation.encryptionRequired)"></v-checkbox>
+                      <v-select ref="fileInformation.encryptionMethod" v-if="formData.fileInformation.encryptionRequired" v-model="formData.fileInformation.encryptionMethod" label="Encryption Method" :items="encryptionMethods" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('encryptionMethod', formData.fileInformation.encryptionMethod)"></v-select>
                     </v-card-text>
                   </v-card>
                   
                   <v-card class="mb-3" variant="outlined">
                     <v-card-title class="text-h6">File Location</v-card-title>
                     <v-card-text>
-                      <v-text-field v-model="formData.fileLocation.sourcePath" label="Source File Path" variant="outlined" class="mb-3" required @blur="onFieldChange('sourcePath', formData.fileLocation.sourcePath)"></v-text-field>
-                      <v-text-field v-model="formData.fileLocation.targetPath" label="Target File Path" variant="outlined" class="mb-3" required @blur="onFieldChange('targetPath', formData.fileLocation.targetPath)"></v-text-field>
-                      <v-text-field v-model="formData.fileLocation.credentials.username" label="Username" variant="outlined" class="mb-3" @blur="onFieldChange('username', formData.fileLocation.credentials.username)"></v-text-field>
-                      <v-select v-model="formData.fileLocation.credentials.authenticationMethod" label="Authentication Method" :items="authMethods" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('authenticationMethod', formData.fileLocation.credentials.authenticationMethod)"></v-select>
+                      <v-text-field ref="fileLocation.sourcePath" v-model="formData.fileLocation.sourcePath" label="Source File Path" variant="outlined" class="mb-3" required @blur="onFieldChange('sourcePath', formData.fileLocation.sourcePath)"></v-text-field>
+                      <v-text-field ref="fileLocation.targetPath" v-model="formData.fileLocation.targetPath" label="Target File Path" variant="outlined" class="mb-3" required @blur="onFieldChange('targetPath', formData.fileLocation.targetPath)"></v-text-field>
+                      <v-text-field ref="fileLocation.credentials.username" v-model="formData.fileLocation.credentials.username" label="Username" variant="outlined" class="mb-3" @blur="onFieldChange('username', formData.fileLocation.credentials.username)"></v-text-field>
+                      <v-select ref="fileLocation.credentials.authenticationMethod" v-model="formData.fileLocation.credentials.authenticationMethod" label="Authentication Method" :items="authMethods" variant="outlined" class="mb-3" @update:modelValue="onFieldChange('authenticationMethod', formData.fileLocation.credentials.authenticationMethod)"></v-select>
                     </v-card-text>
                   </v-card>
                   
-                  <v-text-field v-model="formData.targetServiceDate" label="Target Service Date" type="date" variant="outlined" class="mb-3" required @blur="onFieldChange('targetServiceDate', formData.targetServiceDate)"></v-text-field>
+                  <v-text-field ref="targetServiceDate" v-model="formData.targetServiceDate" label="Target Service Date" type="date" variant="outlined" class="mb-3" required @blur="onFieldChange('targetServiceDate', formData.targetServiceDate)"></v-text-field>
                   
                   <v-card class="mb-3" variant="outlined">
                     <v-card-title class="text-h6">Contact Information</v-card-title>
                     <v-card-text>
-                      <v-text-field v-model="formData.contactInformation.requestorName" label="Requestor Name" variant="outlined" class="mb-3" required @blur="onFieldChange('requestorName', formData.contactInformation.requestorName)"></v-text-field>
-                      <v-text-field v-model="formData.contactInformation.requestorEmail" label="Requestor Email" type="email" variant="outlined" class="mb-3" required @blur="onFieldChange('requestorEmail', formData.contactInformation.requestorEmail)"></v-text-field>
-                      <v-text-field v-model="formData.contactInformation.requestorPhone" label="Requestor Phone" variant="outlined" class="mb-3" @blur="onFieldChange('requestorPhone', formData.contactInformation.requestorPhone)"></v-text-field>
-                      <v-text-field v-model="formData.contactInformation.technicalContact" label="Technical Contact" variant="outlined" class="mb-3" @blur="onFieldChange('technicalContact', formData.contactInformation.technicalContact)"></v-text-field>
-                      <v-text-field v-model="formData.contactInformation.technicalContactEmail" label="Technical Contact Email" type="email" variant="outlined" class="mb-3" @blur="onFieldChange('technicalContactEmail', formData.contactInformation.technicalContactEmail)"></v-text-field>
+                      <v-text-field ref="contactInformation.requestorName" v-model="formData.contactInformation.requestorName" label="Requestor Name" variant="outlined" class="mb-3" required @blur="onFieldChange('requestorName', formData.contactInformation.requestorName)"></v-text-field>
+                      <v-text-field ref="contactInformation.requestorEmail" v-model="formData.contactInformation.requestorEmail" label="Requestor Email" type="email" variant="outlined" class="mb-3" required @blur="onFieldChange('requestorEmail', formData.contactInformation.requestorEmail)"></v-text-field>
+                      <v-text-field ref="contactInformation.requestorPhone" v-model="formData.contactInformation.requestorPhone" label="Requestor Phone" variant="outlined" class="mb-3" @blur="onFieldChange('requestorPhone', formData.contactInformation.requestorPhone)"></v-text-field>
+                      <v-text-field ref="contactInformation.technicalContact" v-model="formData.contactInformation.technicalContact" label="Technical Contact" variant="outlined" class="mb-3" @blur="onFieldChange('technicalContact', formData.contactInformation.technicalContact)"></v-text-field>
+                      <v-text-field ref="contactInformation.technicalContactEmail" v-model="formData.contactInformation.technicalContactEmail" label="Technical Contact Email" type="email" variant="outlined" class="mb-3" @blur="onFieldChange('technicalContactEmail', formData.contactInformation.technicalContactEmail)"></v-text-field>
                     </v-card-text>
                   </v-card>
                   
-                  <v-select v-model="formData.dataClassification" label="Data Classification" :items="dataClassifications" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('dataClassification', formData.dataClassification)"></v-select>
-                  <v-textarea v-model="formData.additionalRequirements" label="Additional Requirements" variant="outlined" class="mb-3" @blur="onFieldChange('additionalRequirements', formData.additionalRequirements)"></v-textarea>
+                  <v-select ref="dataClassification" v-model="formData.dataClassification" label="Data Classification" :items="dataClassifications" variant="outlined" class="mb-3" required @update:modelValue="onFieldChange('dataClassification', formData.dataClassification)"></v-select>
+                  <v-textarea ref="additionalRequirements" v-model="formData.additionalRequirements" label="Additional Requirements" variant="outlined" class="mb-3" @blur="onFieldChange('additionalRequirements', formData.additionalRequirements)"></v-textarea>
                   
                   <v-btn color="primary" size="large" block @click="submitForm">Submit Request</v-btn>
                 </v-form>
@@ -299,6 +299,15 @@
           }
           target[keys[keys.length - 1]] = fieldValue;
           console.log('Form data updated:', this.formData);
+          
+          // Scroll to the updated field
+          this.$nextTick(() => {
+            const fieldRef = this.$refs[fieldName];
+            if (fieldRef && fieldRef.$el) {
+              console.log(`Scrolling to field: ${fieldName}`);
+              fieldRef.$el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+          });
         },
         async onFieldChange(fieldName, fieldValue) {
           const oldValue = this.previousValues[fieldName] || '';

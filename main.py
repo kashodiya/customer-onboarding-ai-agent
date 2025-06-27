@@ -39,6 +39,8 @@ async def ask_agent_endpoint(prompt: str):
 
 @app.get("/api/start-agent")
 def start_agent():
+    global agent_session_id
+    agent_session_id = str(random.randint(10000000, 99999999))
     print(f"Starting agent with session ID: {agent_session_id}")
     answer = ask_agent("Start asking questions.", session_id=agent_session_id)
     return {"answer": answer}
