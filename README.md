@@ -20,3 +20,11 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
+## Some questions
+Describe file formats
+
+
+
+## TODO
+- New ideas
+    - Instead of "REPORT-LAST-ANSWER" ask "GIVE-COMPLETE-JSON-OBJECT"

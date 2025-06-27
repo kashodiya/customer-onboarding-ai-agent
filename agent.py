@@ -17,7 +17,9 @@ def get_memory(session_id="default"):
 def get_llm():
     """Get the LLM instance."""
     return ChatBedrock(
-        model_id="anthropic.claude-3-haiku-20240307-v1:0",
+        # model_id="anthropic.claude-3-haiku-20240307-v1:0",
+        # model_id="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+        model_id="anthropic.claude-3-5-sonnet-20240620-v1:0",
         region_name="us-east-1",
         model_kwargs={"max_tokens": 4096, "temperature": 0.5, "top_p": 0.9}
     )
