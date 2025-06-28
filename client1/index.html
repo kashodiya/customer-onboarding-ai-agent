@@ -13,17 +13,36 @@
 <body>
   <div id="app">
     <v-app>
-      <v-app-bar app color="primary">
-        <v-app-bar-title>Customer Onboarding App</v-app-bar-title>
-        <v-spacer></v-spacer>
-        <v-btn to="/" variant="text" color="white">Home</v-btn>
-        <v-btn to="/about" variant="text" color="white">About</v-btn>
-      </v-app-bar>
-      <v-main>
-        <v-container fluid>
-          <router-view></router-view>
+      <div v-if="!isAuthenticated">
+        <v-container class="fill-height" fluid>
+          <v-row align="center" justify="center">
+            <v-col cols="12" sm="8" md="4">
+              <v-card>
+                <v-card-title>Login</v-card-title>
+                <v-card-text>
+                  <v-text-field v-model="username" label="Username" class="mb-3"></v-text-field>
+                  <v-text-field v-model="password" label="Password" type="password" @keyup.enter="login"></v-text-field>
+                  <v-btn color="primary" block @click="login">Login</v-btn>
+                </v-card-text>
+              </v-card>
+            </v-col>
+          </v-row>
         </v-container>
-      </v-main>
+      </div>
+      <div v-else>
+        <v-app-bar app color="primary">
+          <v-app-bar-title>Customer Onboarding App</v-app-bar-title>
+          <v-spacer></v-spacer>
+          <v-btn to="/" variant="text" color="white">Home</v-btn>
+          <v-btn to="/about" variant="text" color="white">About</v-btn>
+          <v-btn @click="logout" variant="text" color="white">Logout</v-btn>
+        </v-app-bar>
+        <v-main>
+          <v-container fluid>
+            <router-view></router-view>
+          </v-container>
+        </v-main>
+      </div>
     </v-app>
   </div>
 
@@ -236,7 +255,10 @@
           try {
             const response = await fetch(`/api/ask-agent/${this.newMessage}`, {
               method: 'GET',
-              headers: { 'Content-Type': 'application/json' }
+              headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
             });
             if (response.ok) {
               const agentResp = await response.json();
@@ -320,7 +342,10 @@
             try {
               const response = await fetch('/api/update-form-field', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                },
                 body: JSON.stringify({ name: fieldName, value: fieldValue })
               });
               if (response.ok) {
@@ -358,6 +383,9 @@
         try {
           const response = await fetch('/api/start-agent', {
             method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
           });
           if (response.ok) {
             const agentResp = await response.json();
@@ -391,7 +419,51 @@
       }
     });
 
-    createApp({})
+    createApp({
+      data() {
+        return {
+          isAuthenticated: false,
+          username: '',
+          password: ''
+        }
+      },
+      methods: {
+        async login() {
+          try {
+            const response = await fetch('/api/login', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ password: this.password })
+            });
+            if (response.ok) {
+              const data = await response.json();
+              localStorage.setItem('token', data.token);
+              this.isAuthenticated = true;
+            }
+          } catch (error) {
+            console.error('Login failed:', error);
+          }
+        },
+        async logout() {
+          try {
+            await fetch('/api/logout', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              }
+            });
+          } catch (error) {
+            console.error('Logout error:', error);
+          }
+          localStorage.removeItem('token');
+          this.isAuthenticated = false;
+          this.password = '';
+        }
+      },
+      created() {
+        this.isAuthenticated = !!localStorage.getItem('token');
+      }
+    })
       .use(router)
       .use(vuetify)
       .mount('#app');

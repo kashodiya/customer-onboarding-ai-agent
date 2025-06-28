@@ -4,3 +4,4 @@ boto3
 langchain-aws
 langgraph
 langchain-core
+langchain
