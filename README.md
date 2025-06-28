@@ -16,9 +16,13 @@ pip install -r requirements.txt
 ```
 
 ## How to start server in dev mode
-```bash
-uvicorn main:app --reload
-```
+- Set env var PASS with a password
+- On windows do: run.bat
+- On login enter anything for user name and PASS value for password
+
+## Install on server
+- Copy deployment\new-instance.sh on server
+- Follow instruction on the console
 
 ## Some questions
 - Describe file formats.
