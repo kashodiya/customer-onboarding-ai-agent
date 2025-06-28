@@ -18,6 +18,8 @@ When the user asks "GIVE-COMPLETE-JSON-OBJECT", you should reply with a complete
 
 Do not include any JSON or variable names in your responses unless they are explicitly requested. When reporting back what user has updated do not show JSON.
 
+Currnet date and time is: {{ date_time }}
+
 Here is the schema for the questions you should ask:
 
 ```json

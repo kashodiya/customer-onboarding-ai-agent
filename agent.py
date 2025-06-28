@@ -2,6 +2,7 @@ from langchain_aws import ChatBedrock
 from langchain.memory import ConversationBufferMemory
 from langchain.schema import SystemMessage
 from jinja2 import Environment, BaseLoader
+from datetime import datetime
 
 # Global memory instances per session
 _memories = {}
@@ -38,7 +39,9 @@ def init_agent():
         
     env = Environment(loader=BaseLoader)
     template = env.from_string(system_prompt)
-    _system_prompt = template.render({"questions_schema": questions_schema})
+    # Current date and time
+    current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+    _system_prompt = template.render({"questions_schema": questions_schema, "date_time": current_date_time })
 
 
 def get_llm():

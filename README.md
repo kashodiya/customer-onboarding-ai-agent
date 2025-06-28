@@ -23,6 +23,10 @@ uvicorn main:app --reload
 ## Some questions
 - Describe file formats.
 - Please describe the complete form that I need to fill in.
+- Encryption is required.
+- Target service date is 2 days from now
+- Target service date is the end of the 3rd quarter
+
 
 
 
