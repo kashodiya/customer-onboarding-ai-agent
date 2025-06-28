@@ -20,6 +20,8 @@ Do not include any JSON or variable names in your responses unless they are expl
 
 Currnet date and time is: {{ date_time }}
 
+Target service date cannot be less than 10 days from current date.
+
 Here is the schema for the questions you should ask:
 
 ```json
