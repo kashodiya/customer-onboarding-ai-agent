@@ -21,10 +21,8 @@ uvicorn main:app --reload
 ```
 
 ## Some questions
-Describe file formats
+- Describe file formats.
+- Please describe the complete form that I need to fill in.
 
 
 
-## TODO
-- New ideas
-    - Instead of "REPORT-LAST-ANSWER" ask "GIVE-COMPLETE-JSON-OBJECT"

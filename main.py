@@ -2,7 +2,7 @@ from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 import json
-from agent import ask_agent
+from agent import ask_agent, init_agent
 import random
 
 # Initialize FastAPI application
@@ -42,7 +42,8 @@ def start_agent():
     global agent_session_id
     agent_session_id = str(random.randint(10000000, 99999999))
     print(f"Starting agent with session ID: {agent_session_id}")
-    answer = ask_agent("Start asking questions.", session_id=agent_session_id)
+    init_agent()
+    answer = ask_agent("Greet user and start asking questions.", session_id=agent_session_id)
     return {"answer": answer}
 
 

@@ -6,6 +6,10 @@ from jinja2 import Environment, BaseLoader
 # Global memory instances per session
 _memories = {}
 
+# Global cached instances
+_llm_instance = None
+_system_prompt = None
+
 
 def get_memory(session_id="default"):
     """Get or create memory for a session."""
@@ -14,19 +18,18 @@ def get_memory(session_id="default"):
     return _memories[session_id]
 
 
-def get_llm():
-    """Get the LLM instance."""
-    return ChatBedrock(
-        # model_id="anthropic.claude-3-haiku-20240307-v1:0",
-        # model_id="us.anthropic.claude-3-7-sonnet-20250219-v1:0",
+def init_agent():
+    """Initialize/refresh LLM and system prompt."""
+    global _llm_instance, _system_prompt
+
+    print("Initializing agent...")
+    
+    _llm_instance = ChatBedrock(
         model_id="anthropic.claude-3-5-sonnet-20240620-v1:0",
         region_name="us-east-1",
         model_kwargs={"max_tokens": 4096, "temperature": 0.5, "top_p": 0.9}
     )
-
-
-def get_system_prompt():
-    """Load and render system prompt."""
+    
     with open("SYSTEM_PROMPT.md", "r") as f:
         system_prompt = f.read().strip()
     
@@ -35,7 +38,21 @@ def get_system_prompt():
         
     env = Environment(loader=BaseLoader)
     template = env.from_string(system_prompt)
-    return template.render({"questions_schema": questions_schema})
+    _system_prompt = template.render({"questions_schema": questions_schema})
+
+
+def get_llm():
+    """Get the LLM instance."""
+    if _llm_instance is None:
+        init_agent()
+    return _llm_instance
+
+
+def get_system_prompt():
+    """Get the system prompt."""
+    if _system_prompt is None:
+        init_agent()
+    return _system_prompt
 
 
 def debug_memory_state(session_id="default"):
