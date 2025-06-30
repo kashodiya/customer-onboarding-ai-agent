@@ -138,7 +138,7 @@
         "specificTime": {
           "type": "string",
           "title": "Specific Time",
-          "description": "At what time should this transfer occur? (HH:MM in 24-hour format, and indicate timezone)",
+          "description": "At what time should this transfer occur? (HH-MM in 24-hour format, and indicate timezone)",
           "format": "time"
         },
         "dayOfWeek": {
