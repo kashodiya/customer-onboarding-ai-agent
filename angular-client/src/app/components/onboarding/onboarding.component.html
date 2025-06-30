@@ -1,0 +1,173 @@
+<div class="full-height">
+  <div style="display: flex; height: 100%;">
+    
+    <!-- Chat Section (Left) -->
+    <div style="width: 50%; border-right: 1px solid #e0e0e0;">
+      <mat-card class="chat-container">
+        <mat-card-header style="background-color: #1976d2; color: white;">
+          <mat-card-title style="color: white;">AI Assistant</mat-card-title>
+        </mat-card-header>
+        
+        <div class="chat-messages">
+          <div *ngFor="let message of chatMessages" style="margin-bottom: 16px;">
+            <mat-card [ngClass]="message.isUser ? 'user-message' : 'ai-message'" class="message-card">
+              <mat-card-content>
+                {{ message.text }}
+              </mat-card-content>
+            </mat-card>
+          </div>
+        </div>
+        
+        <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="primary"></mat-progress-bar>
+        <mat-divider></mat-divider>
+        
+        <div class="chat-input">
+          <mat-form-field appearance="outline" style="width: 100%;">
+            <mat-label>Type your message...</mat-label>
+            <input matInput 
+                   [(ngModel)]="newMessage" 
+                   (keydown)="onEnterKeyPress($event)"
+                   placeholder="Ask the AI assistant anything...">
+            <button mat-icon-button matSuffix (click)="sendMessage()">
+              <mat-icon>send</mat-icon>
+            </button>
+          </mat-form-field>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Form Section (Right) -->
+    <div style="width: 50%; padding: 16px;">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>File Transfer Onboarding Form</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <form [formGroup]="onboardingForm">
+            
+            <!-- Flow Name -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Flow Name</mat-label>
+              <input matInput formControlName="flowName" 
+                     (blur)="onFieldChange('flowName', onboardingForm.get('flowName')?.value)">
+            </mat-form-field>
+
+            <!-- Source System Information -->
+            <mat-card class="section-card">
+              <mat-card-title class="section-title">Source System Information</mat-card-title>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Source System Name</mat-label>
+                  <input matInput formControlName="sourceSystemName"
+                         (blur)="onFieldChange('sourceSystemName', onboardingForm.get('sourceSystemName')?.value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Source Environment</mat-label>
+                  <mat-select formControlName="sourceEnvironment"
+                              (selectionChange)="onFieldChange('sourceEnvironment', $event.value)">
+                    <mat-option *ngFor="let env of environments" [value]="env">{{env}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Source System Owner</mat-label>
+                  <input matInput formControlName="sourceSystemOwner"
+                         (blur)="onFieldChange('sourceSystemOwner', onboardingForm.get('sourceSystemOwner')?.value)">
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Target System Information -->
+            <mat-card class="section-card">
+              <mat-card-title class="section-title">Target System Information</mat-card-title>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Target System Name</mat-label>
+                  <input matInput formControlName="targetSystemName"
+                         (blur)="onFieldChange('targetSystemName', onboardingForm.get('targetSystemName')?.value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Target Environment</mat-label>
+                  <mat-select formControlName="targetEnvironment"
+                              (selectionChange)="onFieldChange('targetEnvironment', $event.value)">
+                    <mat-option *ngFor="let env of environments" [value]="env">{{env}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Target System Owner</mat-label>
+                  <input matInput formControlName="targetSystemOwner"
+                         (blur)="onFieldChange('targetSystemOwner', onboardingForm.get('targetSystemOwner')?.value)">
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Transfer Method -->
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Transfer Method</mat-label>
+              <mat-select formControlName="transferMethod"
+                          (selectionChange)="onFieldChange('transferMethod', $event.value)">
+                <mat-option *ngFor="let method of transferMethods" [value]="method">{{method}}</mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field *ngIf="onboardingForm.get('transferMethod')?.value === 'Other'" 
+                            appearance="outline" class="full-width">
+              <mat-label>Other Transfer Method</mat-label>
+              <input matInput formControlName="otherTransferMethod"
+                     (blur)="onFieldChange('otherTransferMethod', onboardingForm.get('otherTransferMethod')?.value)">
+            </mat-form-field>
+
+            <!-- Transfer Frequency -->
+            <mat-card class="section-card">
+              <mat-card-title class="section-title">Transfer Frequency</mat-card-title>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Frequency Type</mat-label>
+                  <mat-select formControlName="frequencyType"
+                              (selectionChange)="onFieldChange('frequencyType', $event.value)">
+                    <mat-option *ngFor="let type of frequencyTypes" [value]="type">{{type}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field *ngIf="onboardingForm.get('frequencyType')?.value === 'Custom'" 
+                                appearance="outline" class="full-width">
+                  <mat-label>Custom Schedule</mat-label>
+                  <input matInput formControlName="customSchedule"
+                         (blur)="onFieldChange('customSchedule', onboardingForm.get('customSchedule')?.value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Specific Time (HH:MM)</mat-label>
+                  <input matInput type="time" formControlName="specificTime"
+                         (blur)="onFieldChange('specificTime', onboardingForm.get('specificTime')?.value)">
+                </mat-form-field>
+
+                <mat-form-field *ngIf="onboardingForm.get('frequencyType')?.value === 'Weekly'" 
+                                appearance="outline" class="full-width">
+                  <mat-label>Day of Week</mat-label>
+                  <mat-select formControlName="dayOfWeek"
+                              (selectionChange)="onFieldChange('dayOfWeek', $event.value)">
+                    <mat-option *ngFor="let day of daysOfWeek" [value]="day">{{day}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field *ngIf="onboardingForm.get('frequencyType')?.value === 'Monthly'" 
+                                appearance="outline" class="full-width">
+                  <mat-label>Day of Month (1-31)</mat-label>
+                  <input matInput type="number" min="1" max="31" formControlName="dayOfMonth"
+                         (blur)="onFieldChange('dayOfMonth', onboardingForm.get('dayOfMonth')?.value)">
+                </mat-form-field>
+              </mat-card-content>
+            </mat-card>
+
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+    
+  </div>
+</div> 

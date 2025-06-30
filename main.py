@@ -25,7 +25,7 @@ async def ask_agent_endpoint(prompt: str):
     print(f"Anything changed?\n {changed}")
     
     # Send WebSocket message if changed has a value
-    if changed and changed.strip() != "{}":
+    if changed and str(changed).strip() != "{}":
         for client in connected_clients[:]:
             try:
                 await client.send_text(json.dumps({
@@ -87,5 +87,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
 
 # Mount static files
-# app.mount("/", StaticFiles(directory="client/dist", html=True), name="static")
-app.mount("/", StaticFiles(directory="client1", html=True), name="static")
+# Temporarily serve Vue app until Angular is built for production
+app.mount("/", StaticFiles(directory="angular-client/dist/customer-onboarding-angular", html=True), name="static")
+# For production Angular build, use: angular-client/dist/customer-onboarding-angular
+
+# Add server startup code
+if __name__ == "__main__":
+    import uvicorn
+    print("Starting FastAPI server on http://localhost:8000")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
