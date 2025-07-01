@@ -3,6 +3,11 @@ from langchain.memory import ConversationBufferMemory
 from langchain.schema import SystemMessage, HumanMessage, BaseMessage
 from jinja2 import Environment, BaseLoader
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Global memory instances per session
 _memories = {}
