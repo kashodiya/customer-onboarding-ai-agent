@@ -1,12 +1,23 @@
 from fastapi import FastAPI, WebSocket
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 import json
+import re
 from agent import ask_agent
 import random
 
 # Initialize FastAPI application
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # items = []
 connected_clients = []
@@ -17,25 +28,58 @@ agent_session_id = str(random.randint(10000000, 99999999))
 async def ask_agent_endpoint(prompt: str):
     answer = ask_agent(prompt, session_id=agent_session_id)
 
-    # changed = ask_agent("Application is asking: What was users last answer to the onboarding question? Just return schema field name as 'name' and value as 'value' in JSON format. If nothings changed then return {}. The response must be in a valid JSON format.", session_id=agent_session_id)
-
-    changed = ask_agent("REPORT-LAST-ANSWER", session_id=agent_session_id)
+    # Check if the AI response contains proactive form updates
+    changed = None
+    clean_answer = answer  # Start with the original answer
     
-    # , role="assistant"
-    print(f"Anything changed?\n {changed}")
+    if isinstance(answer, str) and "Form Update Available:" in answer:
+        try:
+            # Extract JSON from the response
+            json_match = re.search(r'```json\s*(\{[^`]+\})\s*```', answer)
+            if json_match:
+                json_str = json_match.group(1)
+                changed = json.loads(json_str)
+                print(f"Proactive form update found: {changed}")
+                
+                # Remove the form update section from the visible response
+                clean_answer = re.sub(r'\s*Form Update Available:\s*```json\s*\{[^`]+\}\s*```', '', answer)
+                clean_answer = clean_answer.strip()
+            else:
+                print("Form update marker found but no valid JSON extracted")
+        except Exception as e:
+            print(f"Error parsing proactive form update: {e}")
+    
+    # Fallback: Use the existing REPORT-LAST-ANSWER method if no proactive update found
+    if not changed:
+        changed = ask_agent("REPORT-LAST-ANSWER", session_id=agent_session_id)
+        print(f"Fallback form update check: {changed}")
+    
+    # Debug logging
+    print(f"Changed value: {changed}")
+    print(f"Changed type: {type(changed)}")
+    print(f"Connected clients: {len(connected_clients)}")
     
     # Send WebSocket message if changed has a value
     if changed and str(changed).strip() != "{}":
+        print(f"Sending WebSocket message for: {changed}")
+        message_data = {
+            "type": "update-form",
+            "payload": changed
+        }
+        message_json = json.dumps(message_data)
+        print(f"WebSocket message: {message_json}")
+        
         for client in connected_clients[:]:
             try:
-                await client.send_text(json.dumps({
-                    "type": "update-form",
-                    "payload": changed
-                }))
-            except:
+                await client.send_text(message_json)
+                print(f"✅ Message sent to client")
+            except Exception as e:
+                print(f"❌ Failed to send message to client: {e}")
                 connected_clients.remove(client)
+    else:
+        print(f"No WebSocket message sent. Changed: {changed}")
 
-    return {"answer": answer}
+    return {"answer": clean_answer}
 
 @app.get("/api/start-agent")
 def start_agent():

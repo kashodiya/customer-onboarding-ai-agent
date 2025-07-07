@@ -2,7 +2,7 @@
   <div style="display: flex; height: 100%;">
     
     <!-- Chat Section (Left) -->
-    <div style="width: 50%; border-right: 1px solid #e0e0e0;">
+    <div style="width: 40%; border-right: 1px solid #e0e0e0;">
       <mat-card class="chat-container">
         <mat-card-header style="background-color: #1976d2; color: white;">
           <mat-card-title style="color: white;">AI Assistant</mat-card-title>
@@ -37,130 +37,353 @@
     </div>
 
     <!-- Form Section (Right) -->
-    <div style="width: 50%; padding: 16px;">
+    <div style="width: 60%; padding: 16px; overflow-y: auto; max-height: 100vh;">
       <mat-card>
         <mat-card-header>
-          <mat-card-title>File Transfer Onboarding Form</mat-card-title>
+          <mat-card-title>Customer Onboarding Form</mat-card-title>
         </mat-card-header>
         
         <mat-card-content>
           <form [formGroup]="onboardingForm">
             
-            <!-- Flow Name -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Flow Name</mat-label>
-              <input matInput formControlName="flowName" 
-                     (blur)="onFieldChange('flowName', onboardingForm.get('flowName')?.value)">
-            </mat-form-field>
-
-            <!-- Source System Information -->
-            <mat-card class="section-card">
-              <mat-card-title class="section-title">Source System Information</mat-card-title>
+            <!-- Section 1: Existing Flows -->
+            <mat-card class="section-card" formGroupName="existingFlows">
+              <mat-card-title class="section-title">Section 1: Existing Flows</mat-card-title>
               <mat-card-content>
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Source System Name</mat-label>
-                  <input matInput formControlName="sourceSystemName"
-                         (blur)="onFieldChange('sourceSystemName', onboardingForm.get('sourceSystemName')?.value)">
+                  <mat-label>1. Source Application Name</mat-label>
+                  <input matInput formControlName="sourceApplicationName"
+                         (blur)="onFieldChange('existingFlows.sourceApplicationName', onboardingForm.get('existingFlows.sourceApplicationName')?.value)">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Source Environment</mat-label>
-                  <mat-select formControlName="sourceEnvironment"
-                              (selectionChange)="onFieldChange('sourceEnvironment', $event.value)">
-                    <mat-option *ngFor="let env of environments" [value]="env">{{env}}</mat-option>
+                  <mat-label>2. Target Application Name</mat-label>
+                  <input matInput formControlName="targetApplicationName"
+                         (blur)="onFieldChange('existingFlows.targetApplicationName', onboardingForm.get('existingFlows.targetApplicationName')?.value)">
+                </mat-form-field>
+
+                <mat-checkbox formControlName="isUsingIODS"
+                              (change)="onFieldChange('existingFlows.isUsingIODS', $event.checked)"
+                              style="margin-bottom: 16px;">
+                  3. Is the application using IODS?
+                </mat-checkbox>
+
+                <!-- IODS Details (Conditional) -->
+                <div *ngIf="isUsingIODS" formGroupName="iodsDetails" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
+                  <h4>IODS Details</h4>
+                  
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Old IODS ID</mat-label>
+                    <input matInput formControlName="oldIodsId"
+                           (blur)="onFieldChange('existingFlows.iodsDetails.oldIodsId', onboardingForm.get('existingFlows.iodsDetails.oldIodsId')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>On Site Server Application Names</mat-label>
+                    <input matInput formControlName="onSiteServerNames"
+                           (blur)="onFieldChange('existingFlows.iodsDetails.onSiteServerNames', onboardingForm.get('existingFlows.iodsDetails.onSiteServerNames')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>File Name</mat-label>
+                    <input matInput formControlName="fileName"
+                           (blur)="onFieldChange('existingFlows.iodsDetails.fileName', onboardingForm.get('existingFlows.iodsDetails.fileName')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>File Type</mat-label>
+                    <input matInput formControlName="fileType"
+                           (blur)="onFieldChange('existingFlows.iodsDetails.fileType', onboardingForm.get('existingFlows.iodsDetails.fileType')?.value)">
+                  </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>IODS Mailbox or Drop Location Name</mat-label>
+                    <input matInput formControlName="iodsMailbox"
+                           (blur)="onFieldChange('existingFlows.iodsDetails.iodsMailbox', onboardingForm.get('existingFlows.iodsDetails.iodsMailbox')?.value)">
+            </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Pre/Post Transfer Processes</mat-label>
+                    <textarea matInput rows="3" formControlName="prePostTransferProcesses"
+                              (blur)="onFieldChange('existingFlows.iodsDetails.prePostTransferProcesses', onboardingForm.get('existingFlows.iodsDetails.prePostTransferProcesses')?.value)"></textarea>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Section 2: Application Information -->
+            <mat-card class="section-card" formGroupName="applicationInfo">
+              <mat-card-title class="section-title">Section 2: Application Information</mat-card-title>
+              <mat-card-content>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>System Name</mat-label>
+                  <input matInput formControlName="systemName"
+                         (blur)="onFieldChange('applicationInfo.systemName', onboardingForm.get('applicationInfo.systemName')?.value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Internal or External Application</mat-label>
+                  <mat-select formControlName="internalOrExternal"
+                              (selectionChange)="onFieldChange('applicationInfo.internalOrExternal', $event.value)">
+                    <mat-option *ngFor="let option of internalExternalOptions" [value]="option">{{option}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Source System Owner</mat-label>
-                  <input matInput formControlName="sourceSystemOwner"
-                         (blur)="onFieldChange('sourceSystemOwner', onboardingForm.get('sourceSystemOwner')?.value)">
+                  <mat-label>Supported Protocols</mat-label>
+                  <input matInput formControlName="supportedProtocols"
+                         (blur)="onFieldChange('applicationInfo.supportedProtocols', onboardingForm.get('applicationInfo.supportedProtocols')?.value)">
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>System Platform</mat-label>
+                  <input matInput formControlName="platform"
+                         (blur)="onFieldChange('applicationInfo.platform', onboardingForm.get('applicationInfo.platform')?.value)">
+                </mat-form-field>
+
+                <div style="margin: 16px 0;">
+                  <label style="font-weight: 500; margin-bottom: 8px; display: block;">Environments In Scope</label>
+                  <div *ngFor="let env of environmentOptions; let i = index" style="margin-bottom: 8px;">
+                    <mat-checkbox [formControl]="$any(environmentsFormArray.at(i))"
+                                  (change)="onFieldChange('applicationInfo.environments.' + i, $event.checked)">
+                      {{env}}
+                    </mat-checkbox>
+                  </div>
+                </div>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Primary Region</mat-label>
+                  <mat-select formControlName="primaryRegion"
+                              (selectionChange)="onFieldChange('applicationInfo.primaryRegion', $event.value)">
+                    <mat-option *ngFor="let region of regionOptions" [value]="region">{{region}}</mat-option>
+                  </mat-select>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Backup Region</mat-label>
+                  <mat-select formControlName="backupRegion"
+                              (selectionChange)="onFieldChange('applicationInfo.backupRegion', $event.value)">
+                    <mat-option *ngFor="let region of backupRegionOptions" [value]="region">{{region}}</mat-option>
+                  </mat-select>
                 </mat-form-field>
               </mat-card-content>
             </mat-card>
 
-            <!-- Target System Information -->
-            <mat-card class="section-card">
-              <mat-card-title class="section-title">Target System Information</mat-card-title>
+            <!-- Section 3: Network Boundary and Cloud Boundary -->
+            <mat-card class="section-card" formGroupName="networkCloudInfo">
+              <mat-card-title class="section-title">Section 3: Network Boundary and Cloud Boundary</mat-card-title>
               <mat-card-content>
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Target System Name</mat-label>
-                  <input matInput formControlName="targetSystemName"
-                         (blur)="onFieldChange('targetSystemName', onboardingForm.get('targetSystemName')?.value)">
-                </mat-form-field>
-
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Target Environment</mat-label>
-                  <mat-select formControlName="targetEnvironment"
-                              (selectionChange)="onFieldChange('targetEnvironment', $event.value)">
-                    <mat-option *ngFor="let env of environments" [value]="env">{{env}}</mat-option>
+                  <mat-label>Network Location</mat-label>
+                  <mat-select formControlName="networkLocation"
+                              (selectionChange)="onFieldChange('networkCloudInfo.networkLocation', $event.value)">
+                    <mat-option *ngFor="let location of networkLocationOptions" [value]="location">{{location}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Target System Owner</mat-label>
-                  <input matInput formControlName="targetSystemOwner"
-                         (blur)="onFieldChange('targetSystemOwner', onboardingForm.get('targetSystemOwner')?.value)">
-                </mat-form-field>
+                <!-- Cloud Details (Conditional) -->
+                <div *ngIf="isCloudLocation" formGroupName="cloudDetails" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
+                  <h4>Cloud Details</h4>
+                  
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>AWS Cloud Account Name</mat-label>
+                    <input matInput formControlName="awsAccountName"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.awsAccountName', onboardingForm.get('networkCloudInfo.cloudDetails.awsAccountName')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>AWS Cloud Account Number</mat-label>
+                    <input matInput formControlName="awsAccountNumber"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.awsAccountNumber', onboardingForm.get('networkCloudInfo.cloudDetails.awsAccountNumber')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Cloud Region Name</mat-label>
+                    <input matInput formControlName="cloudRegion"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.cloudRegion', onboardingForm.get('networkCloudInfo.cloudDetails.cloudRegion')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>AWS Cloud ID</mat-label>
+                    <input matInput formControlName="awsCloudId"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.awsCloudId', onboardingForm.get('networkCloudInfo.cloudDetails.awsCloudId')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Server Name</mat-label>
+                    <input matInput formControlName="serverName"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.serverName', onboardingForm.get('networkCloudInfo.cloudDetails.serverName')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>IP or Subnet</mat-label>
+                    <input matInput formControlName="ipOrSubnet"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.ipOrSubnet', onboardingForm.get('networkCloudInfo.cloudDetails.ipOrSubnet')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Application Target</mat-label>
+                    <input matInput formControlName="applicationTarget"
+                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.applicationTarget', onboardingForm.get('networkCloudInfo.cloudDetails.applicationTarget')?.value)">
+                  </mat-form-field>
+                </div>
+
+                <mat-checkbox formControlName="requiresExternalVendorConnection"
+                              (change)="onFieldChange('networkCloudInfo.requiresExternalVendorConnection', $event.checked)"
+                              style="margin-top: 16px;">
+                  Requires External Vendor Connection?
+                </mat-checkbox>
               </mat-card-content>
             </mat-card>
 
-            <!-- Transfer Method -->
-            <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Transfer Method</mat-label>
-              <mat-select formControlName="transferMethod"
-                          (selectionChange)="onFieldChange('transferMethod', $event.value)">
-                <mat-option *ngFor="let method of transferMethods" [value]="method">{{method}}</mat-option>
-              </mat-select>
-            </mat-form-field>
+            <!-- Section 4: File Transfer Information (Cloud) -->
+            <mat-card class="section-card" formGroupName="fileTransferInfo">
+              <mat-card-title class="section-title">Section 4: File Transfer Information (Cloud)</mat-card-title>
+              <mat-card-content>
+                <mat-checkbox formControlName="hasOutbound"
+                              (change)="onFieldChange('fileTransferInfo.hasOutbound', $event.checked)"
+                              style="margin-bottom: 16px;">
+                  Outbound Request (Cloud to On Site)?
+                </mat-checkbox>
 
-            <mat-form-field *ngIf="onboardingForm.get('transferMethod')?.value === 'Other'" 
-                            appearance="outline" class="full-width">
-              <mat-label>Other Transfer Method</mat-label>
-              <input matInput formControlName="otherTransferMethod"
-                     (blur)="onFieldChange('otherTransferMethod', onboardingForm.get('otherTransferMethod')?.value)">
-            </mat-form-field>
+                <!-- Outbound Fields (Conditional) -->
+                <div *ngIf="hasOutbound" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
+                  <h4>Outbound Transfer Details</h4>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Source AWS Account</mat-label>
+                    <input matInput formControlName="sourceAwsAccount"
+                           (blur)="onFieldChange('fileTransferInfo.sourceAwsAccount', onboardingForm.get('fileTransferInfo.sourceAwsAccount')?.value)">
+                  </mat-form-field>
 
-            <!-- Transfer Frequency -->
-            <mat-card class="section-card">
-              <mat-card-title class="section-title">Transfer Frequency</mat-card-title>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Source Bucket ARN</mat-label>
+                    <input matInput formControlName="sourceBucketArn"
+                           (blur)="onFieldChange('fileTransferInfo.sourceBucketArn', onboardingForm.get('fileTransferInfo.sourceBucketArn')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Source Archive Bucket</mat-label>
+                    <input matInput formControlName="sourceArchiveBucket"
+                           (blur)="onFieldChange('fileTransferInfo.sourceArchiveBucket', onboardingForm.get('fileTransferInfo.sourceArchiveBucket')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Source Archive Prefix</mat-label>
+                    <input matInput formControlName="sourceArchivePrefix"
+                           (blur)="onFieldChange('fileTransferInfo.sourceArchivePrefix', onboardingForm.get('fileTransferInfo.sourceArchivePrefix')?.value)">
+                  </mat-form-field>
+                </div>
+
+                <mat-checkbox formControlName="hasInbound"
+                              (change)="onFieldChange('fileTransferInfo.hasInbound', $event.checked)"
+                              style="margin: 16px 0;">
+                  Inbound Request (On Site to Cloud)?
+                </mat-checkbox>
+
+                <!-- Inbound Fields (Conditional) -->
+                <div *ngIf="hasInbound" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
+                  <h4>Inbound Transfer Details</h4>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Target Bucket</mat-label>
+                    <input matInput formControlName="targetBucket"
+                           (blur)="onFieldChange('fileTransferInfo.targetBucket', onboardingForm.get('fileTransferInfo.targetBucket')?.value)">
+                </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Target Prefix</mat-label>
+                    <input matInput formControlName="targetPrefix"
+                           (blur)="onFieldChange('fileTransferInfo.targetPrefix', onboardingForm.get('fileTransferInfo.targetPrefix')?.value)">
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
+            <!-- Section 5: Environment Information -->
+            <mat-card class="section-card" formGroupName="environmentInfo">
+              <mat-card-title class="section-title">Section 5: Environment Information</mat-card-title>
               <mat-card-content>
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Frequency Type</mat-label>
-                  <mat-select formControlName="frequencyType"
-                              (selectionChange)="onFieldChange('frequencyType', $event.value)">
-                    <mat-option *ngFor="let type of frequencyTypes" [value]="type">{{type}}</mat-option>
+                  <mat-label>Customer Environments In Scope</mat-label>
+                  <textarea matInput rows="3" formControlName="customerEnvironments"
+                            (blur)="onFieldChange('environmentInfo.customerEnvironments', onboardingForm.get('environmentInfo.customerEnvironments')?.value)"></textarea>
+                </mat-form-field>
+
+                <div formGroupName="cloudEnvironmentMapping">
+                  <h4>Cloud Environment Mapping</h4>
+                  
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>DEV maps to</mat-label>
+                    <mat-select formControlName="development"
+                                (selectionChange)="onFieldChange('environmentInfo.cloudEnvironmentMapping.development', $event.value)">
+                      <mat-option *ngFor="let option of environmentOptions" [value]="option">{{option}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>QA maps to</mat-label>
+                    <mat-select formControlName="qualityAssurance"
+                                (selectionChange)="onFieldChange('environmentInfo.cloudEnvironmentMapping.qualityAssurance', $event.value)">
+                      <mat-option *ngFor="let option of environmentOptions" [value]="option">{{option}}</mat-option>
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field *ngIf="onboardingForm.get('frequencyType')?.value === 'Custom'" 
-                                appearance="outline" class="full-width">
-                  <mat-label>Custom Schedule</mat-label>
-                  <input matInput formControlName="customSchedule"
-                         (blur)="onFieldChange('customSchedule', onboardingForm.get('customSchedule')?.value)">
-                </mat-form-field>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>PROD maps to</mat-label>
+                    <mat-select formControlName="production"
+                                (selectionChange)="onFieldChange('environmentInfo.cloudEnvironmentMapping.production', $event.value)">
+                      <mat-option *ngFor="let option of environmentOptions" [value]="option">{{option}}</mat-option>
+                    </mat-select>
+                  </mat-form-field>
+                </div>
+              </mat-card-content>
+            </mat-card>
 
+            <!-- Section 6: Business Information -->
+            <mat-card class="section-card" formGroupName="businessInfo">
+              <mat-card-title class="section-title">Section 6: Business Information</mat-card-title>
+              <mat-card-content>
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>Specific Time (HH:MM)</mat-label>
-                  <input matInput type="time" formControlName="specificTime"
-                         (blur)="onFieldChange('specificTime', onboardingForm.get('specificTime')?.value)">
+                  <mat-label>Implementation Deadline</mat-label>
+                  <input matInput [matDatepicker]="picker" formControlName="implementationDeadline"
+                         (dateChange)="onFieldChange('businessInfo.implementationDeadline', $event.value)">
+                  <mat-hint>Various formats supported (MM/DD/YYYY, YYYY-MM-DD, etc.)</mat-hint>
+                  <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                  <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
 
-                <mat-form-field *ngIf="onboardingForm.get('frequencyType')?.value === 'Weekly'" 
-                                appearance="outline" class="full-width">
-                  <mat-label>Day of Week</mat-label>
-                  <mat-select formControlName="dayOfWeek"
-                              (selectionChange)="onFieldChange('dayOfWeek', $event.value)">
-                    <mat-option *ngFor="let day of daysOfWeek" [value]="day">{{day}}</mat-option>
-                  </mat-select>
-                </mat-form-field>
+                <div formGroupName="contacts">
+                  <h4>Contact Information</h4>
+                  
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Business Contact (Source)</mat-label>
+                    <input matInput formControlName="businessContactSource"
+                           (blur)="onFieldChange('businessInfo.contacts.businessContactSource', onboardingForm.get('businessInfo.contacts.businessContactSource')?.value)">
+                  </mat-form-field>
 
-                <mat-form-field *ngIf="onboardingForm.get('frequencyType')?.value === 'Monthly'" 
-                                appearance="outline" class="full-width">
-                  <mat-label>Day of Month (1-31)</mat-label>
-                  <input matInput type="number" min="1" max="31" formControlName="dayOfMonth"
-                         (blur)="onFieldChange('dayOfMonth', onboardingForm.get('dayOfMonth')?.value)">
-                </mat-form-field>
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Technical Contact (Source)</mat-label>
+                    <input matInput formControlName="technicalContactSource"
+                           (blur)="onFieldChange('businessInfo.contacts.technicalContactSource', onboardingForm.get('businessInfo.contacts.technicalContactSource')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Business Contact (Target)</mat-label>
+                    <input matInput formControlName="businessContactTarget"
+                           (blur)="onFieldChange('businessInfo.contacts.businessContactTarget', onboardingForm.get('businessInfo.contacts.businessContactTarget')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Technical Contact (Target)</mat-label>
+                    <input matInput formControlName="technicalContactTarget"
+                           (blur)="onFieldChange('businessInfo.contacts.technicalContactTarget', onboardingForm.get('businessInfo.contacts.technicalContactTarget')?.value)">
+                  </mat-form-field>
+
+                  <mat-form-field *ngIf="isExternalApplication" appearance="outline" class="full-width">
+                    <mat-label>Vendor Contact (if External)</mat-label>
+                    <input matInput formControlName="vendorContact"
+                           (blur)="onFieldChange('businessInfo.contacts.vendorContact', onboardingForm.get('businessInfo.contacts.vendorContact')?.value)">
+                  </mat-form-field>
+                </div>
               </mat-card-content>
             </mat-card>
 

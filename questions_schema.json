@@ -5,13 +5,17 @@
       "type": "object",
       "title": "Section 1: Existing Flows",
       "properties": {
-        "sourceAndTargetApps": {
+        "sourceApplicationName": {
           "type": "string",
-          "title": "1. Source and Target Application Names"
+          "title": "1. Source Application Name"
+        },
+        "targetApplicationName": {
+          "type": "string",
+          "title": "2. Target Application Name"
         },
         "isUsingIODS": {
           "type": "boolean",
-          "title": "2. Is the application using IODS?"
+          "title": "3. Is the application using IODS?"
         },
         "iodsDetails": {
           "type": "object",
@@ -25,9 +29,13 @@
               "type": "string",
               "title": "On Site Server Application Names"
             },
-            "fileNameAndType": {
+            "fileName": {
               "type": "string",
-              "title": "File Name and File Type"
+              "title": "File Name"
+            },
+            "fileType": {
+              "type": "string",
+              "title": "File Type"
             },
             "iodsMailbox": {
               "type": "string",
@@ -41,7 +49,8 @@
         }
       },
       "required": [
-        "sourceAndTargetApps",
+        "sourceApplicationName",
+        "targetApplicationName",
         "isUsingIODS"
       ]
     },
@@ -74,9 +83,9 @@
           "items": {
             "type": "string",
             "enum": [
-              "DEVELOPMENT",
-              "QUALITY ASSURANCE",
-              "PRODUCTION"
+              "DEV",
+              "QA",
+              "PROD"
             ]
           },
           "uniqueItems": true,
@@ -220,38 +229,36 @@
           "properties": {
             "development": {
               "type": "string",
-              "title": "DEVELOPMENT maps to",
+              "title": "DEV maps to",
               "enum": [
-                "DEVELOPMENT"
-              ]
-            },
-            "testing": {
-              "type": "string",
-              "title": "TESTING maps to",
-              "enum": [
-                "QUALITY ASSURANCE"
-              ]
-            },
-            "userTesting": {
-              "type": "string",
-              "title": "USER TESTING maps to",
-              "enum": [
-                "DEVELOPMENT"
+                "DEV",
+                "QA",
+                "PROD"
               ]
             },
             "qualityAssurance": {
               "type": "string",
-              "title": "QUALITY ASSURANCE maps to",
+              "title": "QA maps to",
               "enum": [
-                "PRODUCTION"
+                "DEV",
+                "QA",
+                "PROD"
+              ]
+            },
+            "production": {
+              "type": "string",
+              "title": "PROD maps to",
+              "enum": [
+                "DEV",
+                "QA",
+                "PROD"
               ]
             }
           },
           "required": [
             "development",
-            "testing",
-            "userTesting",
-            "qualityAssurance"
+            "qualityAssurance",
+            "production"
           ]
         }
       },

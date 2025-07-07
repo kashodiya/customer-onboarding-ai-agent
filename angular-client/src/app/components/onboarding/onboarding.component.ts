@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
@@ -10,6 +10,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatNativeDateModule } from '@angular/material/core';
 import { ChatService, ChatMessage, FormField } from '../../services/chat.service';
 import { Subscription } from 'rxjs';
 
@@ -27,7 +30,10 @@ import { Subscription } from 'rxjs';
     MatButtonModule,
     MatIconModule,
     MatProgressBarModule,
-    MatDividerModule
+    MatDividerModule,
+    MatCheckboxModule,
+    MatDatepickerModule,
+    MatNativeDateModule
   ],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss']
@@ -41,34 +47,101 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
 
-  environments = ['Development', 'Testing', 'Staging', 'Production'];
-  transferMethods = ['SFTP', 'API', 'Database', 'File Share', 'Message Queue', 'Other'];
-  frequencyTypes = ['Daily', 'Weekly', 'Monthly', 'Custom'];
-  daysOfWeek = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+  // Data arrays for dropdowns
+  internalExternalOptions = ['Internal', 'External'];
+  environmentOptions = ['DEV', 'QA', 'PROD'];
+  regionOptions = ['NORTH', 'SOUTH'];
+  backupRegionOptions = ['NORTH', 'SOUTH', 'None'];
+  networkLocationOptions = ['On Site', 'Cloud'];
 
   constructor(
     private chatService: ChatService,
     private formBuilder: FormBuilder
   ) {
-    this.onboardingForm = this.formBuilder.group({
-      flowName: ['', Validators.required],
-      sourceSystemName: ['', Validators.required],
-      sourceEnvironment: ['', Validators.required],
-      sourceSystemOwner: ['', Validators.required],
-      targetSystemName: ['', Validators.required],
-      targetEnvironment: ['', Validators.required],
-      targetSystemOwner: ['', Validators.required],
-      transferMethod: ['', Validators.required],
-      otherTransferMethod: [''],
-      frequencyType: ['', Validators.required],
-      customSchedule: [''],
-      specificTime: [''],
-      dayOfWeek: [''],
-      dayOfMonth: ['']
+    this.onboardingForm = this.createForm();
+  }
+
+  private createForm(): FormGroup {
+    return this.formBuilder.group({
+      // Section 1: Existing Flows
+      existingFlows: this.formBuilder.group({
+        sourceApplicationName: ['', Validators.required],
+        targetApplicationName: ['', Validators.required],
+        isUsingIODS: [false, Validators.required],
+        iodsDetails: this.formBuilder.group({
+          oldIodsId: [''],
+          onSiteServerNames: [''],
+          fileName: [''],
+          fileType: [''],
+          iodsMailbox: [''],
+          prePostTransferProcesses: ['']
+        })
+      }),
+
+      // Section 2: Application Information
+      applicationInfo: this.formBuilder.group({
+        systemName: ['', Validators.required],
+        internalOrExternal: ['', Validators.required],
+        supportedProtocols: ['', Validators.required],
+        platform: ['', Validators.required],
+        environments: this.formBuilder.array([]),
+        primaryRegion: ['', Validators.required],
+        backupRegion: ['', Validators.required]
+      }),
+
+      // Section 3: Network Boundary and Cloud Boundary
+      networkCloudInfo: this.formBuilder.group({
+        networkLocation: ['', Validators.required],
+        cloudDetails: this.formBuilder.group({
+          awsAccountName: [''],
+          awsAccountNumber: [''],
+          cloudRegion: [''],
+          awsCloudId: [''],
+          serverName: [''],
+          ipOrSubnet: [''],
+          applicationTarget: ['']
+        }),
+        requiresExternalVendorConnection: [false, Validators.required]
+      }),
+
+      // Section 4: File Transfer Information (Cloud)
+      fileTransferInfo: this.formBuilder.group({
+        hasOutbound: [false, Validators.required],
+        sourceAwsAccount: [''],
+        sourceBucketArn: [''],
+        sourceArchiveBucket: [''],
+        sourceArchivePrefix: [''],
+        hasInbound: [false, Validators.required],
+        targetBucket: [''],
+        targetPrefix: ['']
+      }),
+
+      // Section 5: Environment Information
+      environmentInfo: this.formBuilder.group({
+        customerEnvironments: ['', Validators.required],
+        cloudEnvironmentMapping: this.formBuilder.group({
+          development: ['', Validators.required],
+          qualityAssurance: ['', Validators.required],
+          production: ['', Validators.required]
+        })
+      }),
+
+      // Section 6: Business Information
+      businessInfo: this.formBuilder.group({
+        implementationDeadline: [''],
+        contacts: this.formBuilder.group({
+          businessContactSource: ['', Validators.required],
+          technicalContactSource: ['', Validators.required],
+          businessContactTarget: ['', Validators.required],
+          technicalContactTarget: ['', Validators.required],
+          vendorContact: ['']
+        })
+      })
     });
   }
 
   ngOnInit() {
+    this.initializeEnvironmentsArray();
     this.startAgent();
     this.subscribeToFormUpdates();
   }
@@ -77,6 +150,37 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     if (this.formUpdatesSubscription) {
       this.formUpdatesSubscription.unsubscribe();
     }
+  }
+
+  private initializeEnvironmentsArray() {
+    const environmentsArray = this.onboardingForm.get('applicationInfo.environments') as FormArray;
+    this.environmentOptions.forEach(() => {
+      environmentsArray.push(this.formBuilder.control(false));
+    });
+  }
+
+  get environmentsFormArray() {
+    return this.onboardingForm.get('applicationInfo.environments') as FormArray<FormControl>;
+  }
+
+  get isUsingIODS() {
+    return this.onboardingForm.get('existingFlows.isUsingIODS')?.value;
+  }
+
+  get isCloudLocation() {
+    return this.onboardingForm.get('networkCloudInfo.networkLocation')?.value === 'Cloud';
+  }
+
+  get isExternalApplication() {
+    return this.onboardingForm.get('applicationInfo.internalOrExternal')?.value === 'External';
+  }
+
+  get hasOutbound() {
+    return this.onboardingForm.get('fileTransferInfo.hasOutbound')?.value;
+  }
+
+  get hasInbound() {
+    return this.onboardingForm.get('fileTransferInfo.hasInbound')?.value;
   }
 
   startAgent() {
@@ -94,18 +198,99 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   subscribeToFormUpdates() {
     this.formUpdatesSubscription = this.chatService.getFormUpdates().subscribe({
       next: (updates) => {
+        console.log('Received form update:', updates);
         try {
-          const parsedUpdates = JSON.parse(updates);
-          if (parsedUpdates.name && parsedUpdates.value !== undefined) {
-            this.onboardingForm.patchValue({
-              [parsedUpdates.name]: parsedUpdates.value
-            });
+          // updates is already parsed, no need for JSON.parse()
+          if (updates && updates.name && updates.value !== undefined) {
+            console.log(`Updating field: ${updates.name} = ${updates.value}`);
+            this.updateNestedFormValue(updates.name, updates.value);
           }
         } catch (error) {
-          console.error('Error parsing form updates:', error);
+          console.error('Error processing form updates:', error);
         }
       }
     });
+  }
+
+  private updateNestedFormValue(path: string, value: any) {
+    const control = this.onboardingForm.get(path);
+    if (control) {
+      // Special handling for environments array
+      if (path === 'applicationInfo.environments' && Array.isArray(value)) {
+        const environmentsArray = control as FormArray;
+        // Reset all checkboxes to false first
+        for (let i = 0; i < environmentsArray.length; i++) {
+          environmentsArray.at(i).setValue(false);
+        }
+        // Set selected environments to true
+        value.forEach((envName: string) => {
+          const index = this.environmentOptions.indexOf(envName);
+          if (index !== -1 && index < environmentsArray.length) {
+            environmentsArray.at(index).setValue(true);
+          }
+        });
+        console.log(`✅ Updated environments: ${value.join(', ')}`);
+      } 
+      // Special handling for date fields to avoid timezone issues
+      else if (path === 'businessInfo.implementationDeadline' && typeof value === 'string') {
+        try {
+          // Handle various date formats more flexibly
+          let parsedDate: Date | null = null;
+          
+          // First try to parse as ISO date (YYYY-MM-DD) to avoid timezone issues
+          const isoMatch = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (isoMatch) {
+            const [, year, month, day] = isoMatch;
+            parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+          } else {
+            // For other formats, parse normally then adjust to local date
+            const tempDate = new Date(value);
+            if (!isNaN(tempDate.getTime())) {
+              // If parsing succeeded, create local date to avoid timezone conversion
+              parsedDate = new Date(tempDate.getFullYear(), tempDate.getMonth(), tempDate.getDate());
+            } else {
+              // If parsing failed, try manual parsing of common formats
+              const dateFormats = [
+                /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/, // MM/DD/YYYY or M/D/YYYY
+                /^(\d{1,2})-(\d{1,2})-(\d{4})$/, // MM-DD-YYYY or M-D-YYYY
+                /^(\d{4})\/(\d{1,2})\/(\d{1,2})$/, // YYYY/MM/DD
+                /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/ // MM.DD.YYYY or M.D.YYYY
+              ];
+              
+              for (const format of dateFormats) {
+                const match = value.match(format);
+                if (match) {
+                  if (format.source.startsWith('(\\d{4})')) {
+                    // YYYY/MM/DD format
+                    const [, year, month, day] = match;
+                    parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                  } else {
+                    // MM/DD/YYYY, MM-DD-YYYY, MM.DD.YYYY formats
+                    const [, month, day, year] = match;
+                    parsedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                  }
+                  break;
+                }
+              }
+            }
+          }
+          
+          if (parsedDate) {
+            control.setValue(parsedDate);
+            console.log(`✅ Updated date: ${value} → ${parsedDate.toLocaleDateString()}`);
+          } else {
+            console.warn(`Could not parse date: ${value}`);
+            control.setValue(value); // Set as string if parsing fails
+          }
+        } catch (error) {
+          console.warn(`Error parsing date ${value}:`, error);
+          control.setValue(value); // Fallback to original value
+        }
+      } 
+      else {
+        control.setValue(value);
+      }
+    }
   }
 
   sendMessage() {
@@ -129,10 +314,10 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.newMessage = '';
   }
 
-  onFieldChange(fieldName: string, value: any) {
-    if (!value) return;
+  onFieldChange(fieldPath: string, value: any) {
+    if (value === null || value === undefined) return;
     
-    const fieldData: FormField = { name: fieldName, value: value };
+    const fieldData: FormField = { name: fieldPath, value: value };
     
     this.chatService.updateFormField(fieldData).subscribe({
       next: (response) => {
