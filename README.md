@@ -33,5 +33,10 @@ pip install -r requirements.txt
 - What are minimal things I still need to provide?
 - Transfer time is 11:25
 
-
-
+## Brainstorm on how to handle user questions:
+- When to use RAG vs System prompt.
+- If you use tartergy to use the scrore from RAG and LLM chat and user higer one.
+    - Instead of doing this user LLM to merge both the answers. 
+    - Note that answer can come from System prompt or RAG. Or, it can come from both partially and we need to merge it? 
+- Strategy 1
+    - Ask to LLM (answewr come from System Prompt) as well as RAG in parallel and combine it. Before combining, check if RAG confidence score is low. 
