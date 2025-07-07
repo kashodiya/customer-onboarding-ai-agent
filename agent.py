@@ -34,6 +34,9 @@ def init_agent():
     with open("SYSTEM_PROMPT.md", "r") as f:
         system_prompt = f.read().strip()
     
+    with open("KNOWLEDGEBASE.md", "r") as f:
+        knowledgebase = f.read().strip()
+
     with open("questions_schema.json", "r") as f:
         questions_schema = f.read().strip()
         
@@ -41,7 +44,7 @@ def init_agent():
     template = env.from_string(system_prompt)
     # Current date and time
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    _system_prompt = template.render({"questions_schema": questions_schema, "date_time": current_date_time })
+    _system_prompt = template.render({"questions_schema": questions_schema, "date_time": current_date_time, "knowledgebase": knowledgebase})
 
 
 def get_llm():

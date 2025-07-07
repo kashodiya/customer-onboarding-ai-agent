@@ -1,5 +1,3 @@
-Certainly! Here's a detailed imaginary documentation for a file transfer service:
-
 # File Transfer Service Documentation
 
 ## Overview
