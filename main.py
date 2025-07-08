@@ -36,7 +36,7 @@ async def ask_agent_endpoint(prompt: str, request: Request):
             print(f"Received form state: {current_form_state}")
         except Exception as e:
             print(f"Error parsing form data: {e}")
-    
+
     # Include form state in the prompt context
     if current_form_state and any(current_form_state.values()):
         # Check if this might be a manual mode response
@@ -161,15 +161,32 @@ async def toggle_smart_guide(toggle_data: dict):
     print(f"Form data provided: {form_data_provided}")
     
     if enabled:
-        # Include form state in the context
-        if form_data_provided and any(form_data_provided.values()):
-            context_prompt = f"Smart Guide enabled. Current form state: {json.dumps(form_data_provided)}. Review what's filled and ask for the next UNFILLED field. Keep under 2 sentences."
-        else:
-            context_prompt = "Briefly confirm Smart Guide is enabled, then ask for the source application name. Keep it under 2 sentences."
+        context_prompt = "Great! Start filling out the form and I'll assist you along the way. Click on any field for context and requirements."
         answer = ask_agent(context_prompt, session_id=agent_session_id)
     else:
         answer = ask_agent("Briefly confirm Manual mode is active. Keep it under 1 sentence.", session_id=agent_session_id)
     
+    return {"answer": answer}
+
+
+@app.post("/api/get-field-context")
+async def get_field_context(request: Request):
+    data = await request.json()
+    field_name = data.get('name', '')
+    field_label = data.get('value', '')  # Using value field to pass the field label
+    complete_form_data = data.get('completeFormData', {})
+    
+    # Create context prompt for field assistance
+    context_prompt = f"""
+FIELD CONTEXT REQUEST:
+The user is focusing on the field: "{field_label}" (path: {field_name})
+
+Current form state: {json.dumps(complete_form_data)}
+
+Provide helpful context about the "{field_label}" field. Explain what it's for, mention any requirements, and give examples if helpful. Be specific and mention the field name explicitly instead of saying "This field". Keep it natural and under 2 sentences.
+"""
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
     return {"answer": answer}
 
 

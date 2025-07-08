@@ -15,19 +15,19 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Source Application Name</mat-label>
                   <input matInput formControlName="sourceApplicationName"
-                         (blur)="onFieldChange('existingFlows.sourceApplicationName', onboardingForm.get('existingFlows.sourceApplicationName')?.value)">
+                         (focus)="onFieldFocus('existingFlows.sourceApplicationName', 'Source Application Name')">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Target Application Name</mat-label>
                   <input matInput formControlName="targetApplicationName"
-                         (blur)="onFieldChange('existingFlows.targetApplicationName', onboardingForm.get('existingFlows.targetApplicationName')?.value)">
+                         (focus)="onFieldFocus('existingFlows.targetApplicationName', 'Target Application Name')">
                 </mat-form-field>
 
                 <mat-checkbox formControlName="isUsingIODS"
-                              (change)="onFieldChange('existingFlows.isUsingIODS', $event.checked)"
-                              style="margin-bottom: 16px;">
-                  Is the application using IODS?
+                              (focus)="onFieldFocus('existingFlows.isUsingIODS', 'Using IODS System')"
+                              style="margin: 16px 0;">
+                  Is using IODS?
                 </mat-checkbox>
 
                 <!-- IODS Details (Conditional) -->
@@ -38,37 +38,37 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Old IODS ID</mat-label>
                     <input matInput formControlName="oldIodsId"
-                           (blur)="onFieldChange('existingFlows.iodsDetails.oldIodsId', onboardingForm.get('existingFlows.iodsDetails.oldIodsId')?.value)">
+                           (focus)="onFieldFocus('existingFlows.iodsDetails.oldIodsId', 'Old IODS ID')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>On Site Server Application Names</mat-label>
                     <input matInput formControlName="onSiteServerNames"
-                           (blur)="onFieldChange('existingFlows.iodsDetails.onSiteServerNames', onboardingForm.get('existingFlows.iodsDetails.onSiteServerNames')?.value)">
+                           (focus)="onFieldFocus('existingFlows.iodsDetails.onSiteServerNames', 'On Site Server Application Names')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>File Name</mat-label>
                     <input matInput formControlName="fileName"
-                           (blur)="onFieldChange('existingFlows.iodsDetails.fileName', onboardingForm.get('existingFlows.iodsDetails.fileName')?.value)">
+                           (focus)="onFieldFocus('existingFlows.iodsDetails.fileName', 'File Name')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>File Type</mat-label>
                     <input matInput formControlName="fileType"
-                           (blur)="onFieldChange('existingFlows.iodsDetails.fileType', onboardingForm.get('existingFlows.iodsDetails.fileType')?.value)">
+                           (focus)="onFieldFocus('existingFlows.iodsDetails.fileType', 'File Type')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>IODS Mailbox or Drop Location Name</mat-label>
                     <input matInput formControlName="iodsMailbox"
-                           (blur)="onFieldChange('existingFlows.iodsDetails.iodsMailbox', onboardingForm.get('existingFlows.iodsDetails.iodsMailbox')?.value)">
+                           (focus)="onFieldFocus('existingFlows.iodsDetails.iodsMailbox', 'IODS Mailbox or Drop Location Name')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Pre/Post Transfer Processes</mat-label>
                     <textarea matInput rows="3" formControlName="prePostTransferProcesses"
-                              (blur)="onFieldChange('existingFlows.iodsDetails.prePostTransferProcesses', onboardingForm.get('existingFlows.iodsDetails.prePostTransferProcesses')?.value)"></textarea>
+                              (focus)="onFieldFocus('existingFlows.iodsDetails.prePostTransferProcesses', 'Pre/Post Transfer Processes')"></textarea>
                   </mat-form-field>
                 </div>
               </mat-card-content>
@@ -81,13 +81,13 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>System Name</mat-label>
                   <input matInput formControlName="systemName"
-                         (blur)="onFieldChange('applicationInfo.systemName', onboardingForm.get('applicationInfo.systemName')?.value)">
+                         (focus)="onFieldFocus('applicationInfo.systemName', 'System Name')">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Internal or External Application</mat-label>
                   <mat-select formControlName="internalOrExternal"
-                              (selectionChange)="onFieldChange('applicationInfo.internalOrExternal', $event.value)">
+                              (focus)="onFieldFocus('applicationInfo.internalOrExternal', 'Internal or External Application')">
                     <mat-option *ngFor="let option of internalExternalOptions" [value]="option">{{option}}</mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -95,13 +95,13 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Supported Protocols</mat-label>
                   <input matInput formControlName="supportedProtocols"
-                         (blur)="onFieldChange('applicationInfo.supportedProtocols', onboardingForm.get('applicationInfo.supportedProtocols')?.value)">
+                         (focus)="onFieldFocus('applicationInfo.supportedProtocols', 'Supported Protocols')">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>System Platform</mat-label>
                   <input matInput formControlName="platform"
-                         (blur)="onFieldChange('applicationInfo.platform', onboardingForm.get('applicationInfo.platform')?.value)">
+                         (focus)="onFieldFocus('applicationInfo.platform', 'System Platform')">
                 </mat-form-field>
 
                 <div class="checkbox-group" formArrayName="environments">
@@ -109,6 +109,7 @@
                   <mat-checkbox *ngFor="let env of environmentOptions; let i = index"
                                 [formControlName]="i"
                                 (change)="onEnvironmentChange()"
+                                (focus)="onFieldFocus('applicationInfo.environments', 'Environments In Scope')"
                                 style="display: block; margin-bottom: 8px;">
                     {{env}}
                   </mat-checkbox>
@@ -117,7 +118,7 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Primary Region</mat-label>
                   <mat-select formControlName="primaryRegion"
-                              (selectionChange)="onFieldChange('applicationInfo.primaryRegion', $event.value)">
+                              (focus)="onFieldFocus('applicationInfo.primaryRegion', 'Primary Region')">
                     <mat-option *ngFor="let region of regionOptions" [value]="region">{{region}}</mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -125,10 +126,21 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Backup Region</mat-label>
                   <mat-select formControlName="backupRegion"
-                              (selectionChange)="onFieldChange('applicationInfo.backupRegion', $event.value)">
+                              (focus)="onFieldFocus('applicationInfo.backupRegion', 'Backup Region')">
                     <mat-option *ngFor="let region of backupRegionOptions" [value]="region">{{region}}</mat-option>
                   </mat-select>
                 </mat-form-field>
+
+                <mat-radio-group formControlName="isExternalApplication" class="radio-group">
+                  <mat-radio-button [value]="true" 
+                                    (focus)="onFieldFocus('applicationInfo.isExternalApplication', 'External Application')">
+                    External Application (via External Vendor)
+                  </mat-radio-button>
+                  <mat-radio-button [value]="false"
+                                    (focus)="onFieldFocus('applicationInfo.isExternalApplication', 'Internal Application')">
+                    Internal Application
+                  </mat-radio-button>
+                </mat-radio-group>
               </mat-card-content>
             </mat-card>
 
@@ -139,7 +151,7 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Network Location</mat-label>
                   <mat-select formControlName="networkLocation"
-                              (selectionChange)="onFieldChange('networkCloudInfo.networkLocation', $event.value)">
+                              (focus)="onFieldFocus('networkCloudInfo.networkLocation', 'Network Location')">
                     <mat-option *ngFor="let location of networkLocationOptions" [value]="location">{{location}}</mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -152,48 +164,49 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>AWS Cloud Account Name</mat-label>
                     <input matInput formControlName="awsAccountName"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.awsAccountName', onboardingForm.get('networkCloudInfo.cloudDetails.awsAccountName')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.awsAccountName', 'AWS Cloud Account Name')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>AWS Cloud Account Number</mat-label>
                     <input matInput formControlName="awsAccountNumber"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.awsAccountNumber', onboardingForm.get('networkCloudInfo.cloudDetails.awsAccountNumber')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.awsAccountNumber', 'AWS Cloud Account Number')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Cloud Region Name</mat-label>
                     <input matInput formControlName="cloudRegion"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.cloudRegion', onboardingForm.get('networkCloudInfo.cloudDetails.cloudRegion')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.cloudRegion', 'Cloud Region Name')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>AWS Cloud ID</mat-label>
                     <input matInput formControlName="awsCloudId"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.awsCloudId', onboardingForm.get('networkCloudInfo.cloudDetails.awsCloudId')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.awsCloudId', 'AWS Cloud ID')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Server Name</mat-label>
                     <input matInput formControlName="serverName"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.serverName', onboardingForm.get('networkCloudInfo.cloudDetails.serverName')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.serverName', 'Server Name')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>IP or Subnet</mat-label>
                     <input matInput formControlName="ipOrSubnet"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.ipOrSubnet', onboardingForm.get('networkCloudInfo.cloudDetails.ipOrSubnet')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.ipOrSubnet', 'IP or Subnet')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Application Target</mat-label>
                     <input matInput formControlName="applicationTarget"
-                           (blur)="onFieldChange('networkCloudInfo.cloudDetails.applicationTarget', onboardingForm.get('networkCloudInfo.cloudDetails.applicationTarget')?.value)">
+                           (focus)="onFieldFocus('networkCloudInfo.cloudDetails.applicationTarget', 'Application Target')">
                   </mat-form-field>
                 </div>
 
                 <mat-checkbox formControlName="requiresExternalVendorConnection"
                               (change)="onFieldChange('networkCloudInfo.requiresExternalVendorConnection', $event.checked)"
+                              (focus)="onFieldFocus('networkCloudInfo.requiresExternalVendorConnection', 'Requires External Vendor Connection')"
                               style="margin-top: 16px;">
                   Requires External Vendor Connection?
                 </mat-checkbox>
@@ -206,6 +219,7 @@
               <mat-card-content>
                 <mat-checkbox formControlName="hasOutbound"
                               (change)="onFieldChange('fileTransferInfo.hasOutbound', $event.checked)"
+                              (focus)="onFieldFocus('fileTransferInfo.hasOutbound', 'Outbound Request (Cloud to On Site)')"
                               style="margin-bottom: 16px;">
                   Outbound Request (Cloud to On Site)?
                 </mat-checkbox>
@@ -216,30 +230,31 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Source AWS Account</mat-label>
                     <input matInput formControlName="sourceAwsAccount"
-                           (blur)="onFieldChange('fileTransferInfo.sourceAwsAccount', onboardingForm.get('fileTransferInfo.sourceAwsAccount')?.value)">
+                           (focus)="onFieldFocus('fileTransferInfo.sourceAwsAccount', 'Source AWS Account')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Source Bucket ARN</mat-label>
                     <input matInput formControlName="sourceBucketArn"
-                           (blur)="onFieldChange('fileTransferInfo.sourceBucketArn', onboardingForm.get('fileTransferInfo.sourceBucketArn')?.value)">
+                           (focus)="onFieldFocus('fileTransferInfo.sourceBucketArn', 'Source Bucket ARN')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Source Archive Bucket</mat-label>
                     <input matInput formControlName="sourceArchiveBucket"
-                           (blur)="onFieldChange('fileTransferInfo.sourceArchiveBucket', onboardingForm.get('fileTransferInfo.sourceArchiveBucket')?.value)">
+                           (focus)="onFieldFocus('fileTransferInfo.sourceArchiveBucket', 'Source Archive Bucket')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Source Archive Prefix</mat-label>
                     <input matInput formControlName="sourceArchivePrefix"
-                           (blur)="onFieldChange('fileTransferInfo.sourceArchivePrefix', onboardingForm.get('fileTransferInfo.sourceArchivePrefix')?.value)">
+                           (focus)="onFieldFocus('fileTransferInfo.sourceArchivePrefix', 'Source Archive Prefix')">
                   </mat-form-field>
                 </div>
 
                 <mat-checkbox formControlName="hasInbound"
                               (change)="onFieldChange('fileTransferInfo.hasInbound', $event.checked)"
+                              (focus)="onFieldFocus('fileTransferInfo.hasInbound', 'Inbound Request (On Site to Cloud)')"
                               style="margin: 16px 0;">
                   Inbound Request (On Site to Cloud)?
                 </mat-checkbox>
@@ -250,13 +265,13 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Target Bucket</mat-label>
                     <input matInput formControlName="targetBucket"
-                           (blur)="onFieldChange('fileTransferInfo.targetBucket', onboardingForm.get('fileTransferInfo.targetBucket')?.value)">
+                           (focus)="onFieldFocus('fileTransferInfo.targetBucket', 'Target Bucket')">
                 </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Target Prefix</mat-label>
                     <input matInput formControlName="targetPrefix"
-                           (blur)="onFieldChange('fileTransferInfo.targetPrefix', onboardingForm.get('fileTransferInfo.targetPrefix')?.value)">
+                           (focus)="onFieldFocus('fileTransferInfo.targetPrefix', 'Target Prefix')">
                   </mat-form-field>
                 </div>
               </mat-card-content>
@@ -269,7 +284,7 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Customer Environments In Scope</mat-label>
                   <textarea matInput rows="3" formControlName="customerEnvironments"
-                            (blur)="onFieldChange('environmentInfo.customerEnvironments', onboardingForm.get('environmentInfo.customerEnvironments')?.value)"></textarea>
+                            (focus)="onFieldFocus('environmentInfo.customerEnvironments', 'Customer Environments In Scope')"></textarea>
                 </mat-form-field>
 
                 <div formGroupName="cloudEnvironmentMapping">
@@ -278,7 +293,7 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>DEV maps to</mat-label>
                     <mat-select formControlName="development"
-                                (selectionChange)="onFieldChange('environmentInfo.cloudEnvironmentMapping.development', $event.value)">
+                                (focus)="onFieldFocus('environmentInfo.cloudEnvironmentMapping.development', 'DEV maps to')">
                       <mat-option *ngFor="let option of environmentOptions" [value]="option">{{option}}</mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -286,7 +301,7 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>QA maps to</mat-label>
                     <mat-select formControlName="qualityAssurance"
-                                (selectionChange)="onFieldChange('environmentInfo.cloudEnvironmentMapping.qualityAssurance', $event.value)">
+                                (focus)="onFieldFocus('environmentInfo.cloudEnvironmentMapping.qualityAssurance', 'QA maps to')">
                       <mat-option *ngFor="let option of environmentOptions" [value]="option">{{option}}</mat-option>
                   </mat-select>
                 </mat-form-field>
@@ -294,7 +309,7 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>PROD maps to</mat-label>
                     <mat-select formControlName="production"
-                                (selectionChange)="onFieldChange('environmentInfo.cloudEnvironmentMapping.production', $event.value)">
+                                (focus)="onFieldFocus('environmentInfo.cloudEnvironmentMapping.production', 'PROD maps to')">
                       <mat-option *ngFor="let option of environmentOptions" [value]="option">{{option}}</mat-option>
                     </mat-select>
                   </mat-form-field>
@@ -309,7 +324,8 @@
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Implementation Deadline</mat-label>
                   <input matInput [matDatepicker]="picker" formControlName="implementationDeadline"
-                         (dateChange)="onFieldChange('businessInfo.implementationDeadline', $event.value)">
+                         (dateChange)="onFieldChange('businessInfo.implementationDeadline', $event.value)"
+                         (focus)="onFieldFocus('businessInfo.implementationDeadline', 'Implementation Deadline')">
                   <mat-hint>Various formats supported (MM/DD/YYYY, YYYY-MM-DD, etc.)</mat-hint>
                   <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                   <mat-datepicker #picker></mat-datepicker>
@@ -321,31 +337,31 @@
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Business Contact (Source)</mat-label>
                     <input matInput formControlName="businessContactSource"
-                           (blur)="onFieldChange('businessInfo.contacts.businessContactSource', onboardingForm.get('businessInfo.contacts.businessContactSource')?.value)">
+                           (focus)="onFieldFocus('businessInfo.contacts.businessContactSource', 'Business Contact (Source)')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Technical Contact (Source)</mat-label>
                     <input matInput formControlName="technicalContactSource"
-                           (blur)="onFieldChange('businessInfo.contacts.technicalContactSource', onboardingForm.get('businessInfo.contacts.technicalContactSource')?.value)">
+                           (focus)="onFieldFocus('businessInfo.contacts.technicalContactSource', 'Technical Contact (Source)')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Business Contact (Target)</mat-label>
                     <input matInput formControlName="businessContactTarget"
-                           (blur)="onFieldChange('businessInfo.contacts.businessContactTarget', onboardingForm.get('businessInfo.contacts.businessContactTarget')?.value)">
+                           (focus)="onFieldFocus('businessInfo.contacts.businessContactTarget', 'Business Contact (Target)')">
                   </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Technical Contact (Target)</mat-label>
                     <input matInput formControlName="technicalContactTarget"
-                           (blur)="onFieldChange('businessInfo.contacts.technicalContactTarget', onboardingForm.get('businessInfo.contacts.technicalContactTarget')?.value)">
+                           (focus)="onFieldFocus('businessInfo.contacts.technicalContactTarget', 'Technical Contact (Target)')">
                   </mat-form-field>
 
                   <mat-form-field *ngIf="isExternalApplication" appearance="outline" class="full-width">
                     <mat-label>Vendor Contact (if External)</mat-label>
                     <input matInput formControlName="vendorContact"
-                           (blur)="onFieldChange('businessInfo.contacts.vendorContact', onboardingForm.get('businessInfo.contacts.vendorContact')?.value)">
+                           (focus)="onFieldFocus('businessInfo.contacts.vendorContact', 'Vendor Contact (if External)')">
                   </mat-form-field>
                 </div>
               </mat-card-content>
@@ -374,7 +390,7 @@
       </mat-slide-toggle>
       <mat-icon 
         class="info-icon" 
-        matTooltip="When enabled, AI proactively guides you through the form. When disabled, AI only responds to your questions (Manual mode)."
+        matTooltip="When enabled, AI provides context and requirements when you click on form fields. When disabled, AI only responds to your questions (Manual mode)."
         matTooltipPosition="left">
         info_outline
       </mat-icon>

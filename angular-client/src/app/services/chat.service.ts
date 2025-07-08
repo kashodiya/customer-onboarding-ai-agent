@@ -84,6 +84,11 @@ export class ChatService {
     return this.http.post(`${this.apiUrl}/toggle-smart-guide`, payload);
   }
 
+  getFieldContext(fieldData: FormField, completeFormData?: any): Observable<any> {
+    const payload = { ...fieldData, completeFormData: completeFormData || {} };
+    return this.http.post(`${this.apiUrl}/get-field-context`, payload);
+  }
+
   getFormUpdates(): Observable<any> {
     return this.formUpdatesSubject.asObservable();
   }

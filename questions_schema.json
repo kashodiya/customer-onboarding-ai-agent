@@ -7,52 +7,75 @@
       "properties": {
         "sourceApplicationName": {
           "type": "string",
-          "title": "1. Source Application Name"
+          "title": "Source Application Name",
+          "description": "The official name of the application or system that will be sending data or files",
+          "requirements": "Use the formal system name as known in your organization",
+          "examples": ["Customer Database", "Inventory Management System", "Payment Gateway", "CRM Platform"]
         },
         "targetApplicationName": {
           "type": "string",
-          "title": "2. Target Application Name"
+          "title": "Target Application Name",
+          "description": "The official name of the application or system that will be receiving data or files",
+          "requirements": "Use the formal system name as known in your organization",
+          "examples": ["Data Warehouse", "Analytics Platform", "Cloud Storage", "Backup System"]
         },
         "isUsingIODS": {
           "type": "boolean",
-          "title": "3. Is the application using IODS?"
+          "title": "Is using IODS?",
+          "description": "Whether your current system uses the legacy IODS (Input/Output Data System) for file transfers",
+          "requirements": "Select Yes if you currently use IODS, No if you don't or are unsure"
         },
         "iodsDetails": {
           "type": "object",
           "title": "IODS Details",
+          "description": "Details about your existing IODS configuration (only if using IODS)",
           "properties": {
             "oldIodsId": {
               "type": "string",
-              "title": "Old IODS ID"
+              "title": "Old IODS ID",
+              "description": "The unique identifier for your current IODS system",
+              "requirements": "Enter the exact ID as it appears in your IODS configuration",
+              "examples": ["IODS_001", "SYS_IODS_PROD", "OLD_TRANSFER_01"]
             },
             "onSiteServerNames": {
               "type": "string",
-              "title": "On Site Server Application Names"
+              "title": "On Site Server Application Names",
+              "description": "Names of the on-premises servers or applications involved in IODS transfers",
+              "requirements": "List all relevant server names, separated by commas if multiple",
+              "examples": ["PROD-SERVER-01", "APP-SRV-MAIN, APP-SRV-BACKUP", "ON-PREM-DB01"]
             },
             "fileName": {
               "type": "string",
-              "title": "File Name"
+              "title": "File Name",
+              "description": "The typical file name pattern or specific file names used in IODS transfers",
+              "requirements": "Include file extensions and any naming patterns",
+              "examples": ["customer_data.csv", "daily_*.txt", "report_YYYYMMDD.xml"]
             },
             "fileType": {
               "type": "string",
-              "title": "File Type"
+              "title": "File Type",
+              "description": "The format or type of files being transferred through IODS",
+              "requirements": "Specify the file format and any special characteristics",
+              "examples": ["CSV", "XML", "JSON", "Fixed-width text", "Binary"]
             },
             "iodsMailbox": {
               "type": "string",
-              "title": "IODS Mailbox or Drop Location Name"
+              "title": "IODS Mailbox or Drop Location Name",
+              "description": "The mailbox or designated drop location name in the IODS system",
+              "requirements": "Use the exact name as configured in IODS",
+              "examples": ["MAILBOX_CUSTOMER", "DROP_ZONE_01", "TRANSFER_INBOX"]
             },
             "prePostTransferProcesses": {
               "type": "string",
-              "title": "Pre/Post Transfer Processes"
+              "title": "Pre/Post Transfer Processes",
+              "description": "Any automated processes that run before or after IODS file transfers",
+              "requirements": "Describe any validation, encryption, or notification processes",
+              "examples": ["File validation and virus scan", "Encryption before transfer", "Email notification on completion"]
             }
           }
         }
       },
-      "required": [
-        "sourceApplicationName",
-        "targetApplicationName",
-        "isUsingIODS"
-      ]
+      "required": ["sourceApplicationName", "targetApplicationName", "isUsingIODS"]
     },
     "applicationInfo": {
       "type": "object",
@@ -60,64 +83,59 @@
       "properties": {
         "systemName": {
           "type": "string",
-          "title": "System Name"
+          "title": "System Name",
+          "description": "A clear, descriptive name that identifies your application system",
+          "requirements": "Use a name that will be easily recognizable to stakeholders",
+          "examples": ["Customer Portal", "Inventory Management", "Financial Reporting System", "User Authentication Service"]
         },
         "internalOrExternal": {
           "type": "string",
           "title": "Internal or External Application",
-          "enum": [
-            "Internal",
-            "External"
-          ]
+          "description": "Whether the application is developed and maintained internally or by an external vendor",
+          "requirements": "Select Internal for in-house systems, External for vendor/third-party systems",
+          "enum": ["Internal", "External"]
         },
         "supportedProtocols": {
           "type": "string",
-          "title": "Supported Protocols"
+          "title": "Supported Protocols",
+          "description": "The communication protocols your system can use for data transfer",
+          "requirements": "List all protocols the system supports, separated by commas",
+          "examples": ["HTTPS, SFTP", "REST API, SOAP", "FTP, FTPS", "S3, API Gateway"]
         },
         "platform": {
           "type": "string",
-          "title": "System Platform"
+          "title": "System Platform",
+          "description": "The underlying technology platform or infrastructure on which your system runs",
+          "requirements": "Specify the operating system, cloud platform, or technology stack",
+          "examples": ["Windows Server 2019", "Linux Ubuntu", "AWS Lambda", "Azure App Service", "Docker on Kubernetes"]
         },
         "environments": {
           "type": "array",
           "items": {
             "type": "string",
-            "enum": [
-              "DEV",
-              "QA",
-              "PROD"
-            ]
+            "enum": ["DEV", "QA", "PROD"]
           },
           "uniqueItems": true,
-          "title": "Environments In Scope"
+          "title": "Environments In Scope",
+          "description": "The environments where this onboarding will be implemented",
+          "requirements": "Select all environments that will be part of this integration"
         },
         "primaryRegion": {
           "type": "string",
-          "enum": [
-            "NORTH",
-            "SOUTH"
-          ],
-          "title": "Primary Region"
+          "enum": ["NORTH", "SOUTH"],
+          "title": "Primary Region",
+          "description": "The primary geographical region where your system operates",
+          "requirements": "Choose the region where most of your system's processing occurs"
         },
         "backupRegion": {
           "type": "string",
-          "enum": [
-            "NORTH",
-            "SOUTH",
-            "None"
-          ],
-          "title": "Backup Region"
+          "enum": ["NORTH", "SOUTH", "None"],
+          "title": "Backup Region",
+          "description": "The backup or disaster recovery region for your system",
+          "requirements": "Select None if no backup region is configured"
         }
       },
-      "required": [
-        "systemName",
-        "internalOrExternal",
-        "supportedProtocols",
-        "platform",
-        "environments",
-        "primaryRegion",
-        "backupRegion"
-      ]
+      "required": ["systemName", "internalOrExternal", "supportedProtocols", "platform", "environments", "primaryRegion", "backupRegion"]
     },
     "networkCloudInfo": {
       "type": "object",
@@ -125,54 +143,77 @@
       "properties": {
         "networkLocation": {
           "type": "string",
-          "enum": [
-            "On Site",
-            "Cloud"
-          ],
-          "title": "Network Location"
+          "enum": ["On Site", "Cloud"],
+          "title": "Network Location",
+          "description": "Whether your system is hosted on-premises or in the cloud",
+          "requirements": "Select On Site for on-premises hosting, Cloud for cloud-hosted systems"
         },
         "cloudDetails": {
           "type": "object",
+          "title": "Cloud Details",
+          "description": "Specific details about your cloud hosting configuration (required if Cloud is selected)",
           "properties": {
             "awsAccountName": {
               "type": "string",
-              "title": "AWS Cloud Account Name"
+              "title": "AWS Cloud Account Name",
+              "description": "The friendly name of your AWS account",
+              "requirements": "Use the account name as it appears in AWS Organizations or your billing",
+              "examples": ["Production Account", "Dev-Test-Account", "CustomerApp-Prod"]
             },
             "awsAccountNumber": {
               "type": "string",
-              "title": "AWS Cloud Account Number"
+              "title": "AWS Cloud Account Number",
+              "description": "The 12-digit AWS account number",
+              "requirements": "Enter the exact 12-digit number without spaces or dashes",
+              "examples": ["123456789012", "987654321098"],
+              "validation": "Must be exactly 12 digits"
             },
             "cloudRegion": {
               "type": "string",
-              "title": "Cloud Region Name"
+              "title": "Cloud Region Name",
+              "description": "The AWS region where your resources are deployed",
+              "requirements": "Use the full region name as it appears in AWS",
+              "examples": ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"]
             },
             "awsCloudId": {
               "type": "string",
-              "title": "AWS Cloud ID"
+              "title": "AWS Cloud ID",
+              "description": "Any specific cloud identifier or resource ID for your deployment",
+              "requirements": "Provide the specific identifier if you have one assigned",
+              "examples": ["vpc-12345678", "cluster-prod-01", "app-environment-id"]
             },
             "serverName": {
               "type": "string",
-              "title": "Server Name"
+              "title": "Server Name",
+              "description": "The name or identifier of your cloud server or compute resource",
+              "requirements": "Use the instance name as it appears in your cloud console",
+              "examples": ["web-server-prod", "app-instance-01", "ec2-customer-app"]
             },
             "ipOrSubnet": {
               "type": "string",
-              "title": "IP or Subnet"
+              "title": "IP or Subnet",
+              "description": "The IP address or subnet range for your cloud resources",
+              "requirements": "Provide either specific IP or CIDR notation for subnet",
+              "examples": ["10.0.1.0/24", "192.168.1.100", "172.16.0.0/16"],
+              "validation": "Must be valid IP address or CIDR notation"
             },
             "applicationTarget": {
               "type": "string",
-              "title": "Application Target"
+              "title": "Application Target",
+              "description": "The specific application endpoint or target for connections",
+              "requirements": "Provide the URL, hostname, or connection string for the application",
+              "examples": ["https://api.company.com", "app.internal.local", "customer-db.rds.amazonaws.com"]
             }
           }
         },
         "requiresExternalVendorConnection": {
           "type": "boolean",
-          "title": "Requires External Vendor Connection?"
+          "title": "Requires External Vendor Connection?",
+          "description": "Whether this system needs to connect to external vendor systems or third-party services",
+          "requirements": "Select Yes if connections to external vendors are required"
         }
       },
-      "required": [
-        "networkLocation",
-        "requiresExternalVendorConnection"
-      ]
+      "required": ["networkLocation", "requiresExternalVendorConnection"]
     },
     "fileTransferInfo": {
       "type": "object",
@@ -180,41 +221,61 @@
       "properties": {
         "hasOutbound": {
           "type": "boolean",
-          "title": "Outbound Request (Cloud to On Site)?"
+          "title": "Outbound Request (Cloud to On Site)?",
+          "description": "Whether files need to be transferred FROM the cloud TO on-premises systems",
+          "requirements": "Select Yes if you need to send files from cloud to on-site"
         },
         "sourceAwsAccount": {
           "type": "string",
-          "title": "Source AWS Account"
+          "title": "Source AWS Account",
+          "description": "The AWS account that will be the source for outbound transfers",
+          "requirements": "Enter the account number or name for the source account",
+          "examples": ["123456789012", "prod-data-account"]
         },
         "sourceBucketArn": {
           "type": "string",
-          "title": "Source Bucket ARN"
+          "title": "Source Bucket ARN",
+          "description": "The Amazon Resource Name (ARN) of the S3 bucket used as the source",
+          "requirements": "Provide the complete ARN starting with arn:aws:s3:::",
+          "examples": ["arn:aws:s3:::my-source-bucket", "arn:aws:s3:::company-data-export"],
+          "validation": "Must be valid S3 bucket ARN format"
         },
         "sourceArchiveBucket": {
           "type": "string",
-          "title": "Source Archive Bucket"
+          "title": "Source Archive Bucket",
+          "description": "The S3 bucket name where source files are archived after transfer",
+          "requirements": "Enter the bucket name used for archiving transferred files",
+          "examples": ["source-archive-bucket", "transferred-files-archive"]
         },
         "sourceArchivePrefix": {
           "type": "string",
-          "title": "Source Archive Prefix"
+          "title": "Source Archive Prefix",
+          "description": "The folder path or prefix used in the archive bucket for organizing files",
+          "requirements": "Specify the prefix structure for archived files",
+          "examples": ["archive/", "processed/YYYY/MM/", "completed-transfers/"]
         },
         "hasInbound": {
           "type": "boolean",
-          "title": "Inbound Request (On Site to Cloud)?"
+          "title": "Inbound Request (On Site to Cloud)?",
+          "description": "Whether files need to be transferred FROM on-premises TO the cloud",
+          "requirements": "Select Yes if you need to send files from on-site to cloud"
         },
         "targetBucket": {
           "type": "string",
-          "title": "Target Bucket"
+          "title": "Target Bucket",
+          "description": "The S3 bucket name that will receive inbound files from on-premises",
+          "requirements": "Enter the destination bucket name for incoming files",
+          "examples": ["inbound-data-bucket", "customer-uploads"]
         },
         "targetPrefix": {
           "type": "string",
-          "title": "Target Prefix"
+          "title": "Target Prefix",
+          "description": "The folder path or prefix in the target bucket where files will be stored",
+          "requirements": "Specify the folder structure for incoming files",
+          "examples": ["incoming/", "uploads/YYYY/MM/DD/", "data-intake/"]
         }
       },
-      "required": [
-        "hasOutbound",
-        "hasInbound"
-      ]
+      "required": ["hasOutbound", "hasInbound"]
     },
     "environmentInfo": {
       "type": "object",
@@ -222,50 +283,42 @@
       "properties": {
         "customerEnvironments": {
           "type": "string",
-          "title": "Customer Environments In Scope"
+          "title": "Customer Environments In Scope",
+          "description": "Detailed description of the customer environments that will be included in this onboarding",
+          "requirements": "Describe all environments, their purposes, and any special considerations",
+          "examples": ["Development for testing, QA for validation, Production for live operations", "Single production environment with blue-green deployment"]
         },
         "cloudEnvironmentMapping": {
           "type": "object",
+          "title": "Cloud Environment Mapping",
+          "description": "How your customer environments map to cloud environments",
           "properties": {
             "development": {
               "type": "string",
               "title": "DEV maps to",
-              "enum": [
-                "DEV",
-                "QA",
-                "PROD"
-              ]
+              "description": "Which cloud environment your development environment maps to",
+              "requirements": "Select the cloud environment that corresponds to your development setup",
+              "enum": ["DEV", "QA", "PROD"]
             },
             "qualityAssurance": {
               "type": "string",
               "title": "QA maps to",
-              "enum": [
-                "DEV",
-                "QA",
-                "PROD"
-              ]
+              "description": "Which cloud environment your quality assurance/testing environment maps to",
+              "requirements": "Select the cloud environment used for testing and validation",
+              "enum": ["DEV", "QA", "PROD"]
             },
             "production": {
               "type": "string",
               "title": "PROD maps to",
-              "enum": [
-                "DEV",
-                "QA",
-                "PROD"
-              ]
+              "description": "Which cloud environment your production environment maps to",
+              "requirements": "Select the cloud environment for live production workloads",
+              "enum": ["DEV", "QA", "PROD"]
             }
           },
-          "required": [
-            "development",
-            "qualityAssurance",
-            "production"
-          ]
+          "required": ["development", "qualityAssurance", "production"]
         }
       },
-      "required": [
-        "customerEnvironments",
-        "cloudEnvironmentMapping"
-      ]
+      "required": ["customerEnvironments", "cloudEnvironmentMapping"]
     },
     "businessInfo": {
       "type": "object",
@@ -274,48 +327,57 @@
         "implementationDeadline": {
           "type": "string",
           "format": "date",
-          "title": "Implementation Deadline"
+          "title": "Implementation Deadline",
+          "description": "The target date when this onboarding implementation should be completed",
+          "requirements": "Select a realistic date considering development, testing, and deployment time",
+          "examples": ["2024-06-30", "2024-12-15"],
+          "validation": "Must be a future date in YYYY-MM-DD format"
         },
         "contacts": {
           "type": "object",
+          "title": "Contact Information",
+          "description": "Key contacts for business and technical coordination",
           "properties": {
             "businessContactSource": {
               "type": "string",
-              "title": "Business Contact (Source)"
+              "title": "Business Contact (Source)",
+              "description": "Primary business contact for the source system or organization",
+              "requirements": "Provide name and email of the business owner or project manager",
+              "examples": ["John Smith (john.smith@company.com)", "Sarah Johnson - Project Manager"]
             },
             "technicalContactSource": {
               "type": "string",
-              "title": "Technical Contact (Source)"
+              "title": "Technical Contact (Source)",
+              "description": "Primary technical contact for the source system",
+              "requirements": "Provide name and email of the technical lead or architect",
+              "examples": ["Mike Developer (mike.dev@company.com)", "Lisa Chen - System Admin"]
             },
             "businessContactTarget": {
               "type": "string",
-              "title": "Business Contact (Target)"
+              "title": "Business Contact (Target)",
+              "description": "Primary business contact for the target system or organization",
+              "requirements": "Provide name and email of the business owner for the receiving system",
+              "examples": ["Jane Doe (jane.doe@target.com)", "Robert Wilson - Business Owner"]
             },
             "technicalContactTarget": {
               "type": "string",
-              "title": "Technical Contact (Target)"
+              "title": "Technical Contact (Target)",
+              "description": "Primary technical contact for the target system",
+              "requirements": "Provide name and email of the technical lead for the receiving system",
+              "examples": ["Alice Engineer (alice.eng@target.com)", "David Kim - DevOps Lead"]
             },
             "vendorContact": {
               "type": "string",
-              "title": "Vendor Contact (if External)"
+              "title": "Vendor Contact (if External)",
+              "description": "Contact information for external vendor if using third-party systems",
+              "requirements": "Required only for external applications - provide vendor representative details",
+              "examples": ["Vendor Support (support@vendor.com)", "Tom Anderson - Vendor Implementation"]
             }
           },
-          "required": [
-            "businessContactSource",
-            "technicalContactSource",
-            "businessContactTarget",
-            "technicalContactTarget"
-          ]
+          "required": ["businessContactSource", "technicalContactSource", "businessContactTarget", "technicalContactTarget"]
         }
       }
     }
   },
-  "required": [
-    "existingFlows",
-    "applicationInfo",
-    "networkCloudInfo",
-    "fileTransferInfo",
-    "environmentInfo",
-    "businessInfo"
-  ]
+  "required": ["existingFlows", "applicationInfo", "networkCloudInfo", "fileTransferInfo", "environmentInfo", "businessInfo"]
 }

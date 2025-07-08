@@ -11,6 +11,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
@@ -34,6 +35,7 @@ import { Subscription } from 'rxjs';
     MatProgressBarModule,
     MatDividerModule,
     MatCheckboxModule,
+    MatRadioModule,
     MatDatepickerModule,
     MatNativeDateModule,
     MatSlideToggleModule,
@@ -387,23 +389,27 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.newMessage = '';
   }
 
-  onFieldChange(fieldPath: string, value: any) {
-    if (value === null || value === undefined) return;
-    
-    // Only send updates to AI agent if Smart Guide is enabled
+  onFieldFocus(fieldPath: string, fieldLabel: string) {
+    // Only provide context in Smart Guide mode
     if (!this.smartGuideEnabled) return;
     
-    const fieldData: FormField = { name: fieldPath, value: value };
+    const fieldData: FormField = { name: fieldPath, value: fieldLabel };
     const completeFormData = this.getCompleteFormData();
     
-    this.chatService.updateFormField(fieldData, completeFormData).subscribe({
+    this.chatService.getFieldContext(fieldData, completeFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
       },
       error: (error) => {
-        console.error('Error updating field:', error);
+        console.error('Error getting field context:', error);
       }
     });
+  }
+
+  onFieldChange(fieldPath: string, value: any) {
+    // This method now only handles form updates, no AI interaction
+    if (value === null || value === undefined) return;
+    // Form value updates are handled automatically by Angular reactive forms
   }
 
   onEnvironmentChange() {
