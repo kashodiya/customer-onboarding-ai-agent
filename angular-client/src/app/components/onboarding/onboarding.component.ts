@@ -13,6 +13,8 @@ import { MatDividerModule } from '@angular/material/divider';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ChatService, ChatMessage, FormField } from '../../services/chat.service';
 import { Subscription } from 'rxjs';
 
@@ -33,7 +35,9 @@ import { Subscription } from 'rxjs';
     MatDividerModule,
     MatCheckboxModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatSlideToggleModule,
+    MatTooltipModule
   ],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss']
@@ -43,6 +47,9 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   newMessage = '';
   isLoading = false;
   messageCounter = 0;
+  chatExpanded = true;
+  smartGuideEnabled = true; // Smart Guide is enabled by default
+  showWelcomeButtons = false; // Show buttons after welcome message
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
@@ -184,9 +191,14 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   }
 
   startAgent() {
-    this.chatService.startAgent().subscribe({
+    // Include current form state in case user has already filled some fields manually
+    const currentFormData = this.getCompleteFormData();
+    
+    this.chatService.startAgent(currentFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
+        // Show welcome buttons after the welcome message
+        this.showWelcomeButtons = true;
       },
       error: (error) => {
         console.error('Error starting agent:', error);
@@ -299,10 +311,51 @@ export class OnboardingComponent implements OnInit, OnDestroy {
     this.addMessage(this.newMessage, true);
     this.isLoading = true;
 
-    this.chatService.askAgent(this.newMessage).subscribe({
+    // Check if user is responding to mode preference question
+    const message = this.newMessage.toLowerCase().trim();
+    const isManualResponse = message.includes('manual') || message.includes('on-demand') || message.includes('on demand') || 
+                             message.includes('only respond') || message.includes('passive') ||
+                             (message.includes('no') && (message.includes('guide') || message.includes('help') || message.includes('assistance'))) ||
+                             message === 'no' || message === 'nope' || message === 'no thanks' || message === 'no thank you';
+    const isSmartGuideResponse = message.includes('smart guide') || message.includes('proactive') || 
+                                 message.includes('guide me') || message.includes('help me') ||
+                                 (message.includes('yes') && (message.includes('guide') || message.includes('help') || message.includes('assistance'))) ||
+                                 message === 'yes' || message === 'yeah' || message === 'yep' || message === 'sure' || message === 'ok' || message === 'okay';
+
+    // Get current form state
+    const currentFormData = this.getCompleteFormData();
+
+    this.chatService.askAgent(this.newMessage, currentFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
         this.isLoading = false;
+        
+        // Auto-toggle Smart Guide based on user's mode preference
+        if (isManualResponse && this.smartGuideEnabled) {
+          console.log('Detected manual preference, disabling Smart Guide');
+          this.smartGuideEnabled = false;
+          // Notify backend about the mode change
+          this.chatService.toggleSmartGuide(false, currentFormData).subscribe({
+            next: (toggleResponse) => {
+              this.addMessage(toggleResponse.answer, false);
+            },
+            error: (error) => {
+              console.error('Error notifying backend about manual mode:', error);
+            }
+          });
+        } else if (isSmartGuideResponse && !this.smartGuideEnabled) {
+          console.log('Detected smart guide preference, enabling Smart Guide');
+          this.smartGuideEnabled = true;
+          // Notify backend about the mode change
+          this.chatService.toggleSmartGuide(true, currentFormData).subscribe({
+            next: (toggleResponse) => {
+              this.addMessage(toggleResponse.answer, false);
+            },
+            error: (error) => {
+              console.error('Error notifying backend about smart guide mode:', error);
+            }
+          });
+        }
       },
       error: (error) => {
         console.error('Error sending message:', error);
@@ -317,9 +370,13 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   onFieldChange(fieldPath: string, value: any) {
     if (value === null || value === undefined) return;
     
-    const fieldData: FormField = { name: fieldPath, value: value };
+    // Only send updates to AI agent if Smart Guide is enabled
+    if (!this.smartGuideEnabled) return;
     
-    this.chatService.updateFormField(fieldData).subscribe({
+    const fieldData: FormField = { name: fieldPath, value: value };
+    const completeFormData = this.getCompleteFormData();
+    
+    this.chatService.updateFormField(fieldData, completeFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
       },
@@ -327,6 +384,54 @@ export class OnboardingComponent implements OnInit, OnDestroy {
         console.error('Error updating field:', error);
       }
     });
+  }
+
+  onEnvironmentChange() {
+    const selectedEnvironments = this.environmentsFormArray.value
+      .map((checked: boolean, idx: number) => checked ? this.environmentOptions[idx] : null)
+      .filter((env: string | null) => env !== null);
+    
+    this.onFieldChange('applicationInfo.environments', selectedEnvironments);
+  }
+
+  onSmartGuideToggle(enabled: boolean) {
+    this.smartGuideEnabled = enabled;
+    
+    // Get current form state to send to the agent
+    const currentFormData = this.getCompleteFormData();
+    
+    this.chatService.toggleSmartGuide(enabled, currentFormData).subscribe({
+      next: (response) => {
+        this.addMessage(response.answer, false);
+      },
+      error: (error) => {
+        console.error('Error toggling Smart Guide:', error);
+        // Add fallback local messages if the API call fails
+        if (enabled) {
+          this.addMessage('Smart Guide enabled! What\'s your source application name?', false);
+        } else {
+          this.addMessage('Manual mode active. Ask me anything!', false);
+        }
+      }
+    });
+  }
+
+  private getCompleteFormData(): any {
+    const formValue = this.onboardingForm.value;
+    
+    // Clean up the form data and handle special cases
+    const cleanedData = {
+      ...formValue,
+      // Convert environment array to selected environment names
+      applicationInfo: {
+        ...formValue.applicationInfo,
+        environments: this.environmentsFormArray.value
+          .map((checked: boolean, idx: number) => checked ? this.environmentOptions[idx] : null)
+          .filter((env: string | null) => env !== null)
+      }
+    };
+
+    return cleanedData;
   }
 
   private addMessage(text: string, isUser: boolean) {
@@ -344,5 +449,15 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       event.preventDefault();
       this.sendMessage();
     }
+  }
+
+  toggleChat() {
+    this.chatExpanded = !this.chatExpanded;
+  }
+
+  onWelcomeButtonClick(wantsAssistance: boolean) {
+    this.showWelcomeButtons = false;
+    this.smartGuideEnabled = wantsAssistance;
+    this.onSmartGuideToggle(wantsAssistance);
   }
 } 

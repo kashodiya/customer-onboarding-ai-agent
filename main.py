@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket
+from fastapi import FastAPI, WebSocket, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -6,6 +6,7 @@ import json
 import re
 from agent import ask_agent
 import random
+from urllib.parse import unquote
 
 # Initialize FastAPI application
 app = FastAPI()
@@ -25,14 +26,40 @@ form_data = {}
 agent_session_id = str(random.randint(10000000, 99999999))
 
 @app.get("/api/ask-agent/{prompt}")
-async def ask_agent_endpoint(prompt: str):
-    answer = ask_agent(prompt, session_id=agent_session_id)
+async def ask_agent_endpoint(prompt: str, request: Request):
+    # Check if form data is provided in query parameters
+    form_data_param = request.query_params.get('formData')
+    current_form_state = {}
+    if form_data_param:
+        try:
+            current_form_state = json.loads(unquote(form_data_param))
+            print(f"Received form state: {current_form_state}")
+        except Exception as e:
+            print(f"Error parsing form data: {e}")
+    
+    # Include form state in the prompt context
+    if current_form_state and any(current_form_state.values()):
+        # Check if this might be a manual mode response
+        if prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']:
+            context_prompt = f"User declined assistance and prefers manual mode. Simply acknowledge and inform them you'll only respond to direct questions. Do not ask follow-up questions or provide guidance."
+        else:
+            context_prompt = f"User asks: '{prompt}'. Current form state: {json.dumps(current_form_state)}. Respond considering what's already filled out."
+    else:
+        if prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']:
+            context_prompt = f"User declined assistance and prefers manual mode. Simply acknowledge and inform them you'll only respond to direct questions. Do not ask follow-up questions or provide guidance."
+        else:
+            context_prompt = prompt
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
 
-    # Check if the AI response contains proactive form updates
+    # Skip form updates if user chose manual mode
+    is_manual_mode_response = prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']
+    
+    # Check if the AI response contains proactive form updates (only if not manual mode)
     changed = None
     clean_answer = answer  # Start with the original answer
     
-    if isinstance(answer, str) and "Form Update Available:" in answer:
+    if not is_manual_mode_response and isinstance(answer, str) and "Form Update Available:" in answer:
         try:
             # Extract JSON from the response
             json_match = re.search(r'```json\s*(\{[^`]+\})\s*```', answer)
@@ -49,10 +76,12 @@ async def ask_agent_endpoint(prompt: str):
         except Exception as e:
             print(f"Error parsing proactive form update: {e}")
     
-    # Fallback: Use the existing REPORT-LAST-ANSWER method if no proactive update found
-    if not changed:
+    # Fallback: Use the existing REPORT-LAST-ANSWER method if no proactive update found (only if not manual mode)
+    if not is_manual_mode_response and not changed:
         changed = ask_agent("REPORT-LAST-ANSWER", session_id=agent_session_id)
         print(f"Fallback form update check: {changed}")
+    elif is_manual_mode_response:
+        print("Skipping form updates - user chose manual mode")
     
     # Debug logging
     print(f"Changed value: {changed}")
@@ -82,9 +111,26 @@ async def ask_agent_endpoint(prompt: str):
     return {"answer": clean_answer}
 
 @app.get("/api/start-agent")
-def start_agent():
+def start_agent(request: Request):
     print(f"Starting agent with session ID: {agent_session_id}")
-    answer = ask_agent("Start asking questions.", session_id=agent_session_id)
+    
+    # Check if form data is provided in query parameters
+    form_data_param = request.query_params.get('formData')
+    current_form_state = {}
+    if form_data_param:
+        try:
+            current_form_state = json.loads(unquote(form_data_param))
+            print(f"Initial form state: {current_form_state}")
+        except Exception as e:
+            print(f"Error parsing form data: {e}")
+    
+    # Include form state in the welcome context
+    if current_form_state and any(current_form_state.values()):
+        context_prompt = f"Give a brief welcome to the customer onboarding process. Current form state: {json.dumps(current_form_state)}. Ask if they would like assistance. Tell them to choose Yes or No using the buttons that will appear. Keep it under 2 sentences."
+    else:
+        context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance. Tell them to choose Yes or No using the buttons that will appear. Keep it under 2 sentences."
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
     return {"answer": answer}
 
 
@@ -94,9 +140,37 @@ async def update_form_field(field_data: dict):
     form_data[field_data["name"]] = field_data["value"]
     print(f"Form data updated: {form_data}")
 
-    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. What should user do next?", session_id=agent_session_id)
+    # Get complete form state if provided
+    complete_form_data = field_data.get("completeFormData", {})
+    
+    # Include complete form state in the prompt context
+    if complete_form_data and any(complete_form_data.values()):
+        context_prompt = f"User updated '{field_data['name']}' to '{field_data['value']}'. Current complete form state: {json.dumps(complete_form_data)}. Give brief confirmation, then ask for the next UNFILLED field. Keep under 2 sentences."
+    else:
+        context_prompt = f"User updated '{field_data['name']}' to '{field_data['value']}'. Give brief confirmation, then ask for the next field. Keep under 2 sentences."
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
     return {"answer": answer}
 
+
+@app.post("/api/toggle-smart-guide")
+async def toggle_smart_guide(toggle_data: dict):
+    enabled = toggle_data.get("enabled", True)
+    form_data_provided = toggle_data.get("formData", {})
+    print(f"Smart Guide toggled: {enabled}")
+    print(f"Form data provided: {form_data_provided}")
+    
+    if enabled:
+        # Include form state in the context
+        if form_data_provided and any(form_data_provided.values()):
+            context_prompt = f"Smart Guide enabled. Current form state: {json.dumps(form_data_provided)}. Review what's filled and ask for the next UNFILLED field. Keep under 2 sentences."
+        else:
+            context_prompt = "Briefly confirm Smart Guide is enabled, then ask for the source application name. Keep it under 2 sentences."
+        answer = ask_agent(context_prompt, session_id=agent_session_id)
+    else:
+        answer = ask_agent("Briefly confirm Manual mode is active. Keep it under 1 sentence.", session_id=agent_session_id)
+    
+    return {"answer": answer}
 
 
     #             "form_state": form_data

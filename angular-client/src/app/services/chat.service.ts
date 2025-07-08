@@ -59,16 +59,29 @@ export class ChatService {
     };
   }
 
-  askAgent(prompt: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/ask-agent/${encodeURIComponent(prompt)}`);
+  askAgent(prompt: string, formData?: any): Observable<any> {
+    const encodedPrompt = encodeURIComponent(prompt);
+    const url = formData ? 
+      `${this.apiUrl}/ask-agent/${encodedPrompt}?formData=${encodeURIComponent(JSON.stringify(formData))}` :
+      `${this.apiUrl}/ask-agent/${encodedPrompt}`;
+    return this.http.get(url);
   }
 
-  startAgent(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/start-agent`);
+  startAgent(formData?: any): Observable<any> {
+    const url = formData ? 
+      `${this.apiUrl}/start-agent?formData=${encodeURIComponent(JSON.stringify(formData))}` :
+      `${this.apiUrl}/start-agent`;
+    return this.http.get(url);
   }
 
-  updateFormField(fieldData: FormField): Observable<any> {
-    return this.http.post(`${this.apiUrl}/update-form-field`, fieldData);
+  updateFormField(fieldData: FormField, completeFormData?: any): Observable<any> {
+    const payload = { ...fieldData, completeFormData: completeFormData || {} };
+    return this.http.post(`${this.apiUrl}/update-form-field`, payload);
+  }
+
+  toggleSmartGuide(enabled: boolean, formData?: any): Observable<any> {
+    const payload = { enabled, formData: formData || {} };
+    return this.http.post(`${this.apiUrl}/toggle-smart-guide`, payload);
   }
 
   getFormUpdates(): Observable<any> {

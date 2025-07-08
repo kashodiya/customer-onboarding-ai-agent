@@ -1,49 +1,11 @@
-<div class="full-height">
-  <div style="display: flex; height: 100%;">
-    
-    <!-- Chat Section (Left) -->
-    <div style="width: 40%; border-right: 1px solid #e0e0e0;">
-      <mat-card class="chat-container">
-        <mat-card-header style="background-color: #1976d2; color: white;">
-          <mat-card-title style="color: white;">AI Assistant</mat-card-title>
-        </mat-card-header>
-        
-        <div class="chat-messages">
-          <div *ngFor="let message of chatMessages" style="margin-bottom: 16px;">
-            <mat-card [ngClass]="message.isUser ? 'user-message' : 'ai-message'" class="message-card">
-              <mat-card-content>
-                {{ message.text }}
-              </mat-card-content>
-            </mat-card>
-          </div>
-        </div>
-        
-        <mat-progress-bar *ngIf="isLoading" mode="indeterminate" color="primary"></mat-progress-bar>
-        <mat-divider></mat-divider>
-        
-        <div class="chat-input">
-          <mat-form-field appearance="outline" style="width: 100%;">
-            <mat-label>Type your message...</mat-label>
-            <input matInput 
-                   [(ngModel)]="newMessage" 
-                   (keydown)="onEnterKeyPress($event)"
-                   placeholder="Ask the AI assistant anything...">
-            <button mat-icon-button matSuffix (click)="sendMessage()">
-              <mat-icon>send</mat-icon>
-            </button>
-          </mat-form-field>
-        </div>
-      </mat-card>
-    </div>
-
-    <!-- Form Section (Right) -->
-    <div style="width: 60%; padding: 16px; overflow-y: auto; max-height: 100vh;">
-      <mat-card>
-        <mat-card-header>
-          <mat-card-title>Customer Onboarding Form</mat-card-title>
-        </mat-card-header>
-        
+<div class="page-container">
+  <!-- Centered Form Section -->
+  <div class="form-section">
+    <div class="form-container">
+      <mat-card class="main-card">
+        <mat-card-title class="main-title">Customer Onboarding Form</mat-card-title>
         <mat-card-content>
+          
           <form [formGroup]="onboardingForm">
             
             <!-- Section 1: Existing Flows -->
@@ -51,13 +13,13 @@
               <mat-card-title class="section-title">Section 1: Existing Flows</mat-card-title>
               <mat-card-content>
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>1. Source Application Name</mat-label>
+                  <mat-label>Source Application Name</mat-label>
                   <input matInput formControlName="sourceApplicationName"
                          (blur)="onFieldChange('existingFlows.sourceApplicationName', onboardingForm.get('existingFlows.sourceApplicationName')?.value)">
                 </mat-form-field>
 
                 <mat-form-field appearance="outline" class="full-width">
-                  <mat-label>2. Target Application Name</mat-label>
+                  <mat-label>Target Application Name</mat-label>
                   <input matInput formControlName="targetApplicationName"
                          (blur)="onFieldChange('existingFlows.targetApplicationName', onboardingForm.get('existingFlows.targetApplicationName')?.value)">
                 </mat-form-field>
@@ -65,11 +27,12 @@
                 <mat-checkbox formControlName="isUsingIODS"
                               (change)="onFieldChange('existingFlows.isUsingIODS', $event.checked)"
                               style="margin-bottom: 16px;">
-                  3. Is the application using IODS?
+                  Is the application using IODS?
                 </mat-checkbox>
 
                 <!-- IODS Details (Conditional) -->
-                <div *ngIf="isUsingIODS" formGroupName="iodsDetails" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
+                <div *ngIf="isUsingIODS" formGroupName="iodsDetails" 
+                     style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
                   <h4>IODS Details</h4>
                   
                   <mat-form-field appearance="outline" class="full-width">
@@ -96,11 +59,11 @@
                            (blur)="onFieldChange('existingFlows.iodsDetails.fileType', onboardingForm.get('existingFlows.iodsDetails.fileType')?.value)">
                   </mat-form-field>
 
-            <mat-form-field appearance="outline" class="full-width">
+                  <mat-form-field appearance="outline" class="full-width">
                     <mat-label>IODS Mailbox or Drop Location Name</mat-label>
                     <input matInput formControlName="iodsMailbox"
                            (blur)="onFieldChange('existingFlows.iodsDetails.iodsMailbox', onboardingForm.get('existingFlows.iodsDetails.iodsMailbox')?.value)">
-            </mat-form-field>
+                  </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Pre/Post Transfer Processes</mat-label>
@@ -141,14 +104,14 @@
                          (blur)="onFieldChange('applicationInfo.platform', onboardingForm.get('applicationInfo.platform')?.value)">
                 </mat-form-field>
 
-                <div style="margin: 16px 0;">
-                  <label style="font-weight: 500; margin-bottom: 8px; display: block;">Environments In Scope</label>
-                  <div *ngFor="let env of environmentOptions; let i = index" style="margin-bottom: 8px;">
-                    <mat-checkbox [formControl]="$any(environmentsFormArray.at(i))"
-                                  (change)="onFieldChange('applicationInfo.environments.' + i, $event.checked)">
-                      {{env}}
-                    </mat-checkbox>
-                  </div>
+                <div class="checkbox-group" formArrayName="environments">
+                  <label class="group-label">Environments In Scope</label>
+                  <mat-checkbox *ngFor="let env of environmentOptions; let i = index"
+                                [formControlName]="i"
+                                (change)="onEnvironmentChange()"
+                                style="display: block; margin-bottom: 8px;">
+                    {{env}}
+                  </mat-checkbox>
                 </div>
 
                 <mat-form-field appearance="outline" class="full-width">
@@ -182,7 +145,8 @@
                 </mat-form-field>
 
                 <!-- Cloud Details (Conditional) -->
-                <div *ngIf="isCloudLocation" formGroupName="cloudDetails" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
+                <div *ngIf="isCloudLocation" formGroupName="cloudDetails" 
+                     style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
                   <h4>Cloud Details</h4>
                   
                   <mat-form-field appearance="outline" class="full-width">
@@ -391,6 +355,66 @@
         </mat-card-content>
       </mat-card>
     </div>
+  </div>
+
+  <!-- Floating Chat Overlay -->
+  <div class="chat-overlay" [class.expanded]="chatExpanded">
+    <div class="chat-header" (click)="toggleChat()">
+      <mat-icon>{{chatExpanded ? 'expand_more' : 'chat'}}</mat-icon>
+      <span *ngIf="!chatExpanded">AI Assistant</span>
+      <span *ngIf="chatExpanded">AI Assistant - Click to minimize</span>
+    </div>
     
+    <div class="smart-guide-toggle" *ngIf="chatExpanded">
+      <mat-slide-toggle 
+        [(ngModel)]="smartGuideEnabled"
+        (change)="onSmartGuideToggle($event.checked)"
+        color="primary">
+        <span class="toggle-label">Smart Guide</span>
+      </mat-slide-toggle>
+      <mat-icon 
+        class="info-icon" 
+        matTooltip="When enabled, AI proactively guides you through the form. When disabled, AI only responds to your questions (Manual mode)."
+        matTooltipPosition="left">
+        info_outline
+      </mat-icon>
+    </div>
+    
+    <div class="chat-content" *ngIf="chatExpanded">
+      <div class="chat-messages">
+        <div *ngFor="let message of chatMessages; let i = index" class="message-card"
+             [ngClass]="{'user-message': message.isUser, 'ai-message': !message.isUser}">
+          <div class="message-text">{{message.text}}</div>
+          <div class="message-time">{{message.timestamp | date:'short'}}</div>
+          
+          <!-- Yes/No buttons for welcome message -->
+          <div *ngIf="!message.isUser && i === 0 && showWelcomeButtons" class="welcome-buttons">
+            <button mat-raised-button color="primary" (click)="onWelcomeButtonClick(true)" class="welcome-btn">
+              Yes, I'd like assistance
+            </button>
+            <button mat-raised-button color="accent" (click)="onWelcomeButtonClick(false)" class="welcome-btn">
+              No, I'll do it myself
+            </button>
+          </div>
+        </div>
+        
+        <div *ngIf="isLoading" class="message-card ai-message">
+          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+          <div class="message-text">AI is thinking...</div>
+        </div>
+      </div>
+      
+      <div class="chat-input">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Type your message</mat-label>
+          <input matInput [(ngModel)]="newMessage" 
+                 (keydown)="onEnterKeyPress($event)"
+                 [disabled]="isLoading">
+          <button mat-icon-button matSuffix (click)="sendMessage()" [disabled]="isLoading || !newMessage.trim()">
+            <mat-icon>send</mat-icon>
+          </button>
+        </mat-form-field>
+      </div>
+    </div>
   </div>
 </div> 
