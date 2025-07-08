@@ -369,6 +369,12 @@
         
         // WebSocket connection
         this.ws = new WebSocket(`ws://${window.location.host}/ws`);
+        this.ws.onopen = () => {
+          // Send token immediately after connection
+          let token = localStorage.getItem('token');
+          console.log(`WebSocket connection established. Sending token... ${token}`);
+          this.ws.send(JSON.stringify({ token }));
+        };
         this.ws.onmessage = (event) => {
           const data = JSON.parse(event.data);
           if (data.type === 'update-form') {

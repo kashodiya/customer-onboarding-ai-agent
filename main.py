@@ -17,16 +17,15 @@ def load_sessions():
         return set()
 
 def save_sessions():
+    global active_sessions
     with open(SESSIONS_FILE, 'w') as f:
         json.dump(list(active_sessions), f)
 
 # Initialize FastAPI application
 app = FastAPI()
  
-# items = []
-connected_clients = []
-form_data = {}
-agent_session_id = str(random.randint(10000000, 99999999))
+# User session data
+user_sessions = {}  # {token: {"agent_session_id": str, "form_data": dict, "websockets": list}}
 active_sessions = load_sessions()
 
 def check_auth(authorization: str = Header(None)):
@@ -41,6 +40,11 @@ async def login(credentials: dict):
     if credentials.get("password") == password:
         session_token = str(random.randint(100000000, 999999999))
         active_sessions.add(session_token)
+        user_sessions[session_token] = {
+            "agent_session_id": str(random.randint(10000000, 99999999)),
+            "form_data": {},
+            "websockets": []
+        }
         save_sessions()
         return {"token": session_token, "success": True}
     raise HTTPException(status_code=401, detail="Invalid password")
@@ -50,6 +54,8 @@ async def logout(authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     if token and token in active_sessions:
         active_sessions.remove(token)
+        if token in user_sessions:
+            del user_sessions[token]
         save_sessions()
     return {"success": True}
 
@@ -58,25 +64,26 @@ async def ask_agent_endpoint(prompt: str, authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     if not token or token not in active_sessions:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    answer = ask_agent(prompt, session_id=agent_session_id)
-
-    # changed = ask_agent("Application is asking: What was users last answer to the onboarding question? Just return schema field name as 'name' and value as 'value' in JSON format. If nothings changed then return {}. The response must be in a valid JSON format.", session_id=agent_session_id)
-
-    changed = ask_agent("REPORT-LAST-ANSWER", session_id=agent_session_id)
     
-    # , role="assistant"
+    user_session = user_sessions[token]
+    answer = ask_agent(prompt, session_id=user_session["agent_session_id"])
+    changed = ask_agent("REPORT-LAST-ANSWER", session_id=user_session["agent_session_id"])
+    
     print(f"Anything changed?\n {changed}")
+    print(f"WebSocket connections for user: {len(user_session['websockets'])}")
     
-    # Send WebSocket message if changed has a value
+    # Send WebSocket message only to this user's connections
     if changed and changed.strip() != "{}":
-        for client in connected_clients[:]:
+        print(f"Sending to {len(user_session['websockets'])} WebSocket connections")
+        for client in user_session["websockets"][:]:
             try:
+                print(f"Sending update to client: {client}")
                 await client.send_text(json.dumps({
                     "type": "update-form",
                     "payload": changed
                 }))
             except:
-                connected_clients.remove(client)
+                user_session["websockets"].remove(client)
 
     return {"answer": answer}
 
@@ -85,11 +92,19 @@ def start_agent(authorization: str = Header(None)):
     token = authorization.replace("Bearer ", "") if authorization else None
     if not token or token not in active_sessions:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    global agent_session_id
-    agent_session_id = str(random.randint(10000000, 99999999))
-    print(f"Starting agent with session ID: {agent_session_id}")
+    
+    if token not in user_sessions:
+        user_sessions[token] = {
+            "agent_session_id": str(random.randint(10000000, 99999999)),
+            "form_data": {},
+            "websockets": []
+        }
+    
+    user_session = user_sessions[token]
+    user_session["agent_session_id"] = str(random.randint(10000000, 99999999))
+    print(f"Starting agent with session ID: {user_session['agent_session_id']}")
     init_agent()
-    answer = ask_agent("Greet user and start asking questions.", session_id=agent_session_id)
+    answer = ask_agent("Greet user and start asking questions.", session_id=user_session["agent_session_id"])
     return {"answer": answer}
 
 
@@ -98,11 +113,12 @@ async def update_form_field(field_data: dict, authorization: str = Header(None))
     token = authorization.replace("Bearer ", "") if authorization else None
     if not token or token not in active_sessions:
         raise HTTPException(status_code=401, detail="Not authenticated")
-    # Update form data
-    form_data[field_data["name"]] = field_data["value"]
-    print(f"Form data updated: {form_data}")
+    
+    user_session = user_sessions[token]
+    user_session["form_data"][field_data["name"]] = field_data["value"]
+    print(f"Form data updated: {user_session['form_data']}")
 
-    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. Briefly confrm it in simple English. What should user do next?", session_id=agent_session_id)
+    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. Briefly confrm it in simple English. What should user do next?", session_id=user_session["agent_session_id"])
     return {"answer": answer}
 
 
@@ -128,13 +144,40 @@ async def update_form_field(field_data: dict, authorization: str = Header(None))
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    connected_clients.append(websocket)
+    print("WebSocket connection accepted")
+    
+    # Get token from first message
+    try:
+        message = await websocket.receive_text()
+        auth_data = json.loads(message)
+        token = auth_data.get("token")
+        print(f"Received token: {token}")
+    except Exception as e:
+        print(f"Failed to get token: {e}")
+        await websocket.close()
+        return
+    
+    if not token or token not in active_sessions:
+        print(f"Invalid token or session: {token}")
+        await websocket.close()
+        return
+    
+    if token not in user_sessions:
+        print(f"Token not in user_sessions: {token}")
+        await websocket.close()
+        return
+    
+    user_sessions[token]["websockets"].append(websocket)
+    print(f"WebSocket connected for token {token}. Total connections: {len(user_sessions[token]['websockets'])}")
+    
     try:
         while True:
             await websocket.receive_text()
-    except:
-        if websocket in connected_clients:
-            connected_clients.remove(websocket)
+    except Exception as e:
+        print(f"WebSocket error: {e}")
+        if token in user_sessions and websocket in user_sessions[token]["websockets"]:
+            user_sessions[token]["websockets"].remove(websocket)
+            print(f"WebSocket disconnected for token {token}. Remaining connections: {len(user_sessions[token]['websockets'])}")
 
 
 
