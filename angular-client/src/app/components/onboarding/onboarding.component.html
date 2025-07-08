@@ -381,7 +381,7 @@
     </div>
     
     <div class="chat-content" *ngIf="chatExpanded">
-      <div class="chat-messages">
+      <div class="chat-messages" #chatMessagesContainer>
         <div *ngFor="let message of chatMessages; let i = index" class="message-card"
              [ngClass]="{'user-message': message.isUser, 'ai-message': !message.isUser}">
           <div class="message-text">{{message.text}}</div>
@@ -389,10 +389,10 @@
           
           <!-- Yes/No buttons for welcome message -->
           <div *ngIf="!message.isUser && i === 0 && showWelcomeButtons" class="welcome-buttons">
-            <button mat-raised-button color="primary" (click)="onWelcomeButtonClick(true)" class="welcome-btn">
+            <button color="primary" (click)="onWelcomeButtonClick(true)" class="welcome-btn">
               Yes, I'd like assistance
             </button>
-            <button mat-raised-button color="accent" (click)="onWelcomeButtonClick(false)" class="welcome-btn">
+            <button color="accent" (click)="onWelcomeButtonClick(false)" class="welcome-btn">
               No, I'll do it myself
             </button>
           </div>
@@ -405,12 +405,12 @@
       </div>
       
       <div class="chat-input">
-        <mat-form-field appearance="outline" class="full-width">
+        <mat-form-field appearance="outline">
           <mat-label>Type your message</mat-label>
           <input matInput [(ngModel)]="newMessage" 
                  (keydown)="onEnterKeyPress($event)"
                  [disabled]="isLoading">
-          <button mat-icon-button matSuffix (click)="sendMessage()" [disabled]="isLoading || !newMessage.trim()">
+          <button mat-icon-button subScriptSizing="dynamic" matSuffix (click)="sendMessage()" [disabled]="isLoading || !newMessage.trim()">
             <mat-icon>send</mat-icon>
           </button>
         </mat-form-field>

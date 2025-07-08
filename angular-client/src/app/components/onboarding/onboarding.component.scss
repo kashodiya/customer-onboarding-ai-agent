@@ -33,7 +33,7 @@
   padding: 24px;
   background: linear-gradient(135deg, #1976d2, #42a5f5);
   color: white;
-  margin: -24px -24px 24px -24px;
+  margin-bottom: 16px;
 }
 
 // Form styling
@@ -111,7 +111,7 @@ div[style*="border-left: 3px solid #ccc"] {
   }
   
   &.expanded {
-    height: 500px;
+    height: fit-content;
   }
 }
 
@@ -302,8 +302,8 @@ mat-checkbox {
 // Welcome buttons styling
 .welcome-buttons {
   display: flex;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 10px;
+  margin-top: 10px;
   justify-content: center;
   
   .welcome-btn {
@@ -311,22 +311,25 @@ mat-checkbox {
     font-weight: 500;
     min-width: 120px;
     border-radius: 20px;
+    padding: 4px;
+    border: 2px solid #424242;
+    cursor: pointer;
     
     &:first-child {
-      background: linear-gradient(135deg, #4caf50, #66bb6a);
+      background: #006397;
       color: white;
       
       &:hover {
-        background: linear-gradient(135deg, #388e3c, #4caf50);
+        background: #0069a1;
       }
     }
     
     &:last-child {
-      background: linear-gradient(135deg, #ff9800, #ffb74d);
+      background: #74777C;
       color: white;
       
       &:hover {
-        background: linear-gradient(135deg, #f57c00, #ff9800);
+        background: #83868b;
       }
     }
   }

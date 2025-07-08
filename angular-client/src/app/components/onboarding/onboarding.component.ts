@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -42,7 +42,9 @@ import { Subscription } from 'rxjs';
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss']
 })
-export class OnboardingComponent implements OnInit, OnDestroy {
+export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked {
+  @ViewChild('chatMessagesContainer') private chatMessagesContainer!: ElementRef;
+  
   chatMessages: ChatMessage[] = [];
   newMessage = '';
   isLoading = false;
@@ -50,6 +52,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   chatExpanded = true;
   smartGuideEnabled = true; // Smart Guide is enabled by default
   showWelcomeButtons = false; // Show buttons after welcome message
+  private shouldScrollToBottom = false;
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
@@ -156,6 +159,23 @@ export class OnboardingComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
     if (this.formUpdatesSubscription) {
       this.formUpdatesSubscription.unsubscribe();
+    }
+  }
+
+  ngAfterViewChecked() {
+    if (this.shouldScrollToBottom) {
+      this.scrollToBottom();
+      this.shouldScrollToBottom = false;
+    }
+  }
+
+  private scrollToBottom(): void {
+    try {
+      if (this.chatMessagesContainer) {
+        this.chatMessagesContainer.nativeElement.scrollTop = this.chatMessagesContainer.nativeElement.scrollHeight;
+      }
+    } catch (err) {
+      console.error('Error scrolling to bottom:', err);
     }
   }
 
@@ -442,6 +462,7 @@ export class OnboardingComponent implements OnInit, OnDestroy {
       timestamp: new Date()
     };
     this.chatMessages.push(message);
+    this.shouldScrollToBottom = true;
   }
 
   onEnterKeyPress(event: KeyboardEvent) {
