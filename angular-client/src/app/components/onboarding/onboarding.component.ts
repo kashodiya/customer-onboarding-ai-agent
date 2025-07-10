@@ -423,23 +423,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   onSmartGuideToggle(enabled: boolean) {
     this.smartGuideEnabled = enabled;
     
-    // Get current form state to send to the agent
-    const currentFormData = this.getCompleteFormData();
-    
-    this.chatService.toggleSmartGuide(enabled, currentFormData).subscribe({
-      next: (response) => {
-        this.addMessage(response.answer, false);
-      },
-      error: (error) => {
-        console.error('Error toggling Smart Guide:', error);
-        // Add fallback local messages if the API call fails
-        if (enabled) {
-          this.addMessage('Smart Guide enabled! What\'s your source application name?', false);
-        } else {
-          this.addMessage('Manual mode active. Ask me anything!', false);
-        }
-      }
-    });
+    if (enabled) {
+      this.addMessage('Great! Start filling out the form and I\'ll assist you along the way.', false);
+    }
   }
 
   private getCompleteFormData(): any {
