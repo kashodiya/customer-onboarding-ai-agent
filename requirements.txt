@@ -5,3 +5,4 @@ langchain-aws
 langgraph
 langchain-core
 langchain
+jinja2

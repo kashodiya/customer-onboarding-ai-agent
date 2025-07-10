@@ -28,6 +28,8 @@ Currnet date and time is: {{ date_time }}
 
 Target service date cannot be less than 10 days from current date.
 
+Do not force user to go in a linear fashion, if the user deviates and jump to answering or discussing other questions, let him do that. 
+
 # Here is the schema for the questions you should ask:
 
 ```json

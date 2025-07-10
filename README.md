@@ -30,7 +30,8 @@ pip install -r requirements.txt
 - Encryption is required.
 - Target service date is 2 days from now
 - Target service date is the end of the 3rd quarter
-- What are minimal things I still need to provide?
+- Enter few answers and ask:
+    - What are minimal things I still need to provide?
 - Transfer time is 11:25
 
 ## Brainstorm on how to handle user questions:
