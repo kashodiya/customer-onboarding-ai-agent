@@ -59,11 +59,16 @@
   width: 100%;
   height: auto;
   padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  position: relative;
 }
 
 .submission-content {
   width: 100%;
   text-align: left;
+  flex: 1;
+  cursor: pointer;
 }
 
 .submission-header {
@@ -137,4 +142,25 @@
 
 .new-form-button:hover {
   background: rgba(255, 255, 255, 0.2);
+}
+
+.delete-button {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #666;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.delete-button:hover {
+  color: #f44336;
+  opacity: 1;
+  background-color: rgba(244, 67, 54, 0.1);
+}
+
+.submission-item:hover .delete-button {
+  opacity: 1;
 } 

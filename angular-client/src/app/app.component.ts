@@ -1,13 +1,15 @@
 import { Component, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { OnboardingComponent } from './components/onboarding/onboarding.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, MatToolbarModule, OnboardingComponent, NavigationComponent],
+  imports: [RouterOutlet, MatToolbarModule, MatDialogModule, MatSnackBarModule, OnboardingComponent, NavigationComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss']
 })

@@ -29,9 +29,8 @@
     
     <button mat-menu-item 
             *ngFor="let submission of submissions$ | async" 
-            (click)="onLoadSubmission(submission.id)"
             class="submission-item">
-      <div class="submission-content">
+      <div class="submission-content" (click)="onLoadSubmission(submission.id)">
         <div class="submission-header">
           <mat-icon class="submission-icon">
             {{submission.status === 'draft' ? 'draft' : 'description'}}
@@ -45,6 +44,13 @@
           </span>
         </div>
       </div>
+      <button mat-icon-button 
+              class="delete-button" 
+              (click)="onDeleteSubmission(submission.id, submission.name, $event)"
+              matTooltip="Delete submission"
+              matTooltipPosition="left">
+        <mat-icon>delete</mat-icon>
+      </button>
     </button>
     
     <mat-divider></mat-divider>

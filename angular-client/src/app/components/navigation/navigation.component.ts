@@ -7,8 +7,12 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormStorageService, FormSubmission } from '../../services/form-storage.service';
 import { Observable } from 'rxjs';
+import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
   selector: 'app-navigation',
@@ -21,7 +25,8 @@ import { Observable } from 'rxjs';
     MatIconModule,
     MatBadgeModule,
     MatDividerModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatTooltipModule
   ],
   templateUrl: './navigation.component.html',
   styleUrls: ['./navigation.component.scss']
@@ -34,7 +39,11 @@ export class NavigationComponent implements OnInit {
 
   submissions$: Observable<FormSubmission[]>;
 
-  constructor(private formStorageService: FormStorageService) {
+  constructor(
+    private formStorageService: FormStorageService,
+    private dialog: MatDialog,
+    private snackBar: MatSnackBar
+  ) {
     this.submissions$ = this.formStorageService.submissions$;
   }
 
@@ -78,5 +87,30 @@ export class NavigationComponent implements OnInit {
     
     // Reset file input
     event.target.value = '';
+  }
+
+  onDeleteSubmission(submissionId: string, submissionName: string, event: Event): void {
+    // Prevent the menu item click from propagating
+    event.stopPropagation();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Delete Submission',
+        message: `Are you sure you want to delete "${submissionName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.formStorageService.deleteSubmission(submissionId);
+        this.snackBar.open('Submission deleted successfully', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+      }
+    });
   }
 } 
