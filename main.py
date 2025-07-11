@@ -110,6 +110,91 @@ async def ask_agent_endpoint(prompt: str, request: Request):
 
     return {"answer": clean_answer}
 
+def has_meaningful_form_content(form_data):
+    """Check if form data contains meaningful content beyond empty fields"""
+    if not form_data or not isinstance(form_data, dict):
+        return False
+    
+    # Helper function to check if a string value is meaningful
+    def is_meaningful_string(value):
+        return value and isinstance(value, str) and value.strip()
+    
+    # Check text fields across all sections
+    text_fields = [
+        # Existing Flows
+        form_data.get('existingFlows', {}).get('sourceApplicationName'),
+        form_data.get('existingFlows', {}).get('targetApplicationName'),
+        form_data.get('existingFlows', {}).get('iodsDetails', {}).get('oldIodsId'),
+        form_data.get('existingFlows', {}).get('iodsDetails', {}).get('onSiteServerNames'),
+        form_data.get('existingFlows', {}).get('iodsDetails', {}).get('fileName'),
+        form_data.get('existingFlows', {}).get('iodsDetails', {}).get('fileType'),
+        form_data.get('existingFlows', {}).get('iodsDetails', {}).get('iodsMailbox'),
+        form_data.get('existingFlows', {}).get('iodsDetails', {}).get('prePostTransferProcesses'),
+        
+        # Application Info
+        form_data.get('applicationInfo', {}).get('systemName'),
+        form_data.get('applicationInfo', {}).get('internalOrExternal'),
+        form_data.get('applicationInfo', {}).get('supportedProtocols'),
+        form_data.get('applicationInfo', {}).get('platform'),
+        form_data.get('applicationInfo', {}).get('primaryRegion'),
+        form_data.get('applicationInfo', {}).get('backupRegion'),
+        
+        # Network Cloud Info
+        form_data.get('networkCloudInfo', {}).get('networkLocation'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('awsAccountName'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('awsAccountNumber'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('cloudRegion'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('awsCloudId'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('serverName'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('ipOrSubnet'),
+        form_data.get('networkCloudInfo', {}).get('cloudDetails', {}).get('applicationTarget'),
+        
+        # File Transfer Info
+        form_data.get('fileTransferInfo', {}).get('sourceAwsAccount'),
+        form_data.get('fileTransferInfo', {}).get('sourceBucketArn'),
+        form_data.get('fileTransferInfo', {}).get('sourceArchiveBucket'),
+        form_data.get('fileTransferInfo', {}).get('sourceArchivePrefix'),
+        form_data.get('fileTransferInfo', {}).get('targetBucket'),
+        form_data.get('fileTransferInfo', {}).get('targetPrefix'),
+        
+        # Environment Info
+        form_data.get('environmentInfo', {}).get('customerEnvironments'),
+        form_data.get('environmentInfo', {}).get('cloudEnvironmentMapping', {}).get('development'),
+        form_data.get('environmentInfo', {}).get('cloudEnvironmentMapping', {}).get('qualityAssurance'),
+        form_data.get('environmentInfo', {}).get('cloudEnvironmentMapping', {}).get('production'),
+        
+        # Business Info
+        form_data.get('businessInfo', {}).get('contacts', {}).get('businessContactSource'),
+        form_data.get('businessInfo', {}).get('contacts', {}).get('technicalContactSource'),
+        form_data.get('businessInfo', {}).get('contacts', {}).get('businessContactTarget'),
+        form_data.get('businessInfo', {}).get('contacts', {}).get('technicalContactTarget'),
+        form_data.get('businessInfo', {}).get('contacts', {}).get('vendorContact'),
+    ]
+    
+    # Check if any text field has meaningful content
+    has_text_content = any(is_meaningful_string(field) for field in text_fields)
+    
+    # Check boolean fields (only true values are meaningful, false is default)
+    boolean_fields = [
+        form_data.get('existingFlows', {}).get('isUsingIODS'),
+        form_data.get('networkCloudInfo', {}).get('requiresExternalVendorConnection'),
+        form_data.get('fileTransferInfo', {}).get('hasOutbound'),
+        form_data.get('fileTransferInfo', {}).get('hasInbound'),
+        form_data.get('applicationInfo', {}).get('isExternalApplication'),
+    ]
+    
+    has_boolean_content = any(field is True for field in boolean_fields)
+    
+    # Check environments array
+    environments = form_data.get('applicationInfo', {}).get('environments', [])
+    has_environments = isinstance(environments, list) and len(environments) > 0
+    
+    # Check implementation deadline
+    deadline = form_data.get('businessInfo', {}).get('implementationDeadline')
+    has_deadline = deadline is not None and deadline != ""
+    
+    return has_text_content or has_boolean_content or has_environments or has_deadline
+
 @app.get("/api/start-agent")
 def start_agent(request: Request):
     print(f"Starting agent with session ID: {agent_session_id}")
@@ -124,14 +209,23 @@ def start_agent(request: Request):
         except Exception as e:
             print(f"Error parsing form data: {e}")
     
+    # Determine if this is asking for assistance based on meaningful content
+    has_meaningful_content = has_meaningful_form_content(current_form_state)
+    is_asking_for_assistance = not has_meaningful_content  # Ask for assistance if no meaningful content
+    
     # Include form state in the welcome context
-    if current_form_state and any(current_form_state.values()):
-        context_prompt = f"Give a brief welcome to the customer onboarding process. Current form state: {json.dumps(current_form_state)}. Ask if they would like assistance. Tell them to choose Yes or No using the buttons that will appear. Keep it under 2 sentences."
+    if has_meaningful_content:
+        # User has existing meaningful form data (real draft/loaded submission)
+        context_prompt = f"Give a brief welcome back message. User has loaded existing form data: {json.dumps(current_form_state)}. Simply acknowledge the loaded data and mention you're ready to help. Keep it under 2 sentences. Do not ask for assistance preference."
     else:
+        # Fresh start or empty draft - ask for assistance
         context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance. Tell them to choose Yes or No using the buttons that will appear. Keep it under 2 sentences."
     
     answer = ask_agent(context_prompt, session_id=agent_session_id)
-    return {"answer": answer}
+    return {
+        "answer": answer,
+        "showAssistanceButtons": is_asking_for_assistance
+    }
 
 
 @app.post("/api/update-form-field")

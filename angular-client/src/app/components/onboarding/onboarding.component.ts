@@ -161,12 +161,14 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   ngOnInit() {
     this.initializeEnvironmentsArray();
-    this.startAgent();
     this.subscribeToFormUpdates();
     this.setupAutosave();
-    this.loadCurrentDraft();
-    this.setupAutosave();
-    this.loadCurrentDraft();
+    
+    // Load draft first, then start agent only if no meaningful draft was loaded
+    const draftLoaded = this.loadCurrentDraft();
+    if (!draftLoaded) {
+      this.startAgent();
+    }
   }
 
   ngOnDestroy() {
@@ -230,8 +232,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.chatService.startAgent(currentFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
-        // Show welcome buttons after the welcome message
-        this.showWelcomeButtons = true;
+        // Use the backend's explicit flag instead of keyword detection
+        this.showWelcomeButtons = response.showAssistanceButtons || false;
       },
       error: (error) => {
         console.error('Error starting agent:', error);
@@ -499,20 +501,97 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   // Autosave current form data
   private autosave(): void {
-    if (this.onboardingForm.dirty) {
+    if (this.onboardingForm.dirty && this.hasFormContent()) {
       const formData = this.getCompleteFormData();
       this.formStorageService.saveDraft(formData);
       console.log('Form autosaved');
     }
   }
 
+  // Check if form has meaningful content (current form or provided data)
+  private hasFormContent(formData?: any): boolean {
+    // Use provided data or get current form data
+    const data = formData || this.getCompleteFormData();
+    
+    if (!data) return false;
+    
+    // Check for any filled text inputs
+    const hasTextContent = 
+      data.existingFlows?.sourceApplicationName?.trim() ||
+      data.existingFlows?.targetApplicationName?.trim() ||
+      data.existingFlows?.iodsDetails?.oldIodsId?.trim() ||
+      data.existingFlows?.iodsDetails?.onSiteServerNames?.trim() ||
+      data.existingFlows?.iodsDetails?.fileName?.trim() ||
+      data.existingFlows?.iodsDetails?.fileType?.trim() ||
+      data.existingFlows?.iodsDetails?.iodsMailbox?.trim() ||
+      data.existingFlows?.iodsDetails?.prePostTransferProcesses?.trim() ||
+      data.applicationInfo?.systemName?.trim() ||
+      data.applicationInfo?.internalOrExternal?.trim() ||
+      data.applicationInfo?.supportedProtocols?.trim() ||
+      data.applicationInfo?.platform?.trim() ||
+      data.applicationInfo?.primaryRegion?.trim() ||
+      data.applicationInfo?.backupRegion?.trim() ||
+      data.networkCloudInfo?.networkLocation?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.awsAccountName?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.awsAccountNumber?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.cloudRegion?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.awsCloudId?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.serverName?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.ipOrSubnet?.trim() ||
+      data.networkCloudInfo?.cloudDetails?.applicationTarget?.trim() ||
+      data.fileTransferInfo?.sourceAwsAccount?.trim() ||
+      data.fileTransferInfo?.sourceBucketArn?.trim() ||
+      data.fileTransferInfo?.sourceArchiveBucket?.trim() ||
+      data.fileTransferInfo?.sourceArchivePrefix?.trim() ||
+      data.fileTransferInfo?.targetBucket?.trim() ||
+      data.fileTransferInfo?.targetPrefix?.trim() ||
+      data.environmentInfo?.customerEnvironments?.trim() ||
+      data.environmentInfo?.cloudEnvironmentMapping?.development?.trim() ||
+      data.environmentInfo?.cloudEnvironmentMapping?.qualityAssurance?.trim() ||
+      data.environmentInfo?.cloudEnvironmentMapping?.production?.trim() ||
+      data.businessInfo?.contacts?.businessContactSource?.trim() ||
+      data.businessInfo?.contacts?.technicalContactSource?.trim() ||
+      data.businessInfo?.contacts?.businessContactTarget?.trim() ||
+      data.businessInfo?.contacts?.technicalContactTarget?.trim() ||
+      data.businessInfo?.contacts?.vendorContact?.trim();
+
+    // Check for any meaningful boolean selections (not default false)
+    const hasBooleanSelections = 
+      data.existingFlows?.isUsingIODS ||
+      data.networkCloudInfo?.requiresExternalVendorConnection ||
+      data.fileTransferInfo?.hasOutbound ||
+      data.fileTransferInfo?.hasInbound ||
+      data.applicationInfo?.isExternalApplication;
+
+    // Check for any selected environments
+    const hasEnvironments = data.applicationInfo?.environments?.length > 0;
+
+    // Check for implementation deadline
+    const hasDeadline = data.businessInfo?.implementationDeadline;
+
+    return !!(hasTextContent || hasBooleanSelections || hasEnvironments || hasDeadline);
+  }
+
   // Load current draft if exists
-  private loadCurrentDraft(): void {
+  private loadCurrentDraft(): boolean {
     const currentDraft = this.formStorageService.getCurrentDraft();
     if (currentDraft) {
-      this.loadFormData(currentDraft.formData);
-      this.addMessage(`Draft "${currentDraft.name}" loaded automatically.`, false);
+      // Check if the draft has meaningful content using the consolidated function
+      if (this.hasFormContent(currentDraft.formData)) {
+        this.loadFormData(currentDraft.formData);
+        this.addMessage(`Draft "${currentDraft.name}" loaded automatically.`, false);
+        // Don't show assistance buttons when loading meaningful content
+        this.showWelcomeButtons = false;
+        return true; // Meaningful draft was loaded
+      } else {
+        // Clear empty draft
+        this.formStorageService.clearCurrentDraft();
+        console.log('Empty draft cleared automatically');
+        // Don't set showWelcomeButtons here - let startAgent handle it
+        return false; // No meaningful draft loaded
+      }
     }
+    return false; // No draft found
   }
 
   // Load form data into the form

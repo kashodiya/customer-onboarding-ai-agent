@@ -6,12 +6,16 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 .main-content {
   flex: 1;
-  padding: 0;
+  padding: 64px 0 0 0; /* Add top padding for fixed navigation bar */
   margin: 0;
+  overflow-y: auto;
+  position: relative;
 }
 
 // Ensure proper spacing and layout
