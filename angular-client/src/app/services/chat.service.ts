@@ -38,11 +38,11 @@ export class ChatService {
     this.ws.onmessage = (event) => {
       console.log('📨 WebSocket message received:', event.data);
       try {
-        const data = JSON.parse(event.data);
+      const data = JSON.parse(event.data);
         console.log('📋 Parsed message:', data);
-        if (data.type === 'update-form') {
+      if (data.type === 'update-form') {
           console.log('🎯 Form update message:', data.payload);
-          this.formUpdatesSubject.next(data.payload);
+        this.formUpdatesSubject.next(data.payload);
         }
       } catch (error) {
         console.error('❌ Error parsing WebSocket message:', error);
@@ -91,5 +91,9 @@ export class ChatService {
 
   getFormUpdates(): Observable<any> {
     return this.formUpdatesSubject.asObservable();
+  }
+
+  submitForm(formData: any): Observable<any> {
+    return this.http.post(`${this.apiUrl}/submit-form`, formData);
   }
 } 

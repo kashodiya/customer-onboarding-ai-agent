@@ -1,3 +1,26 @@
 .toolbar-spacer {
   flex: 1 1 auto;
+}
+
+.app-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding: 0;
+  margin: 0;
+}
+
+// Ensure proper spacing and layout
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+* {
+  box-sizing: border-box;
 } 

@@ -16,8 +16,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { ChatService, ChatMessage, FormField } from '../../services/chat.service';
+import { FormStorageService, FormSubmission } from '../../services/form-storage.service';
 import { Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
   selector: 'app-onboarding',
@@ -39,7 +42,8 @@ import { Subscription } from 'rxjs';
     MatDatepickerModule,
     MatNativeDateModule,
     MatSlideToggleModule,
-    MatTooltipModule
+    MatTooltipModule,
+    MatSnackBarModule
   ],
   templateUrl: './onboarding.component.html',
   styleUrls: ['./onboarding.component.scss']
@@ -55,6 +59,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   smartGuideEnabled = true; // Smart Guide is enabled by default
   showWelcomeButtons = false; // Show buttons after welcome message
   private shouldScrollToBottom = false;
+  isSubmitting = false; // Add loading state for form submission
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
@@ -68,7 +73,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   constructor(
     private chatService: ChatService,
-    private formBuilder: FormBuilder
+    private formBuilder: FormBuilder,
+    private snackBar: MatSnackBar,
+    private formStorageService: FormStorageService
   ) {
     this.onboardingForm = this.createForm();
   }
@@ -79,7 +86,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       existingFlows: this.formBuilder.group({
         sourceApplicationName: ['', Validators.required],
         targetApplicationName: ['', Validators.required],
-        isUsingIODS: [false, Validators.required],
+        isUsingIODS: [false], // Checkbox - no required validator needed
         iodsDetails: this.formBuilder.group({
           oldIodsId: [''],
           onSiteServerNames: [''],
@@ -113,17 +120,17 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
           ipOrSubnet: [''],
           applicationTarget: ['']
         }),
-        requiresExternalVendorConnection: [false, Validators.required]
+        requiresExternalVendorConnection: [false] // Checkbox - no required validator needed
       }),
 
       // Section 4: File Transfer Information (Cloud)
       fileTransferInfo: this.formBuilder.group({
-        hasOutbound: [false, Validators.required],
+        hasOutbound: [false], // Checkbox - no required validator needed
         sourceAwsAccount: [''],
         sourceBucketArn: [''],
         sourceArchiveBucket: [''],
         sourceArchivePrefix: [''],
-        hasInbound: [false, Validators.required],
+        hasInbound: [false], // Checkbox - no required validator needed
         targetBucket: [''],
         targetPrefix: ['']
       }),
@@ -156,6 +163,10 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.initializeEnvironmentsArray();
     this.startAgent();
     this.subscribeToFormUpdates();
+    this.setupAutosave();
+    this.loadCurrentDraft();
+    this.setupAutosave();
+    this.loadCurrentDraft();
   }
 
   ngOnDestroy() {
@@ -472,5 +483,115 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.showWelcomeButtons = false;
     this.smartGuideEnabled = wantsAssistance;
     this.onSmartGuideToggle(wantsAssistance);
+  }
+
+  // Setup autosave functionality
+  private setupAutosave(): void {
+    this.onboardingForm.valueChanges
+      .pipe(
+        debounceTime(2000), // Wait 2 seconds after user stops typing
+        distinctUntilChanged()
+      )
+      .subscribe(() => {
+        this.autosave();
+      });
+  }
+
+  // Autosave current form data
+  private autosave(): void {
+    if (this.onboardingForm.dirty) {
+      const formData = this.getCompleteFormData();
+      this.formStorageService.saveDraft(formData);
+      console.log('Form autosaved');
+    }
+  }
+
+  // Load current draft if exists
+  private loadCurrentDraft(): void {
+    const currentDraft = this.formStorageService.getCurrentDraft();
+    if (currentDraft) {
+      this.loadFormData(currentDraft.formData);
+      this.addMessage(`Draft "${currentDraft.name}" loaded automatically.`, false);
+    }
+  }
+
+  // Load form data into the form
+  private loadFormData(formData: any): void {
+    this.onboardingForm.patchValue(formData);
+    
+    // Handle environments array specially
+    if (formData.applicationInfo?.environments) {
+      const environmentsArray = this.onboardingForm.get('applicationInfo.environments') as FormArray;
+      environmentsArray.clear();
+      this.environmentOptions.forEach((env, index) => {
+        const isSelected = formData.applicationInfo.environments.includes(env);
+        environmentsArray.push(this.formBuilder.control(isSelected));
+      });
+    }
+  }
+
+  // Navigation event handlers
+  refreshForm(): void {
+    this.loadCurrentDraft();
+  }
+
+  createNewForm(): void {
+    this.formStorageService.clearCurrentDraft();
+    this.onboardingForm.reset();
+    this.onboardingForm.markAsPristine();
+    this.addMessage('New form created. Previous draft cleared.', false);
+  }
+
+  clearForm(): void {
+    this.onboardingForm.reset();
+    this.onboardingForm.markAsPristine();
+    this.addMessage('Form cleared.', false);
+  }
+
+  // Form validation getter
+  get isFormValid(): boolean {
+    return this.onboardingForm.valid;
+  }
+
+  // Submit form method - now saves as JSON file
+  submitForm() {
+    if (!this.isFormValid) {
+      this.snackBar.open('Please fill in all required fields before submitting.', 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+      return;
+    }
+
+    this.isSubmitting = true;
+    
+    try {
+      const formData = this.getCompleteFormData();
+      const submissionName = `Onboarding Submission ${new Date().toLocaleDateString()}`;
+      
+      // Save and download as JSON
+      const submissionId = this.formStorageService.submitForm(formData, submissionName);
+      
+      this.snackBar.open('Form submitted successfully! JSON file downloaded.', 'Close', {
+        duration: 5000,
+        panelClass: ['success-snackbar']
+      });
+      
+      // Add confirmation message to chat
+      this.addMessage(`Your onboarding request has been submitted successfully! Submission ID: ${submissionId}. The form data has been saved as a JSON file.`, false);
+      
+      // Reset form
+      this.onboardingForm.reset();
+      this.onboardingForm.markAsPristine();
+      
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      this.snackBar.open('Error submitting form. Please try again.', 'Close', {
+        duration: 5000,
+        panelClass: ['error-snackbar']
+      });
+    } finally {
+      this.isSubmitting = false;
+    }
   }
 } 

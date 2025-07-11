@@ -92,6 +92,67 @@ div[style*="border-left: 3px solid #ccc"] {
   }
 }
 
+// Submit Button Section
+.submit-section {
+  margin-top: 32px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px solid #1976d2;
+  border-radius: 12px;
+  
+  .submit-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    
+    .submit-button {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 16px 32px;
+      min-width: 280px;
+      height: 56px;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      mat-icon {
+        margin-right: 8px;
+        animation: spin 1s linear infinite;
+      }
+    }
+    
+    .form-validation-message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f44336;
+      font-size: 14px;
+      text-align: center;
+      padding: 12px 16px;
+      background: #ffebee;
+      border-radius: 8px;
+      border-left: 4px solid #f44336;
+      max-width: 400px;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
 // Chat overlay styling
 .chat-overlay {
   position: fixed;
@@ -333,4 +394,104 @@ mat-checkbox {
       }
     }
   }
+} 
+
+/* Submit Button Section */
+.submit-section {
+  margin-top: 32px;
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  border: 2px solid #1976d2;
+  border-radius: 12px;
+  
+  .submit-button-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    
+    .submit-button {
+      font-size: 18px;
+      font-weight: 600;
+      padding: 16px 32px;
+      min-width: 280px;
+      height: 56px;
+      border-radius: 28px;
+      box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(25, 118, 210, 0.4);
+      }
+      
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      
+      mat-icon {
+        margin-right: 8px;
+        animation: spin 1s linear infinite;
+      }
+    }
+    
+    .form-validation-message {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #f44336;
+      font-size: 14px;
+      text-align: center;
+      padding: 12px 16px;
+      background: #ffebee;
+      border-radius: 8px;
+      border-left: 4px solid #f44336;
+      max-width: 400px;
+      
+      mat-icon {
+        font-size: 20px;
+        width: 20px;
+        height: 20px;
+      }
+    }
+  }
+}
+
+/* Snackbar Styles */
+::ng-deep .success-snackbar {
+  background: #4caf50 !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+::ng-deep .error-snackbar {
+  background: #f44336 !important;
+  color: white !important;
+  
+  .mat-mdc-snack-bar-label {
+    color: white !important;
+  }
+}
+
+/* Loading Animation */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Form Validation Enhancement */
+.mat-mdc-form-field.ng-invalid .mat-mdc-form-field-outline {
+  border-color: #f44336 !important;
+}
+
+.mat-mdc-form-field.ng-invalid .mat-mdc-floating-label {
+  color: #f44336 !important;
+}
+
+/* Required field asterisk */
+.mat-mdc-form-field-required-marker {
+  color: #f44336;
 } 

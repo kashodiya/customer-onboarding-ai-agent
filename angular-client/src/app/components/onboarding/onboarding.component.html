@@ -367,6 +367,27 @@
               </mat-card-content>
             </mat-card>
 
+            <!-- Submit Button Section -->
+            <mat-card class="submit-section">
+              <mat-card-content>
+                <div class="submit-button-container">
+                  <button mat-raised-button 
+                          color="primary" 
+                          [disabled]="!isFormValid || isSubmitting"
+                          (click)="submitForm()"
+                          class="submit-button">
+                    <mat-icon *ngIf="isSubmitting">hourglass_empty</mat-icon>
+                    <span *ngIf="!isSubmitting">Submit Onboarding Request</span>
+                    <span *ngIf="isSubmitting">Submitting...</span>
+                  </button>
+                  <div class="form-validation-message" *ngIf="!isFormValid">
+                    <mat-icon>info</mat-icon>
+                    <span>Please fill in all required fields marked with * to submit the form.</span>
+                  </div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+
           </form>
         </mat-card-content>
       </mat-card>
