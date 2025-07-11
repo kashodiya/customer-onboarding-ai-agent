@@ -76,11 +76,9 @@ async def ask_agent_endpoint(prompt: str, request: Request):
         except Exception as e:
             print(f"Error parsing proactive form update: {e}")
     
-    # Fallback: Use the existing REPORT-LAST-ANSWER method if no proactive update found (only if not manual mode)
-    if not is_manual_mode_response and not changed:
-        changed = ask_agent("REPORT-LAST-ANSWER", session_id=agent_session_id)
-        print(f"Fallback form update check: {changed}")
-    elif is_manual_mode_response:
+    # Note: Form updates are handled via "Form Update Available:" markers in AI responses
+    # Skip form updates if user chose manual mode
+    if is_manual_mode_response:
         print("Skipping form updates - user chose manual mode")
     
     # Debug logging

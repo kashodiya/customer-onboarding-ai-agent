@@ -83,6 +83,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   private createForm(): FormGroup {
     return this.formBuilder.group({
+      // Form Title - empty with placeholder
+      formTitle: [''],
+      
       // Section 1: Existing Flows
       existingFlows: this.formBuilder.group({
         sourceApplicationName: ['', Validators.required],
@@ -250,11 +253,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   subscribeToFormUpdates() {
     this.formUpdatesSubscription = this.chatService.getFormUpdates().subscribe({
       next: (updates) => {
-        console.log('Received form update:', updates);
         try {
           // updates is already parsed, no need for JSON.parse()
           if (updates && updates.name && updates.value !== undefined) {
-            console.log(`Updating field: ${updates.name} = ${updates.value}`);
             this.updateNestedFormValue(updates.name, updates.value);
           }
         } catch (error) {
@@ -281,7 +282,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
             environmentsArray.at(index).setValue(true);
           }
         });
-        console.log(`✅ Updated environments: ${value.join(', ')}`);
       } 
       // Special handling for date fields to avoid timezone issues
       else if (path === 'businessInfo.implementationDeadline' && typeof value === 'string') {
@@ -329,7 +329,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
           
           if (parsedDate) {
             control.setValue(parsedDate);
-            console.log(`✅ Updated date: ${value} → ${parsedDate.toLocaleDateString()}`);
           } else {
             console.warn(`Could not parse date: ${value}`);
             control.setValue(value); // Set as string if parsing fails
@@ -372,7 +371,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
         
         // Auto-toggle Smart Guide based on user's mode preference
         if (isManualResponse && this.smartGuideEnabled) {
-          console.log('Detected manual preference, disabling Smart Guide');
           this.smartGuideEnabled = false;
           // Notify backend about the mode change
           this.chatService.toggleSmartGuide(false, currentFormData).subscribe({
@@ -384,7 +382,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
             }
           });
         } else if (isSmartGuideResponse && !this.smartGuideEnabled) {
-          console.log('Detected smart guide preference, enabling Smart Guide');
           this.smartGuideEnabled = true;
           // Notify backend about the mode change
           this.chatService.toggleSmartGuide(true, currentFormData).subscribe({
@@ -449,12 +446,15 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   private getCompleteFormData(): any {
     const formValue = this.onboardingForm.value;
     
+    // Exclude formTitle from the data - it's only for filename
+    const { formTitle, ...dataWithoutTitle } = formValue;
+    
     // Clean up the form data and handle special cases
     const cleanedData = {
-      ...formValue,
+      ...dataWithoutTitle,
       // Convert environment array to selected environment names
       applicationInfo: {
-        ...formValue.applicationInfo,
+        ...dataWithoutTitle.applicationInfo,
         environments: this.environmentsFormArray.value
           .map((checked: boolean, idx: number) => checked ? this.environmentOptions[idx] : null)
           .filter((env: string | null) => env !== null)
@@ -506,17 +506,24 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   // Autosave current form data
   private autosave(): void {
-    if (this.onboardingForm.dirty && this.hasFormContent()) {
-      this.isAutosaving = true;
-      const formData = this.getCompleteFormData();
-      this.formStorageService.saveDraft(formData);
-      console.log('Form autosaved - showing indicator');
+    
+    if (this.onboardingForm.dirty) {
+      const formTitle = this.onboardingForm.get('formTitle')?.value || '';
+      const hasTitleContent = formTitle.trim().length > 0;
+      const hasOtherContent = this.hasFormContent();
       
-      // Hide autosaving indicator after a longer delay for visibility
-      setTimeout(() => {
-        this.isAutosaving = false;
-        console.log('Autosaving indicator hidden');
-      }, 2000); // Increased from 1000ms to 2000ms
+      // Trigger autosave if there's either a title or other form content
+      if (hasTitleContent || hasOtherContent) {
+        this.isAutosaving = true;
+        const formData = this.getCompleteFormData();
+        const titleForDraft = formTitle.trim() || 'Untitled Draft';
+        this.formStorageService.saveDraft(formData, titleForDraft);
+        
+        // Hide autosaving indicator after a longer delay for visibility
+        setTimeout(() => {
+          this.isAutosaving = false;
+        }, 2000); // Increased from 1000ms to 2000ms
+      }
     }
   }
 
@@ -569,7 +576,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (currentDraft) {
       // Check if the draft has meaningful content using the consolidated function
       if (this.hasFormContent(currentDraft.formData)) {
-        this.loadFormData(currentDraft.formData);
+        this.loadFormData(currentDraft.formData, currentDraft.name);
         this.addMessage(`Draft "${currentDraft.name}" loaded automatically.`, false);
         // Don't show assistance buttons when loading meaningful content
         this.showWelcomeButtons = false;
@@ -577,7 +584,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       } else {
         // Clear empty draft
         this.formStorageService.clearCurrentDraft();
-        console.log('Empty draft cleared automatically');
         // Don't set showWelcomeButtons here - let startAgent handle it
         return false; // No meaningful draft loaded
       }
@@ -586,8 +592,13 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   // Load form data into the form
-  private loadFormData(formData: any): void {
+  private loadFormData(formData: any, titleName?: string): void {
     this.onboardingForm.patchValue(formData);
+    
+    // Set the form title if provided
+    if (titleName) {
+      this.onboardingForm.patchValue({ formTitle: titleName });
+    }
     
     // Handle environments array specially
     if (formData.applicationInfo?.environments) {
@@ -608,6 +619,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   createNewForm(): void {
     this.formStorageService.clearCurrentDraft();
     this.onboardingForm.reset();
+    // Don't set default title - let placeholder handle it
     this.onboardingForm.markAsPristine();
     this.addMessage('New form created. Previous draft cleared.', false);
   }
@@ -637,10 +649,10 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     
     try {
       const formData = this.getCompleteFormData();
-      const submissionName = `Onboarding Submission ${new Date().toLocaleDateString()}`;
+      const formTitle = this.onboardingForm.get('formTitle')?.value || 'Customer Onboarding Form';
       
       // Save and download as JSON
-      const submissionId = this.formStorageService.submitForm(formData, submissionName);
+      const submissionId = this.formStorageService.submitForm(formData, formTitle);
       
       this.snackBar.open('Form submitted successfully! JSON file downloaded.', 'Close', {
         duration: 5000,
@@ -650,7 +662,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       // Add confirmation message to chat
       this.addMessage(`Your onboarding request has been submitted successfully! Submission ID: ${submissionId}. The form data has been saved as a JSON file.`, false);
       
-      // Reset form
+      // Reset form (this will clear the title field)
       this.onboardingForm.reset();
       this.onboardingForm.markAsPristine();
       

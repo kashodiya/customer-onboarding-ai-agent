@@ -1,0 +1,140 @@
+.navigation-toolbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  z-index: 1000;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #1976d2;
+}
+
+.app-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.toolbar-spacer {
+  flex: 1 1 auto;
+}
+
+.submissions-button {
+  margin-right: 16px;
+}
+
+.badge-container {
+  margin-left: 8px;
+}
+
+.submissions-menu {
+  max-width: 400px;
+  min-width: 300px;
+}
+
+.menu-header {
+  padding: 16px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.menu-header h3 {
+  margin: 0;
+  color: #1976d2;
+  font-size: 16px;
+}
+
+.no-submissions {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  color: #666;
+  font-style: italic;
+}
+
+.no-submissions mat-icon {
+  margin-right: 8px;
+  color: #999;
+}
+
+.submission-item {
+  width: 100%;
+  height: auto;
+  padding: 12px 16px;
+}
+
+.submission-content {
+  width: 100%;
+  text-align: left;
+}
+
+.submission-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.submission-icon {
+  margin-right: 8px;
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.submission-name {
+  font-weight: 500;
+  flex: 1;
+}
+
+.submission-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: #666;
+}
+
+.submission-status {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.submission-status.draft {
+  background: #fff3e0;
+  color: #f57c00;
+}
+
+.submission-status.submitted {
+  background: #e8f5e8;
+  color: #2e7d32;
+}
+
+.autosaving-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 16px;
+  color: #fff;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.autosaving-indicator mat-spinner {
+  margin-right: 8px;
+}
+
+.autosaving-indicator span {
+  font-weight: 400;
+}
+
+.import-button, .clear-draft-button {
+  color: #1976d2;
+}
+
+.new-form-button {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.new-form-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+} 

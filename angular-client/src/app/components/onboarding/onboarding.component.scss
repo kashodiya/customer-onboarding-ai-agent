@@ -495,3 +495,32 @@ mat-checkbox {
 .mat-mdc-form-field-required-marker {
   color: #f44336;
 } 
+
+/* Title Section Styling */
+.title-section {
+  margin-bottom: 24px;
+  text-align: center;
+  
+  .title-field {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto;
+    
+    .title-input {
+      font-size: 20px;
+      font-weight: 600;
+      text-align: center;
+      color: #1976d2;
+    }
+    
+    .mat-mdc-form-field-outline {
+      border-width: 2px;
+      border-color: #1976d2;
+    }
+    
+    .mat-mdc-floating-label {
+      font-weight: 500;
+      color: #1976d2;
+    }
+  }
+} 

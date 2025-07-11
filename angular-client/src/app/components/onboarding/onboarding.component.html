@@ -3,10 +3,18 @@
   <div class="form-section">
     <div class="form-container">
       <mat-card class="main-card">
-        <mat-card-title class="main-title">Customer Onboarding Form</mat-card-title>
         <mat-card-content>
-          
           <form [formGroup]="onboardingForm">
+            
+            <!-- Editable Title Field -->
+            <div class="title-section">
+              <mat-form-field appearance="outline" class="title-field">
+                <input matInput formControlName="formTitle"
+                       (focus)="onFieldFocus('formTitle', 'Form Title')"
+                       placeholder="Customer Onboarding Form"
+                       class="title-input">
+              </mat-form-field>
+            </div>
             
             <!-- Section 1: Existing Flows -->
             <mat-card class="section-card" formGroupName="existingFlows">
@@ -59,11 +67,11 @@
                            (focus)="onFieldFocus('existingFlows.iodsDetails.fileType', 'File Type')">
                   </mat-form-field>
 
-                  <mat-form-field appearance="outline" class="full-width">
+            <mat-form-field appearance="outline" class="full-width">
                     <mat-label>IODS Mailbox or Drop Location Name</mat-label>
                     <input matInput formControlName="iodsMailbox"
                            (focus)="onFieldFocus('existingFlows.iodsDetails.iodsMailbox', 'IODS Mailbox or Drop Location Name')">
-                  </mat-form-field>
+            </mat-form-field>
 
                   <mat-form-field appearance="outline" class="full-width">
                     <mat-label>Pre/Post Transfer Processes</mat-label>

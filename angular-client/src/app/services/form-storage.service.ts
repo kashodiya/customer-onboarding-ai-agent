@@ -115,8 +115,14 @@ export class FormStorageService {
     const dataStr = JSON.stringify(submission, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
     
-    const exportFileDefaultName = `onboarding_submission_${submission.id}.json`;
+    // Use submission name as filename, sanitized for file system
+    const sanitizedName = submission.name
+      .replace(/[^a-zA-Z0-9\s\-_]/g, '') // Remove special characters
+      .trim()
+      .replace(/\s+/g, '_') // Replace spaces with underscores
+      .toLowerCase();
     
+    const exportFileDefaultName = `${sanitizedName || 'onboarding_form'}.json`;
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);

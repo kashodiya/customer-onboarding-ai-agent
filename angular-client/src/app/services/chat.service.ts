@@ -31,31 +31,23 @@ export class ChatService {
     const wsHost = window.location.host.includes('4200') ? 'localhost:8000' : window.location.host;
     this.ws = new WebSocket(`${wsUrl}//${wsHost}/ws`);
     
-    this.ws.onopen = () => {
-      console.log('🔌 WebSocket connected');
-    };
-    
     this.ws.onmessage = (event) => {
-      console.log('📨 WebSocket message received:', event.data);
       try {
       const data = JSON.parse(event.data);
-        console.log('📋 Parsed message:', data);
       if (data.type === 'update-form') {
-          console.log('🎯 Form update message:', data.payload);
         this.formUpdatesSubject.next(data.payload);
         }
       } catch (error) {
-        console.error('❌ Error parsing WebSocket message:', error);
+        console.error('Error parsing WebSocket message:', error);
       }
     };
 
     this.ws.onclose = () => {
-      console.log('🔌 WebSocket disconnected, attempting to reconnect...');
       setTimeout(() => this.initializeWebSocket(), 5000);
     };
 
     this.ws.onerror = (error) => {
-      console.error('❌ WebSocket error:', error);
+      console.error('WebSocket error:', error);
     };
   }
 
