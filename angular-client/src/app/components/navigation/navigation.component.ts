@@ -1,4 +1,4 @@
-import { Component, OnInit, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, EventEmitter, Output, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatMenuModule } from '@angular/material/menu';
@@ -6,6 +6,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatBadgeModule } from '@angular/material/badge';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormStorageService, FormSubmission } from '../../services/form-storage.service';
 import { Observable } from 'rxjs';
 
@@ -19,13 +20,20 @@ import { Observable } from 'rxjs';
     MatButtonModule,
     MatIconModule,
     MatBadgeModule,
-    MatDividerModule
+    MatDividerModule,
+    MatProgressSpinnerModule
   ],
   template: `
     <mat-toolbar color="primary" class="navigation-toolbar">
       <span class="app-title">Customer Onboarding</span>
       
       <div class="toolbar-spacer"></div>
+      
+      <!-- Autosaving Indicator -->
+      <div *ngIf="isAutosaving" class="autosaving-indicator">
+        <mat-spinner diameter="16" color="accent"></mat-spinner>
+        <span>Autosaving...</span>
+      </div>
       
       <!-- Past Submissions Dropdown -->
       <button mat-button [matMenuTriggerFor]="submissionsMenu" class="submissions-button">
@@ -201,6 +209,23 @@ import { Observable } from 'rxjs';
       color: #2e7d32;
     }
     
+    .autosaving-indicator {
+      display: flex;
+      align-items: center;
+      margin-right: 16px;
+      color: #fff;
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    
+    .autosaving-indicator mat-spinner {
+      margin-right: 8px;
+    }
+    
+    .autosaving-indicator span {
+      font-weight: 400;
+    }
+    
     .import-button, .clear-draft-button {
       color: #1976d2;
     }
@@ -218,6 +243,7 @@ export class NavigationComponent implements OnInit {
   @Output() loadSubmission = new EventEmitter<string>();
   @Output() newForm = new EventEmitter<void>();
   @Output() clearDraft = new EventEmitter<void>();
+  @Input() isAutosaving: boolean = false;
 
   submissions$: Observable<FormSubmission[]>;
 

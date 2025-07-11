@@ -38,4 +38,12 @@ export class AppComponent {
       this.onboardingComponent.clearForm();
     }
   }
+
+  get isAutosaving(): boolean {
+    const autosaving = this.onboardingComponent?.isAutosaving || false;
+    if (autosaving) {
+      console.log('App component: isAutosaving = true');
+    }
+    return autosaving;
+  }
 } 

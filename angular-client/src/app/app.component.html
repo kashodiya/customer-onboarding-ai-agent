@@ -1,5 +1,6 @@
 <div class="app-container">
   <app-navigation 
+    [isAutosaving]="isAutosaving"
     (loadSubmission)="onLoadSubmission($event)"
     (newForm)="onNewForm()"
     (clearDraft)="onClearDraft()">

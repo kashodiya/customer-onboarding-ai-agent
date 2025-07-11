@@ -60,6 +60,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   showWelcomeButtons = false; // Show buttons after welcome message
   private shouldScrollToBottom = false;
   isSubmitting = false; // Add loading state for form submission
+  isAutosaving = false; // Add autosaving state indicator
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
@@ -506,9 +507,16 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   // Autosave current form data
   private autosave(): void {
     if (this.onboardingForm.dirty && this.hasFormContent()) {
+      this.isAutosaving = true;
       const formData = this.getCompleteFormData();
       this.formStorageService.saveDraft(formData);
-      console.log('Form autosaved');
+      console.log('Form autosaved - showing indicator');
+      
+      // Hide autosaving indicator after a longer delay for visibility
+      setTimeout(() => {
+        this.isAutosaving = false;
+        console.log('Autosaving indicator hidden');
+      }, 2000); // Increased from 1000ms to 2000ms
     }
   }
 
