@@ -225,6 +225,10 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     return this.onboardingForm.get('fileTransferInfo.hasInbound')?.value;
   }
 
+  get requiresExternalVendorConnection() {
+    return this.onboardingForm.get('networkCloudInfo.requiresExternalVendorConnection')?.value;
+  }
+
   startAgent() {
     // Include current form state in case user has already filled some fields manually
     const currentFormData = this.getCompleteFormData();
@@ -510,66 +514,45 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   // Check if form has meaningful content (current form or provided data)
   private hasFormContent(formData?: any): boolean {
-    // Use provided data or get current form data
     const data = formData || this.getCompleteFormData();
     
-    if (!data) return false;
-    
-    // Check for any filled text inputs
-    const hasTextContent = 
-      data.existingFlows?.sourceApplicationName?.trim() ||
-      data.existingFlows?.targetApplicationName?.trim() ||
-      data.existingFlows?.iodsDetails?.oldIodsId?.trim() ||
-      data.existingFlows?.iodsDetails?.onSiteServerNames?.trim() ||
-      data.existingFlows?.iodsDetails?.fileName?.trim() ||
-      data.existingFlows?.iodsDetails?.fileType?.trim() ||
-      data.existingFlows?.iodsDetails?.iodsMailbox?.trim() ||
-      data.existingFlows?.iodsDetails?.prePostTransferProcesses?.trim() ||
-      data.applicationInfo?.systemName?.trim() ||
-      data.applicationInfo?.internalOrExternal?.trim() ||
-      data.applicationInfo?.supportedProtocols?.trim() ||
-      data.applicationInfo?.platform?.trim() ||
-      data.applicationInfo?.primaryRegion?.trim() ||
-      data.applicationInfo?.backupRegion?.trim() ||
-      data.networkCloudInfo?.networkLocation?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.awsAccountName?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.awsAccountNumber?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.cloudRegion?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.awsCloudId?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.serverName?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.ipOrSubnet?.trim() ||
-      data.networkCloudInfo?.cloudDetails?.applicationTarget?.trim() ||
-      data.fileTransferInfo?.sourceAwsAccount?.trim() ||
-      data.fileTransferInfo?.sourceBucketArn?.trim() ||
-      data.fileTransferInfo?.sourceArchiveBucket?.trim() ||
-      data.fileTransferInfo?.sourceArchivePrefix?.trim() ||
-      data.fileTransferInfo?.targetBucket?.trim() ||
-      data.fileTransferInfo?.targetPrefix?.trim() ||
-      data.environmentInfo?.customerEnvironments?.trim() ||
-      data.environmentInfo?.cloudEnvironmentMapping?.development?.trim() ||
-      data.environmentInfo?.cloudEnvironmentMapping?.qualityAssurance?.trim() ||
-      data.environmentInfo?.cloudEnvironmentMapping?.production?.trim() ||
-      data.businessInfo?.contacts?.businessContactSource?.trim() ||
-      data.businessInfo?.contacts?.technicalContactSource?.trim() ||
-      data.businessInfo?.contacts?.businessContactTarget?.trim() ||
-      data.businessInfo?.contacts?.technicalContactTarget?.trim() ||
-      data.businessInfo?.contacts?.vendorContact?.trim();
+    // Handle null/undefined
+    if (data === null || data === undefined) {
+      return false;
+    }
 
-    // Check for any meaningful boolean selections (not default false)
-    const hasBooleanSelections = 
-      data.existingFlows?.isUsingIODS ||
-      data.networkCloudInfo?.requiresExternalVendorConnection ||
-      data.fileTransferInfo?.hasOutbound ||
-      data.fileTransferInfo?.hasInbound ||
-      data.applicationInfo?.isExternalApplication;
+    // Handle strings - meaningful if not empty after trimming
+    if (typeof data === 'string') {
+      return data.trim().length > 0;
+    }
 
-    // Check for any selected environments
-    const hasEnvironments = data.applicationInfo?.environments?.length > 0;
+    // Handle numbers - meaningful if not 0 (though 0 could be meaningful in some contexts)
+    if (typeof data === 'number') {
+      return data !== 0;
+    }
 
-    // Check for implementation deadline
-    const hasDeadline = data.businessInfo?.implementationDeadline;
+    // Handle booleans - meaningful if true (false is typically default)
+    if (typeof data === 'boolean') {
+      return data === true;
+    }
 
-    return !!(hasTextContent || hasBooleanSelections || hasEnvironments || hasDeadline);
+    // Handle dates - meaningful if it's a valid date
+    if (data instanceof Date) {
+      return !isNaN(data.getTime());
+    }
+
+    // Handle arrays - meaningful if not empty and contains meaningful values
+    if (Array.isArray(data)) {
+      return data.length > 0 && data.some(item => this.hasFormContent(item));
+    }
+
+    // Handle objects - meaningful if any property has meaningful value
+    if (typeof data === 'object') {
+      return Object.values(data).some(prop => this.hasFormContent(prop));
+    }
+
+    // For any other type, consider it meaningful if it exists
+    return true;
   }
 
   // Load current draft if exists

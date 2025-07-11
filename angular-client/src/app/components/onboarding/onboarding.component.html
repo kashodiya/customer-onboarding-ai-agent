@@ -358,7 +358,7 @@
                            (focus)="onFieldFocus('businessInfo.contacts.technicalContactTarget', 'Technical Contact (Target)')">
                   </mat-form-field>
 
-                  <mat-form-field *ngIf="isExternalApplication" appearance="outline" class="full-width">
+                  <mat-form-field *ngIf="requiresExternalVendorConnection" appearance="outline" class="full-width">
                     <mat-label>Vendor Contact (if External)</mat-label>
                     <input matInput formControlName="vendorContact"
                            (focus)="onFieldFocus('businessInfo.contacts.vendorContact', 'Vendor Contact (if External)')">
