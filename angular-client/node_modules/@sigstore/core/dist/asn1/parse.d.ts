@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export declare function parseInteger(buf: Buffer): bigint;
 export declare function parseStringASCII(buf: Buffer): string;
 export declare function parseTime(buf: Buffer, shortYear: boolean): Date;

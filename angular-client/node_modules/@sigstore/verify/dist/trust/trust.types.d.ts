@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import type { X509Certificate, crypto } from '@sigstore/core';
 export type TLogAuthority = {
     logID: Buffer;

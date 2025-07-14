@@ -23,30 +23,29 @@ import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-onboarding',
-  standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressBarModule,
-    MatDividerModule,
-    MatCheckboxModule,
-    MatRadioModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatSlideToggleModule,
-    MatTooltipModule,
-    MatSnackBarModule
-  ],
-  templateUrl: './onboarding.component.html',
-  styleUrls: ['./onboarding.component.scss']
+    selector: 'app-onboarding',
+    imports: [
+        CommonModule,
+        FormsModule,
+        ReactiveFormsModule,
+        MatCardModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatIconModule,
+        MatProgressBarModule,
+        MatDividerModule,
+        MatCheckboxModule,
+        MatRadioModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatSlideToggleModule,
+        MatTooltipModule,
+        MatSnackBarModule
+    ],
+    templateUrl: './onboarding.component.html',
+    styleUrls: ['./onboarding.component.scss']
 })
 export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked {
   @ViewChild('chatMessagesContainer') private chatMessagesContainer!: ElementRef;

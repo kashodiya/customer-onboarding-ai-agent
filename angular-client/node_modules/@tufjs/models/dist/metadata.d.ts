@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { MetadataKind, Signable } from './base';
 import { Root } from './root';
 import { Signature } from './signature';

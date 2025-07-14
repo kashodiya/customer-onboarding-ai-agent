@@ -32,11 +32,11 @@ Quoted.prototype = Object.assign(new node_1.default(), {
         var that = this;
         var value = this.value;
         var variableReplacement = function (_, name) {
-            var v = new variable_1.default("@" + name, that.getIndex(), that.fileInfo()).eval(context, true);
+            var v = new variable_1.default("@".concat(name), that.getIndex(), that.fileInfo()).eval(context, true);
             return (v instanceof Quoted) ? v.value : v.toCSS();
         };
         var propertyReplacement = function (_, name) {
-            var v = new property_1.default("$" + name, that.getIndex(), that.fileInfo()).eval(context, true);
+            var v = new property_1.default("$".concat(name), that.getIndex(), that.fileInfo()).eval(context, true);
             return (v instanceof Quoted) ? v.value : v.toCSS();
         };
         function iterativeReplace(value, regexp, replacementFnc) {

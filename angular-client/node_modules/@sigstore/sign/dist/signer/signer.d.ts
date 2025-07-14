@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export type KeyMaterial = {
     $case: 'x509Certificate';
     certificate: string;

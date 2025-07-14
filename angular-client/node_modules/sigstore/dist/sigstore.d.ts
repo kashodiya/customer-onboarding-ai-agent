@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { SerializedBundle } from '@sigstore/bundle';
 import * as config from './config';
 export declare function sign(payload: Buffer, options?: config.SignOptions): Promise<SerializedBundle>;

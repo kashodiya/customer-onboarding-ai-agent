@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ASN1Obj } from '../asn1';
 export declare class TSTInfo {
     root: ASN1Obj;

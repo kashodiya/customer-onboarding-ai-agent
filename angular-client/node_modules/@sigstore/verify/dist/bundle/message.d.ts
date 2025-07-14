@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import { crypto } from '@sigstore/core';
 import type { MessageSignature } from '@sigstore/bundle';
 import type { SignatureContent } from '../shared.types';

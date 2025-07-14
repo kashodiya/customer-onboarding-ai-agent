@@ -15,21 +15,20 @@ import { Observable } from 'rxjs';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
-  selector: 'app-navigation',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatToolbarModule,
-    MatMenuModule,
-    MatButtonModule,
-    MatIconModule,
-    MatBadgeModule,
-    MatDividerModule,
-    MatProgressSpinnerModule,
-    MatTooltipModule
-  ],
-  templateUrl: './navigation.component.html',
-  styleUrls: ['./navigation.component.scss']
+    selector: 'app-navigation',
+    imports: [
+        CommonModule,
+        MatToolbarModule,
+        MatMenuModule,
+        MatButtonModule,
+        MatIconModule,
+        MatBadgeModule,
+        MatDividerModule,
+        MatProgressSpinnerModule,
+        MatTooltipModule
+    ],
+    templateUrl: './navigation.component.html',
+    styleUrls: ['./navigation.component.scss']
 })
 export class NavigationComponent implements OnInit {
   @Output() loadSubmission = new EventEmitter<string>();

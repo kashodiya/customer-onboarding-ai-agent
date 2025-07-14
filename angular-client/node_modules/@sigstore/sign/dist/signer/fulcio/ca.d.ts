@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import type { FetchOptions } from '../../types/fetch';
 export interface CA {
     createSigningCertificate: (identityToken: string, publicKey: string, challenge: Buffer) => Promise<string[]>;

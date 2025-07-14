@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import type { MakeFetchHappenOptions } from 'make-fetch-happen';
 type DownloadFileHandler<T> = (file: string) => Promise<T>;
 export interface Fetcher {

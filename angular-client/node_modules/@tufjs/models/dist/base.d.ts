@@ -5,9 +5,9 @@ export interface Signable {
     signed: Signed;
 }
 export interface SignedOptions {
-    version?: number;
-    specVersion?: string;
-    expires?: string;
+    version: number;
+    specVersion: string;
+    expires: string;
     unrecognizedFields?: Record<string, JSONValue>;
 }
 export declare enum MetadataKind {

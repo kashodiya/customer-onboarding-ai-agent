@@ -111,7 +111,7 @@ contexts.Eval.prototype.rewritePath = function (path, rootpath) {
     if (isPathLocalRelative(path) &&
         isPathRelative(rootpath) &&
         isPathLocalRelative(newPath) === false) {
-        newPath = "./" + newPath;
+        newPath = "./".concat(newPath);
     }
     return newPath;
 };

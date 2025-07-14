@@ -7,11 +7,10 @@ import { OnboardingComponent } from './components/onboarding/onboarding.componen
 import { NavigationComponent } from './components/navigation/navigation.component';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [RouterOutlet, MatToolbarModule, MatDialogModule, MatSnackBarModule, OnboardingComponent, NavigationComponent],
-  templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+    selector: 'app-root',
+    imports: [RouterOutlet, MatToolbarModule, MatDialogModule, MatSnackBarModule, OnboardingComponent, NavigationComponent],
+    templateUrl: './app.component.html',
+    styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
   @ViewChild('onboardingComponent') onboardingComponent!: OnboardingComponent;

@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ASN1Obj } from '../asn1';
 import { X509AuthorityKeyIDExtension, X509BasicConstraintsExtension, X509Extension, X509KeyUsageExtension, X509SCTExtension, X509SubjectAlternativeNameExtension, X509SubjectKeyIDExtension } from './ext';
 export declare const EXTENSION_OID_SCT = "1.3.6.1.4.1.11129.2.4.2";

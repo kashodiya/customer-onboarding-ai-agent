@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { RFC3161Timestamp } from '@sigstore/core';
 import type { TransparencyLogEntry } from '@sigstore/bundle';
 import type { CertAuthority, TLogAuthority } from '../trust';

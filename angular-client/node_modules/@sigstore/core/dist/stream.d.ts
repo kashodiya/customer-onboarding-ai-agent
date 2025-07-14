@@ -1,4 +1,3 @@
-/// <reference types="node" />
 export declare class ByteStream {
     private static BLOCK_SIZE;
     private buf;

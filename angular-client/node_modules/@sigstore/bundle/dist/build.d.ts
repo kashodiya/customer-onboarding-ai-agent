@@ -1,9 +1,8 @@
-/// <reference types="node" />
 import type { BundleWithDsseEnvelope, BundleWithMessageSignature } from './bundle';
 type VerificationMaterialOptions = {
     certificate?: Buffer;
     keyHint?: string;
-    singleCertificate?: boolean;
+    certificateChain?: boolean;
 };
 type MessageSignatureBundleOptions = {
     digest: Buffer;

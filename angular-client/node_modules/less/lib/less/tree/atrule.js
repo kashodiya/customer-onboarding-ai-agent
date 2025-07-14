@@ -115,18 +115,18 @@ AtRule.prototype = Object.assign(new node_1.default(), {
             return;
         }
         // Non-compressed
-        var tabSetStr = "\n" + Array(context.tabLevel).join('  '), tabRuleStr = tabSetStr + "  ";
+        var tabSetStr = "\n".concat(Array(context.tabLevel).join('  ')), tabRuleStr = "".concat(tabSetStr, "  ");
         if (!ruleCnt) {
-            output.add(" {" + tabSetStr + "}");
+            output.add(" {".concat(tabSetStr, "}"));
         }
         else {
-            output.add(" {" + tabRuleStr);
+            output.add(" {".concat(tabRuleStr));
             rules[0].genCSS(context, output);
             for (i = 1; i < ruleCnt; i++) {
                 output.add(tabRuleStr);
                 rules[i].genCSS(context, output);
             }
-            output.add(tabSetStr + "}");
+            output.add("".concat(tabSetStr, "}"));
         }
         context.tabLevel--;
     }

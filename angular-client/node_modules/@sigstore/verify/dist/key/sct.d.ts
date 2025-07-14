@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { X509Certificate } from '@sigstore/core';
 import type { TLogAuthority } from '../trust';
 export type VerifiedSCTProvider = Buffer;

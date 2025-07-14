@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import type { TransparencyLogEntry } from '@sigstore/bundle';
 import type { RFC3161Timestamp, X509Certificate, crypto } from '@sigstore/core';
 export type CertificateExtensionName = 'issuer';

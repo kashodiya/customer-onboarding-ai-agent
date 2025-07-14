@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ASN1Tag } from './tag';
 export declare class ASN1Obj {
     readonly tag: ASN1Tag;

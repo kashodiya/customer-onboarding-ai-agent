@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import { ASN1Obj } from '../asn1';
 import * as crypto from '../crypto';
 import { TSTInfo } from './tstinfo';

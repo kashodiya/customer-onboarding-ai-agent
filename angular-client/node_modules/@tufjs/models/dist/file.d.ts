@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import { Readable } from 'stream';
 import { JSONObject, JSONValue } from './utils';
 interface MetaFileOptions {

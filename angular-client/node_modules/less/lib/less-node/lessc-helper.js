@@ -14,7 +14,7 @@ var lessc_helper = {
             'red': [31, 39],
             'grey': [90, 39]
         };
-        return "\u001B[" + styles[style][0] + "m" + str + "\u001B[" + styles[style][1] + "m";
+        return "\u001B[".concat(styles[style][0], "m").concat(str, "\u001B[").concat(styles[style][1], "m");
     },
     // Print command line options
     printUsage: function () {

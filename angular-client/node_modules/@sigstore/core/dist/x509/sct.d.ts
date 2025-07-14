@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import * as crypto from '../crypto';
 interface SCTOptions {
     version: number;

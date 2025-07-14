@@ -8,7 +8,7 @@
 [![node][node]][node-url]
 [![tests][tests]][tests-url]
 [![cover][cover]][cover-url]
-[![chat][chat]][chat-url]
+[![discussion][discussion]][discussion-url]
 [![size][size]][size-url]
 
 # less-loader
@@ -66,6 +66,7 @@ And run `webpack` via your preferred method.
 - **[`sourceMap`](#sourcemap)**
 - **[`webpackImporter`](#webpackimporter)**
 - **[`implementation`](#implementation)**
+- **[`lessLogAsWarnOrErr`](#lesslogaswarnorerr)**
 
 ### `lessOptions`
 
@@ -411,6 +412,52 @@ module.exports = {
 };
 ```
 
+### `lessLogAsWarnOrErr`
+
+Type:
+
+```ts
+type lessLogAsWarnOrErr = boolean;
+```
+
+Default: `false`
+
+`Less` warnings and errors will be webpack warnings and errors, not just logs.
+
+**warning.less**
+
+```less
+div {
+  &:extend(.body1);
+}
+```
+
+If `lessLogAsWarnOrErr` is set to `false` it will be just a log and webpack will compile successfully, but if you set this option to `true` webpack will compile fail with a warning.
+
+**webpack.config.js**
+
+```js
+module.exports = {
+  module: {
+    rules: [
+      {
+        test: /\.less$/i,
+        use: [
+          "style-loader",
+          "css-loader",
+          {
+            loader: "less-loader",
+            options: {
+              lessLogAsWarnOrErr: true,
+            },
+          },
+        ],
+      },
+    ],
+  },
+};
+```
+
 ## Examples
 
 ### Normal usage
@@ -633,7 +680,7 @@ Please take a moment to read our contributing guidelines if you haven't yet done
 [tests-url]: https://github.com/webpack-contrib/less-loader/actions
 [cover]: https://codecov.io/gh/webpack-contrib/less-loader/branch/master/graph/badge.svg
 [cover-url]: https://codecov.io/gh/webpack-contrib/less-loader
-[chat]: https://img.shields.io/badge/gitter-webpack%2Fwebpack-brightgreen.svg
-[chat-url]: https://gitter.im/webpack/webpack
+[discussion]: https://img.shields.io/github/discussions/webpack/webpack
+[discussion-url]: https://github.com/webpack/webpack/discussions
 [size]: https://packagephobia.now.sh/badge?p=less-loader
 [size-url]: https://packagephobia.now.sh/result?p=less-loader

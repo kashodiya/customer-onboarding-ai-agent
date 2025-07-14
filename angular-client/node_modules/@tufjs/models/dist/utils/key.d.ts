@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { VerifyKeyObjectInput } from 'crypto';
 interface KeyInfo {
     keyType: string;

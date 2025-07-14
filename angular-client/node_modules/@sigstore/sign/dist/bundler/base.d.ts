@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import type { Bundle } from '@sigstore/bundle';
 import type { Signature, Signer } from '../signer';
 import type { Witness } from '../witness';

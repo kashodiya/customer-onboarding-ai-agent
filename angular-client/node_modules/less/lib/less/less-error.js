@@ -103,16 +103,16 @@ LessError.prototype.toString = function (options) {
     if (options.stylize) {
         var type = typeof options.stylize;
         if (type !== 'function') {
-            throw Error("options.stylize should be a function, got a " + type + "!");
+            throw Error("options.stylize should be a function, got a ".concat(type, "!"));
         }
         stylize = options.stylize;
     }
     if (this.line !== null) {
         if (typeof extract[0] === 'string') {
-            error.push(stylize(this.line - 1 + " " + extract[0], 'grey'));
+            error.push(stylize("".concat(this.line - 1, " ").concat(extract[0]), 'grey'));
         }
         if (typeof extract[1] === 'string') {
-            var errorTxt = this.line + " ";
+            var errorTxt = "".concat(this.line, " ");
             if (extract[1]) {
                 errorTxt += extract[1].slice(0, this.column) +
                     stylize(stylize(stylize(extract[1].substr(this.column, 1), 'bold') +
@@ -121,21 +121,21 @@ LessError.prototype.toString = function (options) {
             error.push(errorTxt);
         }
         if (typeof extract[2] === 'string') {
-            error.push(stylize(this.line + 1 + " " + extract[2], 'grey'));
+            error.push(stylize("".concat(this.line + 1, " ").concat(extract[2]), 'grey'));
         }
-        error = error.join('\n') + stylize('', 'reset') + "\n";
+        error = "".concat(error.join('\n') + stylize('', 'reset'), "\n");
     }
-    message += stylize(this.type + "Error: " + this.message, 'red');
+    message += stylize("".concat(this.type, "Error: ").concat(this.message), 'red');
     if (this.filename) {
         message += stylize(' in ', 'red') + this.filename;
     }
     if (this.line) {
-        message += stylize(" on line " + this.line + ", column " + (this.column + 1) + ":", 'grey');
+        message += stylize(" on line ".concat(this.line, ", column ").concat(this.column + 1, ":"), 'grey');
     }
-    message += "\n" + error;
+    message += "\n".concat(error);
     if (this.callLine) {
-        message += stylize('from ', 'red') + (this.filename || '') + "/n";
-        message += stylize(this.callLine, 'grey') + " " + this.callExtract + "/n";
+        message += "".concat(stylize('from ', 'red') + (this.filename || ''), "/n");
+        message += "".concat(stylize(this.callLine, 'grey'), " ").concat(this.callExtract, "/n");
     }
     return message;
 };

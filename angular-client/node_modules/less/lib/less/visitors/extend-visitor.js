@@ -117,9 +117,9 @@ var ProcessExtendsVisitor = /** @class */ (function () {
                 selector = extend.selector.toCSS({});
             }
             catch (_) { }
-            if (!indices[extend.index + " " + selector]) {
-                indices[extend.index + " " + selector] = true;
-                logger_1.default.warn("extend '" + selector + "' has no matches");
+            if (!indices["".concat(extend.index, " ").concat(selector)]) {
+                indices["".concat(extend.index, " ").concat(selector)] = true;
+                logger_1.default.warn("extend '".concat(selector, "' has no matches"));
             }
         });
     };
@@ -200,7 +200,7 @@ var ProcessExtendsVisitor = /** @class */ (function () {
                     selectorTwo = extendsToAdd[0].selector.toCSS();
                 }
                 catch (e) { }
-                throw { message: "extend circular reference detected. One of the circular extends is currently:" + selectorOne + ":extend(" + selectorTwo + ")" };
+                throw { message: "extend circular reference detected. One of the circular extends is currently:".concat(selectorOne, ":extend(").concat(selectorTwo, ")") };
             }
             // now process the new extends on the existing rules so that we can handle a extending b extending c extending
             // d extending e...

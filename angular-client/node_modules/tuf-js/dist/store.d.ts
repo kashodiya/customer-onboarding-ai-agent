@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { Metadata, Root, Snapshot, Targets, Timestamp } from '@tufjs/models';
 export declare class TrustedMetadataStore {
     private trustedSet;

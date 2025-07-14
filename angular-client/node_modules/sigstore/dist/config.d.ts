@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { DSSEBundleBuilder, IdentityProvider, MessageSignatureBundleBuilder } from '@sigstore/sign';
 import { KeyFinderFunc, VerificationPolicy } from '@sigstore/verify';
 import type { MakeFetchHappenOptions } from 'make-fetch-happen';
@@ -15,6 +14,7 @@ export type SignOptions = {
     rekorURL?: string;
     tlogUpload?: boolean;
     tsaServerURL?: string;
+    legacyCompatibility?: boolean;
 } & FetchOptions;
 export type VerifyOptions = {
     ctLogThreshold?: number;

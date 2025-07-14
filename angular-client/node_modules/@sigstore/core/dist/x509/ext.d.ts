@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { ASN1Obj } from '../asn1';
 import { SignedCertificateTimestamp } from './sct';
 export declare class X509Extension {

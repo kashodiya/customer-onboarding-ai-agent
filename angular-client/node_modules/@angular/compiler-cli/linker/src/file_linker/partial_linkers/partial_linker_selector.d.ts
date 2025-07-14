@@ -3,7 +3,7 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 import semver from 'semver';
 import { AbsoluteFsPath } from '../../../../src/ngtsc/file_system';
@@ -18,6 +18,7 @@ export declare const ɵɵngDeclareInjectable = "\u0275\u0275ngDeclareInjectable"
 export declare const ɵɵngDeclareInjector = "\u0275\u0275ngDeclareInjector";
 export declare const ɵɵngDeclareNgModule = "\u0275\u0275ngDeclareNgModule";
 export declare const ɵɵngDeclarePipe = "\u0275\u0275ngDeclarePipe";
+export declare const ɵɵngDeclareClassMetadataAsync = "\u0275\u0275ngDeclareClassMetadataAsync";
 export declare const declarationFunctions: string[];
 export interface LinkerRange<TExpression> {
     range: semver.Range;

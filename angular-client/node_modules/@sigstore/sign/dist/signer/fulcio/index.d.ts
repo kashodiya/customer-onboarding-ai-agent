@@ -1,4 +1,3 @@
-/// <reference types="node" />
 import { CAClientOptions } from './ca';
 import type { IdentityProvider } from '../../identity';
 import type { Signature, Signer } from '../signer';
