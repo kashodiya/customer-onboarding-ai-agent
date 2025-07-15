@@ -85,7 +85,7 @@ export class FormStorageService {
     }
   }
 
-  // Submit form (save as submitted and download JSON)
+  // Submit form (save as submitted)
   submitForm(formData: any, name?: string): string {
     const submissionId = this.generateId();
     const submission: FormSubmission = {
@@ -101,33 +101,13 @@ export class FormStorageService {
     const updatedSubmissions = [...currentSubmissions, submission];
     this.saveSubmissions(updatedSubmissions);
 
-    // Download as JSON file
-    this.downloadAsJson(submission);
-
     // Clear current draft
     this.clearCurrentDraft();
 
     return submissionId;
   }
 
-  // Download submission as JSON file
-  private downloadAsJson(submission: FormSubmission): void {
-    const dataStr = JSON.stringify(submission, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    // Use submission name as filename, sanitized for file system
-    const sanitizedName = submission.name
-      .replace(/[^a-zA-Z0-9\s\-_]/g, '') // Remove special characters
-      .trim()
-      .replace(/\s+/g, '_') // Replace spaces with underscores
-      .toLowerCase();
-    
-    const exportFileDefaultName = `${sanitizedName || 'onboarding_form'}.json`;
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  }
+
 
   // Load a past submission as new draft
   loadSubmissionAsDraft(submissionId: string): boolean {

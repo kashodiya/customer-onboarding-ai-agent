@@ -650,16 +650,16 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       const formData = this.getCompleteFormData();
       const formTitle = this.onboardingForm.get('formTitle')?.value || 'Customer Onboarding Form';
       
-      // Save and download as JSON
+      // Save submission
       const submissionId = this.formStorageService.submitForm(formData, formTitle);
       
-      this.snackBar.open('Form submitted successfully! JSON file downloaded.', 'Close', {
+      this.snackBar.open('Form submitted successfully!', 'Close', {
         duration: 5000,
         panelClass: ['success-snackbar']
       });
       
       // Add confirmation message to chat
-      this.addMessage(`Your onboarding request has been submitted successfully! Submission ID: ${submissionId}. The form data has been saved as a JSON file.`, false);
+      this.addMessage(`Your onboarding request has been submitted successfully! Submission ID: ${submissionId}. The form data has been saved to your submissions.`, false);
       
       // Reset form (this will clear the title field)
       this.onboardingForm.reset();
