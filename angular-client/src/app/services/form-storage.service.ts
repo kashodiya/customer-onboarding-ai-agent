@@ -6,7 +6,7 @@ export interface FormSubmission {
   name: string;
   timestamp: Date;
   formData: any;
-  status: 'draft' | 'submitted';
+  status: 'draft' | 'submitted' | 'template';
 }
 
 @Injectable({
@@ -107,6 +107,25 @@ export class FormStorageService {
     return submissionId;
   }
 
+  // Save as template
+  saveAsTemplate(formData: any, name?: string): string {
+    const templateId = this.generateId();
+    const template: FormSubmission = {
+      id: templateId,
+      name: name || `Template ${new Date().toLocaleDateString()}`,
+      timestamp: new Date(),
+      formData: formData,
+      status: 'template'
+    };
+
+    // Add to submissions list (templates are stored in the same list but filtered by status)
+    const currentSubmissions = this.submissionsSubject.value;
+    const updatedSubmissions = [...currentSubmissions, template];
+    this.saveSubmissions(updatedSubmissions);
+
+    return templateId;
+  }
+
 
 
   // Load a past submission as new draft
@@ -121,9 +140,19 @@ export class FormStorageService {
     return false;
   }
 
-  // Get all submissions
+  // Get all submissions (all types)
   getSubmissions(): FormSubmission[] {
     return this.submissionsSubject.value;
+  }
+
+  // Get only templates
+  getTemplates(): FormSubmission[] {
+    return this.submissionsSubject.value.filter(sub => sub.status === 'template');
+  }
+
+  // Get only regular submissions (not templates)
+  getRegularSubmissions(): FormSubmission[] {
+    return this.submissionsSubject.value.filter(sub => sub.status === 'submitted');
   }
 
   // Get current draft

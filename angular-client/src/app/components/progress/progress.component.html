@@ -1,0 +1,85 @@
+<div class="progress-container">
+  <div class="progress-content">
+    <mat-card class="progress-card">
+      <mat-card-header>
+        <mat-card-title class="progress-title">
+          <mat-icon class="success-icon">check_circle</mat-icon>
+          Form Submitted Successfully!
+        </mat-card-title>
+        <mat-card-subtitle *ngIf="currentSubmission">
+          Submission: {{ currentSubmission.name }}
+        </mat-card-subtitle>
+      </mat-card-header>
+      
+      <mat-card-content>
+        <!-- Progress Flow Diagram -->
+        <div class="progress-flow">
+          <div class="progress-title-section">
+            <h3>Submission Progress</h3>
+            <p>Your onboarding request is being processed. Current status: <strong>Validation</strong></p>
+          </div>
+          
+          <div class="progress-steps">
+            <div class="step-container" *ngFor="let step of progressSteps; let i = index">
+              <div class="step-item" [ngClass]="getStepClass(step)">
+                <div class="step-circle">
+                  <mat-icon *ngIf="step.completed">check</mat-icon>
+                  <mat-icon *ngIf="step.current">schedule</mat-icon>
+                  <mat-icon *ngIf="!step.completed && !step.current">{{ step.icon }}</mat-icon>
+                </div>
+                <div class="step-label">{{ step.label }}</div>
+              </div>
+              
+              <!-- Connector line -->
+              <div class="step-connector" *ngIf="i < progressSteps.length - 1"
+                   [ngClass]="{'active': step.completed}">
+              </div>
+            </div>
+          </div>
+          
+          <!-- Status Description -->
+          <div class="status-description">
+            <mat-icon class="status-icon">info</mat-icon>
+            <div class="status-text">
+              <h4>Validation in Progress</h4>
+              <p>Our team is reviewing your submission for completeness and accuracy. You will receive an email notification once the validation is complete.</p>
+            </div>
+          </div>
+        </div>
+        
+        <mat-divider></mat-divider>
+        
+        <!-- Action Buttons -->
+        <div class="action-section">
+          <h3>What would you like to do next?</h3>
+          
+          <div class="action-buttons">
+            <button mat-raised-button 
+                    color="primary" 
+                    (click)="onSaveAsTemplate()"
+                    [disabled]="templateSaved"
+                    class="action-button">
+              <mat-icon>{{ templateSaved ? 'check' : 'save' }}</mat-icon>
+              {{ templateSaved ? 'Template Saved' : 'Save as Template' }}
+            </button>
+            
+            <button mat-raised-button 
+                    color="accent" 
+                    (click)="onStartNewForm()"
+                    class="action-button">
+              <mat-icon>add</mat-icon>
+              Start New Form
+            </button>
+            
+            <button mat-button 
+                    (click)="onGoHome()"
+                    class="action-button">
+              <mat-icon>home</mat-icon>
+              Go to Home
+            </button>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div> 

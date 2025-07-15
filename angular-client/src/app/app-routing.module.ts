@@ -6,6 +6,10 @@ export const routes: Routes = [
     path: '', 
     loadComponent: () => import('./components/onboarding/onboarding.component').then(m => m.OnboardingComponent)
   },
+  { 
+    path: 'progress', 
+    loadComponent: () => import('./components/progress/progress.component').then(m => m.ProgressComponent)
+  },
   { path: '**', redirectTo: '' }
 ];
 

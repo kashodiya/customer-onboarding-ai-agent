@@ -12,10 +12,12 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { FormStorageService, FormSubmission } from '../../services/form-storage.service';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { ConfirmationDialogComponent } from '../confirmation-dialog/confirmation-dialog.component';
 
 @Component({
     selector: 'app-navigation',
+    standalone: true,
     imports: [
         CommonModule,
         MatToolbarModule,
@@ -36,14 +38,17 @@ export class NavigationComponent implements OnInit {
   @Output() clearDraft = new EventEmitter<void>();
   @Input() isAutosaving: boolean = false;
 
-  submissions$: Observable<FormSubmission[]>;
+  templates$: Observable<FormSubmission[]>;
 
   constructor(
     private formStorageService: FormStorageService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar
   ) {
-    this.submissions$ = this.formStorageService.submissions$;
+    // Only show templates in the navigation
+    this.templates$ = this.formStorageService.submissions$.pipe(
+      map(submissions => submissions.filter(sub => sub.status === 'template'))
+    );
   }
 
   ngOnInit(): void {
@@ -95,7 +100,7 @@ export class NavigationComponent implements OnInit {
     const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
       width: '350px',
       data: {
-        title: 'Delete Submission',
+        title: 'Delete Template',
         message: `Are you sure you want to delete "${submissionName}"? This action cannot be undone.`,
         confirmText: 'Delete',
         cancelText: 'Cancel'
@@ -105,7 +110,7 @@ export class NavigationComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.formStorageService.deleteSubmission(submissionId);
-        this.snackBar.open('Submission deleted successfully', 'Close', {
+        this.snackBar.open('Template deleted successfully', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
         });

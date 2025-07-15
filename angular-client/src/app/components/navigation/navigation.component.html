@@ -9,31 +9,31 @@
     <span>Autosaving...</span>
   </div>
   
-  <!-- Past Submissions Dropdown -->
+  <!-- Templates Dropdown -->
   <button mat-button [matMenuTriggerFor]="submissionsMenu" class="submissions-button">
     <mat-icon>history</mat-icon>
-    <span>Past Submissions</span>
-    <span matBadge="{{(submissions$ | async)?.length || 0}}" matBadgeOverlap="false" 
+    <span>Templates</span>
+    <span matBadge="{{(templates$ | async)?.length || 0}}" matBadgeOverlap="false" 
           matBadgeColor="accent" matBadgeSize="small" class="badge-container"></span>
   </button>
   
   <mat-menu #submissionsMenu="matMenu" class="submissions-menu">
     <div class="menu-header">
-      <h3>Past Submissions</h3>
+      <h3>Templates</h3>
     </div>
     
-    <div *ngIf="(submissions$ | async)?.length === 0" class="no-submissions">
+    <div *ngIf="(templates$ | async)?.length === 0" class="no-submissions">
       <mat-icon>inbox</mat-icon>
-      <span>No submissions yet</span>
+      <span>No templates yet</span>
     </div>
     
     <button mat-menu-item 
-            *ngFor="let submission of submissions$ | async" 
+            *ngFor="let submission of templates$ | async" 
             class="submission-item">
       <div class="submission-content" (click)="onLoadSubmission(submission.id)">
         <div class="submission-header">
           <mat-icon class="submission-icon">
-            {{submission.status === 'draft' ? 'draft' : 'description'}}
+            {{submission.status === 'template' ? 'content_copy' : 'description'}}
           </mat-icon>
           <span class="submission-name">{{submission.name}}</span>
         </div>

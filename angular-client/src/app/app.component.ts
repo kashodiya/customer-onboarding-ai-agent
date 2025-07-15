@@ -1,44 +1,50 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
-import { OnboardingComponent } from './components/onboarding/onboarding.component';
 import { NavigationComponent } from './components/navigation/navigation.component';
+import { FormStorageService } from './services/form-storage.service';
 
 @Component({
     selector: 'app-root',
-    imports: [RouterOutlet, MatToolbarModule, MatDialogModule, MatSnackBarModule, OnboardingComponent, NavigationComponent],
+    standalone: true,
+    imports: [RouterOutlet, MatToolbarModule, MatDialogModule, MatSnackBarModule, NavigationComponent],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent {
-  @ViewChild('onboardingComponent') onboardingComponent!: OnboardingComponent;
-  
   title = 'Customer Onboarding';
 
+  constructor(
+    private router: Router,
+    private formStorageService: FormStorageService
+  ) {}
+
   onLoadSubmission(submissionId: string): void {
-    // The FormStorageService already handles loading the submission as a draft
-    // We just need to refresh the form in the onboarding component
-    if (this.onboardingComponent) {
-      this.onboardingComponent.refreshForm();
-    }
+    // Set flag to indicate we're loading a template
+    sessionStorage.setItem('isLoadingTemplate', 'true');
+    
+    // Load the template and navigate to form
+    this.formStorageService.loadSubmissionAsDraft(submissionId);
+    // Navigate to home to ensure the onboarding component is loaded
+    this.router.navigate(['/']);
   }
 
   onNewForm(): void {
-    if (this.onboardingComponent) {
-      this.onboardingComponent.createNewForm();
-    }
+    // Clear current draft and navigate to home
+    this.formStorageService.clearCurrentDraft();
+    this.router.navigate(['/']);
   }
 
   onClearDraft(): void {
-    if (this.onboardingComponent) {
-      this.onboardingComponent.clearForm();
-    }
+    // Clear current draft - the onboarding component will handle the UI update
+    this.formStorageService.clearCurrentDraft();
   }
 
   get isAutosaving(): boolean {
-    const autosaving = this.onboardingComponent?.isAutosaving || false;
-    return autosaving;
+    // This will need to be handled differently with router outlet
+    return false;
   }
 } 

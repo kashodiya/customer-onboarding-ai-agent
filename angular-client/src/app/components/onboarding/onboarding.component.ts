@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -24,6 +25,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 @Component({
     selector: 'app-onboarding',
+    standalone: true,
     imports: [
         CommonModule,
         FormsModule,
@@ -63,6 +65,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
+  draftSubscription?: Subscription;
+  isLoadingTemplate: boolean = false; // Track if we're loading a template
 
   // Data arrays for dropdowns
   internalExternalOptions = ['Internal', 'External'];
@@ -72,6 +76,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   networkLocationOptions = ['On Site', 'Cloud'];
 
   constructor(
+    private router: Router,
     private chatService: ChatService,
     private formBuilder: FormBuilder,
     private snackBar: MatSnackBar,
@@ -108,7 +113,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
         platform: ['', Validators.required],
         environments: this.formBuilder.array([]),
         primaryRegion: ['', Validators.required],
-        backupRegion: ['', Validators.required]
+        backupRegion: ['', Validators.required],
+        isExternalApplication: [false] // Add the missing radio button control
       }),
 
       // Section 3: Network Boundary and Cloud Boundary
@@ -163,20 +169,48 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   ngOnInit() {
+    console.log('OnboardingComponent ngOnInit called');
+    
+    // Check if we're loading a template
+    this.isLoadingTemplate = sessionStorage.getItem('isLoadingTemplate') === 'true';
+    if (this.isLoadingTemplate) {
+      sessionStorage.removeItem('isLoadingTemplate'); // Clear flag
+    }
+    
     this.initializeEnvironmentsArray();
     this.subscribeToFormUpdates();
     this.setupAutosave();
     
-    // Load draft first, then start agent only if no meaningful draft was loaded
-    const draftLoaded = this.loadCurrentDraft();
-    if (!draftLoaded) {
+    // Subscribe to draft changes first
+    this.subscribeToDraftChanges();
+    
+    // Check if we should clear draft (coming from progress screen)
+    try {
+      const navigation = this.router.getCurrentNavigation();
+      const state = navigation?.extras?.state;
+      if (state && state['clearDraft']) {
+        console.log('Clearing draft due to navigation state');
+        this.formStorageService.clearCurrentDraft();
+      }
+    } catch (error) {
+      console.log('No navigation state available, continuing normally');
+    }
+    
+    // Check if there's an existing draft, if not start the agent
+    const currentDraft = this.formStorageService.getCurrentDraft();
+    if (!currentDraft || !this.hasFormContent(currentDraft.formData)) {
       this.startAgent();
     }
+    
+    console.log('OnboardingComponent ngOnInit completed');
   }
 
   ngOnDestroy() {
     if (this.formUpdatesSubscription) {
       this.formUpdatesSubscription.unsubscribe();
+    }
+    if (this.draftSubscription) {
+      this.draftSubscription.unsubscribe();
     }
   }
 
@@ -610,9 +644,43 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     }
   }
 
-  // Navigation event handlers
+  // Subscribe to draft changes to handle template loading
+  private subscribeToDraftChanges(): void {
+    this.draftSubscription = this.formStorageService.currentDraft$.subscribe(draft => {
+      if (draft) {
+        console.log('Draft changed, loading into form:', draft.name);
+        this.loadFormData(draft.formData, draft.name);
+        
+        // Only show message if we're actively loading a template
+        if (this.isLoadingTemplate) {
+          this.addMessage(`Template "${draft.name}" loaded successfully.`, false);
+          this.isLoadingTemplate = false; // Reset flag after showing message
+        }
+      } else {
+        console.log('Draft cleared, resetting form');
+        this.resetForm();
+      }
+    });
+  }
+
+  // Reset form to initial state
+  private resetForm(): void {
+    this.onboardingForm.reset();
+    this.onboardingForm.markAsPristine();
+    
+    // Reinitialize the environments array
+    const environmentsArray = this.onboardingForm.get('applicationInfo.environments') as FormArray;
+    environmentsArray.clear();
+    this.initializeEnvironmentsArray();
+  }
+
+  // Refresh form from current draft
   refreshForm(): void {
-    this.loadCurrentDraft();
+    const currentDraft = this.formStorageService.getCurrentDraft();
+    if (currentDraft) {
+      this.loadFormData(currentDraft.formData, currentDraft.name);
+      this.addMessage(`Form refreshed with "${currentDraft.name}".`, false);
+    }
   }
 
   createNewForm(): void {
@@ -634,7 +702,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     return this.onboardingForm.valid;
   }
 
-  // Submit form method - now saves as JSON file
+  // Submit form method - now redirects to progress screen
   submitForm() {
     if (!this.isFormValid) {
       this.snackBar.open('Please fill in all required fields before submitting.', 'Close', {
@@ -653,17 +721,15 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       // Save submission
       const submissionId = this.formStorageService.submitForm(formData, formTitle);
       
-      this.snackBar.open('Form submitted successfully!', 'Close', {
-        duration: 5000,
-        panelClass: ['success-snackbar']
-      });
-      
       // Add confirmation message to chat
-      this.addMessage(`Your onboarding request has been submitted successfully! Submission ID: ${submissionId}. The form data has been saved to your submissions.`, false);
+      this.addMessage(`Your onboarding request has been submitted successfully! Submission ID: ${submissionId}. Redirecting to progress screen...`, false);
       
-      // Reset form (this will clear the title field)
-      this.onboardingForm.reset();
-      this.onboardingForm.markAsPristine();
+      // Navigate to progress screen with submission ID
+      setTimeout(() => {
+        this.router.navigate(['/progress'], { 
+          state: { submissionId: submissionId } 
+        });
+      }, 1000); // Small delay to show the message
       
     } catch (error) {
       console.error('Error submitting form:', error);
