@@ -1,7 +1,7 @@
-@use '../../../style/elevation';
 @use '../../../theming/inspection';
+@use '../../../style/elevation';
 @use '../../../style/sass-utils';
-@use '../../token-utils';
+@use '../../token-definition';
 
 // The prefix used to generate the fully qualified name for tokens in this file.
 $prefix: (mdc, elevated-card);
@@ -35,6 +35,7 @@ $prefix: (mdc, elevated-card);
     pressed-container-elevation: null,
     pressed-state-layer-color: null,
     pressed-state-layer-opacity: null,
+    container-shadow-color: null,
     // Angular Material does not currently support surface tint.
     container-surface-tint-layer-color: null,
     // MDC does not seem to use these tokens.
@@ -50,12 +51,7 @@ $prefix: (mdc, elevated-card);
   @return (
     // The background color of the card.
     container-color: inspection.get-theme-color($theme, background, card),
-    // The elevation level of the card.
-    // (Part of the color tokens because it needs to be combined with the shadow color to generate
-    // the final box-shadow).
-    container-elevation: 1,
-    // The color of the card's shadow.
-    container-shadow-color: if($elevation != null, $elevation, elevation.$color),
+    container-elevation: elevation.get-box-shadow(1),
   );
 }
 
@@ -74,8 +70,8 @@ $prefix: (mdc, elevated-card);
 @function get-token-slots() {
   @return sass-utils.deep-merge-all(
       get-unthemable-tokens(),
-      get-color-tokens(token-utils.$placeholder-color-config),
-      get-typography-tokens(token-utils.$placeholder-typography-config),
-      get-density-tokens(token-utils.$placeholder-density-config)
+      get-color-tokens(token-definition.$placeholder-color-config),
+      get-typography-tokens(token-definition.$placeholder-typography-config),
+      get-density-tokens(token-definition.$placeholder-density-config)
   );
 }

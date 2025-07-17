@@ -1,15 +1,15 @@
 {
-  "/api/*": {
-    "target": "http://localhost:8000",
+  "/api": {
+    "target": "https://ec2-54-209-155-169.compute-1.amazonaws.com:7104/proxy/8000",
     "secure": false,
     "changeOrigin": true,
     "logLevel": "debug"
   },
   "/ws": {
-    "target": "http://localhost:8000",
+    "target": "ws://ec2-54-209-155-169.compute-1.amazonaws.com:7104/proxy/8000",
+    "ws": true,
     "secure": false,
     "changeOrigin": true,
-    "ws": true,
     "logLevel": "debug"
   }
-} 
+}

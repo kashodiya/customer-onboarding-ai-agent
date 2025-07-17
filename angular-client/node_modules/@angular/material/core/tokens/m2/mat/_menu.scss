@@ -1,6 +1,7 @@
-@use '../../token-utils';
+@use '../../token-definition';
 @use '../../../theming/inspection';
 @use '../../../style/sass-utils';
+@use '../../../style/elevation';
 
 // The prefix used to generate the fully qualified name for tokens in this file.
 $prefix: (mat, menu);
@@ -18,6 +19,10 @@ $prefix: (mat, menu);
     item-trailing-spacing: 16px,
     item-with-icon-leading-spacing: 16px,
     item-with-icon-trailing-spacing: 16px,
+    container-elevation-shadow: elevation.get-box-shadow(8),
+
+    // Unused
+    base-elevation-level: null,
   );
 }
 
@@ -59,8 +64,8 @@ $prefix: (mat, menu);
 @function get-token-slots() {
   @return sass-utils.deep-merge-all(
       get-unthemable-tokens(),
-      get-color-tokens(token-utils.$placeholder-color-config),
-      get-typography-tokens(token-utils.$placeholder-typography-config),
-      get-density-tokens(token-utils.$placeholder-density-config)
+      get-color-tokens(token-definition.$placeholder-color-config),
+      get-typography-tokens(token-definition.$placeholder-typography-config),
+      get-density-tokens(token-definition.$placeholder-density-config)
   );
 }
