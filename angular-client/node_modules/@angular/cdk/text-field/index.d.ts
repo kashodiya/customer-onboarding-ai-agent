@@ -1,33 +1,27 @@
-import { AfterViewInit } from '@angular/core';
-import { DoCheck } from '@angular/core';
-import { ElementRef } from '@angular/core';
-import { EventEmitter } from '@angular/core';
 import * as i0 from '@angular/core';
-import { NgZone } from '@angular/core';
-import { NumberInput } from '@angular/cdk/coercion';
+import { OnDestroy, ElementRef, OnInit, EventEmitter, AfterViewInit, DoCheck } from '@angular/core';
 import { Observable } from 'rxjs';
-import { OnDestroy } from '@angular/core';
-import { OnInit } from '@angular/core';
-import { Platform } from '@angular/cdk/platform';
+import { N as NumberInput } from '../number-property.d-CJVxXUcb.js';
 
 /** An event that is emitted when the autofill state of an input changes. */
-export declare type AutofillEvent = {
+type AutofillEvent = {
     /** The element whose autofill state changes. */
     target: Element;
     /** Whether the element is currently autofilled. */
     isAutofilled: boolean;
 };
-
 /**
  * An injectable service that can be used to monitor the autofill state of an input.
  * Based on the following blog post:
  * https://medium.com/@brunn/detecting-autofilled-fields-in-javascript-aed598d25da7
  */
-export declare class AutofillMonitor implements OnDestroy {
+declare class AutofillMonitor implements OnDestroy {
     private _platform;
     private _ngZone;
+    private _renderer;
+    private _styleLoader;
     private _monitoredElements;
-    constructor(_platform: Platform, _ngZone: NgZone);
+    constructor(...args: unknown[]);
     /**
      * Monitor for changes in the autofill state of the given input element.
      * @param element The element to monitor.
@@ -54,14 +48,13 @@ export declare class AutofillMonitor implements OnDestroy {
     static ɵfac: i0.ɵɵFactoryDeclaration<AutofillMonitor, never>;
     static ɵprov: i0.ɵɵInjectableDeclaration<AutofillMonitor>;
 }
-
 /** A directive that can be used to monitor the autofill state of an input. */
-export declare class CdkAutofill implements OnDestroy, OnInit {
+declare class CdkAutofill implements OnDestroy, OnInit {
     private _elementRef;
     private _autofillMonitor;
     /** Emits when the autofill state of the element changes. */
     readonly cdkAutofill: EventEmitter<AutofillEvent>;
-    constructor(_elementRef: ElementRef<HTMLElement>, _autofillMonitor: AutofillMonitor);
+    constructor(...args: unknown[]);
     ngOnInit(): void;
     ngOnDestroy(): void;
     static ɵfac: i0.ɵɵFactoryDeclaration<CdkAutofill, never>;
@@ -69,14 +62,17 @@ export declare class CdkAutofill implements OnDestroy, OnInit {
 }
 
 /** Directive to automatically resize a textarea to fit its content. */
-export declare class CdkTextareaAutosize implements AfterViewInit, DoCheck, OnDestroy {
+declare class CdkTextareaAutosize implements AfterViewInit, DoCheck, OnDestroy {
     private _elementRef;
     private _platform;
     private _ngZone;
+    private _renderer;
+    private _resizeEvents;
     /** Keep track of the previous textarea value to avoid resizing when the value hasn't changed. */
     private _previousValue?;
     private _initialHeight;
     private readonly _destroyed;
+    private _listenerCleanups;
     private _minRows;
     private _maxRows;
     private _enabled;
@@ -99,16 +95,16 @@ export declare class CdkTextareaAutosize implements AfterViewInit, DoCheck, OnDe
     get placeholder(): string;
     set placeholder(value: string);
     /** Cached height of a textarea with a single row. */
-    private _cachedLineHeight;
+    private _cachedLineHeight?;
     /** Cached height of a textarea with only the placeholder. */
     private _cachedPlaceholderHeight?;
+    /** Cached scroll top of a textarea */
+    private _cachedScrollTop;
     /** Used to reference correct document/window */
-    protected _document?: Document;
+    protected _document?: Document | null | undefined;
     private _hasFocus;
     private _isViewInited;
-    constructor(_elementRef: ElementRef<HTMLElement>, _platform: Platform, _ngZone: NgZone, 
-    /** @breaking-change 11.0.0 make document required */
-    document?: any);
+    constructor(...args: unknown[]);
     /** Sets the minimum height of the textarea as determined by minRows. */
     _setMinHeight(): void;
     /** Sets the maximum height of the textarea as determined by maxRows. */
@@ -139,39 +135,22 @@ export declare class CdkTextareaAutosize implements AfterViewInit, DoCheck, OnDe
      */
     reset(): void;
     _noopInputHandler(): void;
-    /** Access injected document if available or fallback to global document reference */
-    private _getDocument;
-    /** Use defaultView of injected document if available or fallback to global window reference */
-    private _getWindow;
     /**
      * Scrolls a textarea to the caret position. On Firefox resizing the textarea will
      * prevent it from scrolling to the caret position. We need to re-set the selection
      * in order for it to scroll to the proper position.
      */
     private _scrollToCaretPosition;
-    static ɵfac: i0.ɵɵFactoryDeclaration<CdkTextareaAutosize, [null, null, null, { optional: true; }]>;
+    static ɵfac: i0.ɵɵFactoryDeclaration<CdkTextareaAutosize, never>;
     static ɵdir: i0.ɵɵDirectiveDeclaration<CdkTextareaAutosize, "textarea[cdkTextareaAutosize]", ["cdkTextareaAutosize"], { "minRows": { "alias": "cdkAutosizeMinRows"; "required": false; }; "maxRows": { "alias": "cdkAutosizeMaxRows"; "required": false; }; "enabled": { "alias": "cdkTextareaAutosize"; "required": false; }; "placeholder": { "alias": "placeholder"; "required": false; }; }, {}, never, never, true, never>;
     static ngAcceptInputType_enabled: unknown;
 }
 
-declare namespace i1 {
-    export {
-        AutofillEvent,
-        AutofillMonitor,
-        CdkAutofill
-    }
-}
-
-declare namespace i2 {
-    export {
-        CdkTextareaAutosize
-    }
-}
-
-export declare class TextFieldModule {
+declare class TextFieldModule {
     static ɵfac: i0.ɵɵFactoryDeclaration<TextFieldModule, never>;
-    static ɵmod: i0.ɵɵNgModuleDeclaration<TextFieldModule, never, [typeof i1.CdkAutofill, typeof i2.CdkTextareaAutosize], [typeof i1.CdkAutofill, typeof i2.CdkTextareaAutosize]>;
+    static ɵmod: i0.ɵɵNgModuleDeclaration<TextFieldModule, never, [typeof CdkAutofill, typeof CdkTextareaAutosize], [typeof CdkAutofill, typeof CdkTextareaAutosize]>;
     static ɵinj: i0.ɵɵInjectorDeclaration<TextFieldModule>;
 }
 
-export { }
+export { AutofillMonitor, CdkAutofill, CdkTextareaAutosize, TextFieldModule };
+export type { AutofillEvent };

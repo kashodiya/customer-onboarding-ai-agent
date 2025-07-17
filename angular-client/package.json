@@ -2,19 +2,19 @@
   "name": "customer-onboarding-angular",
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve",
+    "start": "ng serve --host 0.0.0.0 --port 7151 --disable-host-check",
     "build": "ng build",
     "install-deps": "npm install"
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "^19.2.14",
-    "@angular/cdk": "^17.0.0",
+    "@angular/cdk": "^19.2.14",
     "@angular/common": "^19.2.14",
     "@angular/compiler": "^19.2.14",
     "@angular/core": "^19.2.14",
     "@angular/forms": "^19.2.14",
-    "@angular/material": "^17.0.0",
+    "@angular/material": "^19.2.14",
     "@angular/platform-browser": "^19.2.14",
     "@angular/platform-browser-dynamic": "^19.2.14",
     "@angular/router": "^19.2.14",
