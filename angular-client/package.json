@@ -2,7 +2,7 @@
   "name": "customer-onboarding-angular",
   "version": "0.0.0",
   "scripts": {
-    "start": "ng serve",
+    "start": "ng serve --proxy-config proxy.conf.json",
     "build": "ng build",
     "install-deps": "npm install"
   },
