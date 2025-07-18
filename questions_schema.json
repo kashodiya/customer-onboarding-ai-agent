@@ -8,69 +8,69 @@
         "sourceApplicationName": {
           "type": "string",
           "title": "Source Application Name",
-          "description": "The official name of the application or system that will be sending data or files",
-          "requirements": "Use the formal system name as known in your organization",
-          "examples": ["Customer Database", "Inventory Management System", "Payment Gateway", "CRM Platform"]
+          "description": "The official name of the application or system that will be sending files through the File Transfer Service",
+          "requirements": "Use the formal system name as known in your organization for the source system",
+          "examples": ["Customer Database", "Inventory Management System", "Payment Gateway", "CRM Platform", "ERP System"]
         },
         "targetApplicationName": {
           "type": "string",
           "title": "Target Application Name",
-          "description": "The official name of the application or system that will be receiving data or files",
-          "requirements": "Use the formal system name as known in your organization",
-          "examples": ["Data Warehouse", "Analytics Platform", "Cloud Storage", "Backup System"]
+          "description": "The official name of the application or system that will be receiving files through the File Transfer Service",
+          "requirements": "Use the formal system name as known in your organization for the target system",
+          "examples": ["Data Warehouse", "Analytics Platform", "Cloud Storage", "Backup System", "Business Intelligence Platform"]
         },
         "isUsingIODS": {
           "type": "boolean",
           "title": "Is using IODS?",
-          "description": "Whether your current system uses the legacy IODS (Input/Output Data System) for file transfers",
-          "requirements": "Select Yes if you currently use IODS, No if you don't or are unsure"
+          "description": "Whether your current system uses the legacy IODS (Input/Output Data System) for file transfers that will be migrated to the File Transfer Service",
+          "requirements": "Select Yes if you currently use IODS and need to migrate, No if you don't or are setting up a new transfer flow"
         },
         "iodsDetails": {
           "type": "object",
           "title": "IODS Details",
-          "description": "Details about your existing IODS configuration (only if using IODS)",
+          "description": "Details about your existing IODS configuration that will be migrated to the File Transfer Service (only if using IODS)",
           "properties": {
             "oldIodsId": {
               "type": "string",
               "title": "Old IODS ID",
-              "description": "The unique identifier for your current IODS system",
-              "requirements": "Enter the exact ID as it appears in your IODS configuration",
-              "examples": ["IODS_001", "SYS_IODS_PROD", "OLD_TRANSFER_01"]
+              "description": "The unique identifier for your current IODS system that will be replaced by the File Transfer Service",
+              "requirements": "Enter the exact ID as it appears in your IODS configuration for migration reference",
+              "examples": ["IODS_001", "SYS_IODS_PROD", "OLD_TRANSFER_01", "LEGACY_FT_001"]
             },
             "onSiteServerNames": {
               "type": "string",
               "title": "On Site Server Application Names",
-              "description": "Names of the on-premises servers or applications involved in IODS transfers",
-              "requirements": "List all relevant server names, separated by commas if multiple",
-              "examples": ["PROD-SERVER-01", "APP-SRV-MAIN, APP-SRV-BACKUP", "ON-PREM-DB01"]
+              "description": "Names of the on-premises servers or applications currently involved in IODS transfers",
+              "requirements": "List all relevant server names, separated by commas if multiple, for migration planning",
+              "examples": ["PROD-SERVER-01", "APP-SRV-MAIN, APP-SRV-BACKUP", "ON-PREM-DB01", "FILE-SRV-PROD"]
             },
             "fileName": {
               "type": "string",
               "title": "File Name",
-              "description": "The typical file name pattern or specific file names used in IODS transfers",
-              "requirements": "Include file extensions and any naming patterns",
-              "examples": ["customer_data.csv", "daily_*.txt", "report_YYYYMMDD.xml"]
+              "description": "The typical file name pattern or specific file names used in current IODS transfers",
+              "requirements": "Include file extensions and any naming patterns to maintain consistency in the File Transfer Service",
+              "examples": ["customer_data.csv", "daily_*.txt", "report_YYYYMMDD.xml", "inventory_*.json"]
             },
             "fileType": {
               "type": "string",
               "title": "File Type",
-              "description": "The format or type of files being transferred through IODS",
-              "requirements": "Specify the file format and any special characteristics",
-              "examples": ["CSV", "XML", "JSON", "Fixed-width text", "Binary"]
+              "description": "The format or type of files being transferred through IODS that will continue through the File Transfer Service",
+              "requirements": "Specify the file format and any special characteristics for proper handling",
+              "examples": ["CSV", "XML", "JSON", "Fixed-width text", "Binary", "Excel", "PDF"]
             },
             "iodsMailbox": {
               "type": "string",
               "title": "IODS Mailbox or Drop Location Name",
-              "description": "The mailbox or designated drop location name in the IODS system",
-              "requirements": "Use the exact name as configured in IODS",
-              "examples": ["MAILBOX_CUSTOMER", "DROP_ZONE_01", "TRANSFER_INBOX"]
+              "description": "The mailbox or designated drop location name in the current IODS system",
+              "requirements": "Use the exact name as configured in IODS for migration reference",
+              "examples": ["MAILBOX_CUSTOMER", "DROP_ZONE_01", "TRANSFER_INBOX", "FT_MAILBOX"]
             },
             "prePostTransferProcesses": {
               "type": "string",
               "title": "Pre/Post Transfer Processes",
-              "description": "Any automated processes that run before or after IODS file transfers",
-              "requirements": "Describe any validation, encryption, or notification processes",
-              "examples": ["File validation and virus scan", "Encryption before transfer", "Email notification on completion"]
+              "description": "Any automated processes that run before or after IODS file transfers that may need to be recreated in the File Transfer Service",
+              "requirements": "Describe any validation, encryption, or notification processes for migration consideration",
+              "examples": ["File validation and virus scan", "PGP encryption before transfer", "Email notification on completion", "Data quality checks"]
             }
           }
         }
@@ -84,30 +84,30 @@
         "systemName": {
           "type": "string",
           "title": "System Name",
-          "description": "A clear, descriptive name that identifies your application system",
-          "requirements": "Use a name that will be easily recognizable to stakeholders",
-          "examples": ["Customer Portal", "Inventory Management", "Financial Reporting System", "User Authentication Service"]
+          "description": "A clear, descriptive name that identifies your application system for the File Transfer Service flow",
+          "requirements": "Use a name that will be easily recognizable to stakeholders and will appear in File Transfer Service monitoring",
+          "examples": ["Customer Portal", "Inventory Management", "Financial Reporting System", "User Authentication Service", "Order Processing System"]
         },
         "internalOrExternal": {
           "type": "string",
           "title": "Internal or External Application",
-          "description": "Whether the application is developed and maintained internally or by an external vendor",
-          "requirements": "Select Internal for in-house systems, External for vendor/third-party systems",
+          "description": "Whether the application is developed and maintained internally or by an external vendor for File Transfer Service access control",
+          "requirements": "Select Internal for in-house systems, External for vendor/third-party systems to determine appropriate security measures",
           "enum": ["Internal", "External"]
         },
         "supportedProtocols": {
           "type": "string",
           "title": "Supported Protocols",
-          "description": "The communication protocols your system can use for data transfer",
-          "requirements": "List all protocols the system supports, separated by commas",
-          "examples": ["HTTPS, SFTP", "REST API, SOAP", "FTP, FTPS", "S3, API Gateway"]
+          "description": "The communication protocols your system can use for data transfer through the File Transfer Service",
+          "requirements": "List all protocols the system supports from: SFTP, FTP, API, Shared Directory, AWS S3, Azure Blob Storage",
+          "examples": ["SFTP, API", "AWS S3, SFTP", "FTP, Shared Directory", "API, Azure Blob Storage"]
         },
         "platform": {
           "type": "string",
           "title": "System Platform",
-          "description": "The underlying technology platform or infrastructure on which your system runs",
-          "requirements": "Specify the operating system, cloud platform, or technology stack",
-          "examples": ["Windows Server 2019", "Linux Ubuntu", "AWS Lambda", "Azure App Service", "Docker on Kubernetes"]
+          "description": "The underlying technology platform or infrastructure on which your system runs for File Transfer Service connectivity planning",
+          "requirements": "Specify the operating system, cloud platform, or technology stack for proper integration setup",
+          "examples": ["Windows Server 2019", "Linux Ubuntu", "AWS Lambda", "Azure App Service", "Docker on Kubernetes", "Google Cloud Platform"]
         },
         "environments": {
           "type": "array",
@@ -117,22 +117,22 @@
           },
           "uniqueItems": true,
           "title": "Environments In Scope",
-          "description": "The environments where this onboarding will be implemented",
-          "requirements": "Select all environments that will be part of this integration"
+          "description": "The environments where this File Transfer Service onboarding will be implemented",
+          "requirements": "Select all environments that will be part of this File Transfer Service integration for proper setup"
         },
         "primaryRegion": {
           "type": "string",
           "enum": ["NORTH", "SOUTH"],
           "title": "Primary Region",
-          "description": "The primary geographical region where your system operates",
-          "requirements": "Choose the region where most of your system's processing occurs"
+          "description": "The primary geographical region where your system operates for File Transfer Service routing",
+          "requirements": "Choose the region where most of your system's processing occurs for optimal transfer performance"
         },
         "backupRegion": {
           "type": "string",
           "enum": ["NORTH", "SOUTH", "None"],
           "title": "Backup Region",
-          "description": "The backup or disaster recovery region for your system",
-          "requirements": "Select None if no backup region is configured"
+          "description": "The backup or disaster recovery region for your system for File Transfer Service failover planning",
+          "requirements": "Select None if no backup region is configured, otherwise choose the backup region for redundancy"
         }
       },
       "required": ["systemName", "internalOrExternal", "supportedProtocols", "platform", "environments", "primaryRegion", "backupRegion"]
@@ -145,72 +145,72 @@
           "type": "string",
           "enum": ["On Site", "Cloud"],
           "title": "Network Location",
-          "description": "Whether your system is hosted on-premises or in the cloud",
-          "requirements": "Select On Site for on-premises hosting, Cloud for cloud-hosted systems"
+          "description": "Whether your system is hosted on-premises or in the cloud for File Transfer Service connectivity configuration",
+          "requirements": "Select On Site for on-premises hosting, Cloud for cloud-hosted systems to determine network access requirements"
         },
         "cloudDetails": {
           "type": "object",
           "title": "Cloud Details",
-          "description": "Specific details about your cloud hosting configuration (required if Cloud is selected)",
+          "description": "Specific details about your cloud hosting configuration for File Transfer Service integration (required if Cloud is selected)",
           "properties": {
             "awsAccountName": {
               "type": "string",
               "title": "AWS Cloud Account Name",
-              "description": "The friendly name of your AWS account",
-              "requirements": "Use the account name as it appears in AWS Organizations or your billing",
-              "examples": ["Production Account", "Dev-Test-Account", "CustomerApp-Prod"]
+              "description": "The friendly name of your AWS account for File Transfer Service S3 integration",
+              "requirements": "Use the account name as it appears in AWS Organizations or your billing for proper S3 bucket access",
+              "examples": ["Production Account", "Dev-Test-Account", "CustomerApp-Prod", "FileTransfer-Prod"]
             },
             "awsAccountNumber": {
               "type": "string",
               "title": "AWS Cloud Account Number",
-              "description": "The 12-digit AWS account number",
-              "requirements": "Enter the exact 12-digit number without spaces or dashes",
+              "description": "The 12-digit AWS account number for File Transfer Service S3 and API access configuration",
+              "requirements": "Enter the exact 12-digit number without spaces or dashes for IAM role and S3 bucket permissions",
               "examples": ["123456789012", "987654321098"],
               "validation": "Must be exactly 12 digits"
             },
             "cloudRegion": {
               "type": "string",
               "title": "Cloud Region Name",
-              "description": "The AWS region where your resources are deployed",
-              "requirements": "Use the full region name as it appears in AWS",
-              "examples": ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1"]
+              "description": "The AWS region where your resources are deployed for File Transfer Service regional optimization",
+              "requirements": "Use the full region name as it appears in AWS for proper S3 bucket region configuration",
+              "examples": ["us-east-1", "us-west-2", "eu-west-1", "ap-southeast-1", "ca-central-1"]
             },
             "awsCloudId": {
               "type": "string",
               "title": "AWS Cloud ID",
-              "description": "Any specific cloud identifier or resource ID for your deployment",
-              "requirements": "Provide the specific identifier if you have one assigned",
-              "examples": ["vpc-12345678", "cluster-prod-01", "app-environment-id"]
+              "description": "Any specific cloud identifier or resource ID for your deployment for File Transfer Service resource identification",
+              "requirements": "Provide the specific identifier if you have one assigned for proper resource tagging",
+              "examples": ["vpc-12345678", "cluster-prod-01", "app-environment-id", "ft-resource-group"]
             },
             "serverName": {
               "type": "string",
               "title": "Server Name",
-              "description": "The name or identifier of your cloud server or compute resource",
-              "requirements": "Use the instance name as it appears in your cloud console",
-              "examples": ["web-server-prod", "app-instance-01", "ec2-customer-app"]
+              "description": "The name or identifier of your cloud server or compute resource for File Transfer Service endpoint configuration",
+              "requirements": "Use the instance name as it appears in your cloud console for proper SFTP or API endpoint setup",
+              "examples": ["web-server-prod", "app-instance-01", "ec2-customer-app", "ft-endpoint-server"]
             },
             "ipOrSubnet": {
               "type": "string",
               "title": "IP or Subnet",
-              "description": "The IP address or subnet range for your cloud resources",
-              "requirements": "Provide either specific IP or CIDR notation for subnet",
-              "examples": ["10.0.1.0/24", "192.168.1.100", "172.16.0.0/16"],
+              "description": "The IP address or subnet range for your cloud resources for File Transfer Service firewall and security group configuration",
+              "requirements": "Provide either specific IP or CIDR notation for subnet to configure proper access controls",
+              "examples": ["10.0.1.0/24", "192.168.1.100", "172.16.0.0/16", "10.10.0.0/16"],
               "validation": "Must be valid IP address or CIDR notation"
             },
             "applicationTarget": {
               "type": "string",
               "title": "Application Target",
-              "description": "The specific application endpoint or target for connections",
-              "requirements": "Provide the URL, hostname, or connection string for the application",
-              "examples": ["https://api.company.com", "app.internal.local", "customer-db.rds.amazonaws.com"]
+              "description": "The specific application endpoint or target for File Transfer Service connections",
+              "requirements": "Provide the URL, hostname, or connection string for the application that will integrate with File Transfer Service",
+              "examples": ["https://api.company.com", "app.internal.local", "customer-db.rds.amazonaws.com", "ft-api.company.com"]
             }
           }
         },
         "requiresExternalVendorConnection": {
           "type": "boolean",
           "title": "Requires External Vendor Connection?",
-          "description": "Whether this system needs to connect to external vendor systems or third-party services",
-          "requirements": "Select Yes if connections to external vendors are required"
+          "description": "Whether this system needs to connect to external vendor systems or third-party services through the File Transfer Service",
+          "requirements": "Select Yes if file transfers to/from external vendors are required, affecting security and compliance requirements"
         }
       },
       "required": ["networkLocation", "requiresExternalVendorConnection"]
@@ -222,57 +222,57 @@
         "hasOutbound": {
           "type": "boolean",
           "title": "Outbound Request (Cloud to On Site)?",
-          "description": "Whether files need to be transferred FROM the cloud TO on-premises systems",
-          "requirements": "Select Yes if you need to send files from cloud to on-site"
+          "description": "Whether files need to be transferred FROM the cloud TO on-premises systems using the File Transfer Service",
+          "requirements": "Select Yes if you need to send files from cloud to on-site through the File Transfer Service"
         },
         "sourceAwsAccount": {
           "type": "string",
           "title": "Source AWS Account",
-          "description": "The AWS account that will be the source for outbound transfers",
-          "requirements": "Enter the account number or name for the source account",
-          "examples": ["123456789012", "prod-data-account"]
+          "description": "The AWS account that will be the source for outbound transfers through the File Transfer Service",
+          "requirements": "Enter the account number or name for the source account that will send files via the File Transfer Service",
+          "examples": ["123456789012", "prod-data-account", "ft-source-account"]
         },
         "sourceBucketArn": {
           "type": "string",
           "title": "Source Bucket ARN",
-          "description": "The Amazon Resource Name (ARN) of the S3 bucket used as the source",
-          "requirements": "Provide the complete ARN starting with arn:aws:s3:::",
-          "examples": ["arn:aws:s3:::my-source-bucket", "arn:aws:s3:::company-data-export"],
+          "description": "The Amazon Resource Name (ARN) of the S3 bucket used as the source for File Transfer Service outbound transfers",
+          "requirements": "Provide the complete ARN starting with arn:aws:s3::: for File Transfer Service S3 integration",
+          "examples": ["arn:aws:s3:::my-source-bucket", "arn:aws:s3:::company-data-export", "arn:aws:s3:::ft-outbound-files"],
           "validation": "Must be valid S3 bucket ARN format"
         },
         "sourceArchiveBucket": {
           "type": "string",
           "title": "Source Archive Bucket",
-          "description": "The S3 bucket name where source files are archived after transfer",
-          "requirements": "Enter the bucket name used for archiving transferred files",
-          "examples": ["source-archive-bucket", "transferred-files-archive"]
+          "description": "The S3 bucket name where source files are archived after successful transfer by the File Transfer Service",
+          "requirements": "Enter the bucket name used for archiving transferred files as per File Transfer Service retention policies",
+          "examples": ["source-archive-bucket", "transferred-files-archive", "ft-processed-files"]
         },
         "sourceArchivePrefix": {
           "type": "string",
           "title": "Source Archive Prefix",
-          "description": "The folder path or prefix used in the archive bucket for organizing files",
-          "requirements": "Specify the prefix structure for archived files",
-          "examples": ["archive/", "processed/YYYY/MM/", "completed-transfers/"]
+          "description": "The folder path or prefix used in the archive bucket for organizing files processed by the File Transfer Service",
+          "requirements": "Specify the prefix structure for archived files to maintain File Transfer Service organization standards",
+          "examples": ["archive/", "processed/YYYY/MM/", "completed-transfers/", "ft-archive/YYYY/MM/DD/"]
         },
         "hasInbound": {
           "type": "boolean",
           "title": "Inbound Request (On Site to Cloud)?",
-          "description": "Whether files need to be transferred FROM on-premises TO the cloud",
-          "requirements": "Select Yes if you need to send files from on-site to cloud"
+          "description": "Whether files need to be transferred FROM on-premises TO the cloud using the File Transfer Service",
+          "requirements": "Select Yes if you need to send files from on-site to cloud through the File Transfer Service"
         },
         "targetBucket": {
           "type": "string",
           "title": "Target Bucket",
-          "description": "The S3 bucket name that will receive inbound files from on-premises",
-          "requirements": "Enter the destination bucket name for incoming files",
-          "examples": ["inbound-data-bucket", "customer-uploads"]
+          "description": "The S3 bucket name that will receive inbound files from on-premises via the File Transfer Service",
+          "requirements": "Enter the destination bucket name for incoming files processed by the File Transfer Service",
+          "examples": ["inbound-data-bucket", "customer-uploads", "ft-inbound-files"]
         },
         "targetPrefix": {
           "type": "string",
           "title": "Target Prefix",
-          "description": "The folder path or prefix in the target bucket where files will be stored",
-          "requirements": "Specify the folder structure for incoming files",
-          "examples": ["incoming/", "uploads/YYYY/MM/DD/", "data-intake/"]
+          "description": "The folder path or prefix in the target bucket where files will be stored by the File Transfer Service",
+          "requirements": "Specify the folder structure for incoming files to maintain File Transfer Service organization standards",
+          "examples": ["incoming/", "uploads/YYYY/MM/DD/", "data-intake/", "ft-incoming/YYYY/MM/DD/"]
         }
       },
       "required": ["hasOutbound", "hasInbound"]
@@ -284,34 +284,34 @@
         "customerEnvironments": {
           "type": "string",
           "title": "Customer Environments In Scope",
-          "description": "Detailed description of the customer environments that will be included in this onboarding",
-          "requirements": "Describe all environments, their purposes, and any special considerations",
-          "examples": ["Development for testing, QA for validation, Production for live operations", "Single production environment with blue-green deployment"]
+          "description": "Detailed description of the customer environments that will be included in this File Transfer Service onboarding",
+          "requirements": "Describe all environments, their purposes, and any special considerations for File Transfer Service implementation",
+          "examples": ["Development for testing File Transfer Service flows, QA for validation, Production for live operations", "Single production environment with blue-green deployment for File Transfer Service"]
         },
         "cloudEnvironmentMapping": {
           "type": "object",
           "title": "Cloud Environment Mapping",
-          "description": "How your customer environments map to cloud environments",
+          "description": "How your customer environments map to File Transfer Service cloud environments for proper flow configuration",
           "properties": {
             "development": {
               "type": "string",
               "title": "DEV maps to",
-              "description": "Which cloud environment your development environment maps to",
-              "requirements": "Select the cloud environment that corresponds to your development setup",
+              "description": "Which File Transfer Service cloud environment your development environment maps to",
+              "requirements": "Select the File Transfer Service cloud environment that corresponds to your development setup",
               "enum": ["DEV", "QA", "PROD"]
             },
             "qualityAssurance": {
               "type": "string",
               "title": "QA maps to",
-              "description": "Which cloud environment your quality assurance/testing environment maps to",
-              "requirements": "Select the cloud environment used for testing and validation",
+              "description": "Which File Transfer Service cloud environment your quality assurance/testing environment maps to",
+              "requirements": "Select the File Transfer Service cloud environment used for testing and validation",
               "enum": ["DEV", "QA", "PROD"]
             },
             "production": {
               "type": "string",
               "title": "PROD maps to",
-              "description": "Which cloud environment your production environment maps to",
-              "requirements": "Select the cloud environment for live production workloads",
+              "description": "Which File Transfer Service cloud environment your production environment maps to",
+              "requirements": "Select the File Transfer Service cloud environment for live production workloads",
               "enum": ["DEV", "QA", "PROD"]
             }
           },
@@ -328,50 +328,50 @@
           "type": "string",
           "format": "date",
           "title": "Implementation Deadline",
-          "description": "The target date when this onboarding implementation should be completed",
-          "requirements": "Select a realistic date considering development, testing, and deployment time",
+          "description": "The target date when this File Transfer Service onboarding implementation should be completed and operational",
+          "requirements": "Select a realistic date considering File Transfer Service setup, testing, and deployment time. Allow adequate time for security reviews and testing.",
           "examples": ["2024-06-30", "2024-12-15"],
           "validation": "Must be a future date in YYYY-MM-DD format"
         },
         "contacts": {
           "type": "object",
           "title": "Contact Information",
-          "description": "Key contacts for business and technical coordination",
+          "description": "Key contacts for business and technical coordination during File Transfer Service implementation",
           "properties": {
             "businessContactSource": {
               "type": "string",
               "title": "Business Contact (Source)",
-              "description": "Primary business contact for the source system or organization",
-              "requirements": "Provide name and email of the business owner or project manager",
-              "examples": ["John Smith (john.smith@company.com)", "Sarah Johnson - Project Manager"]
+              "description": "Primary business contact for the source system or organization for File Transfer Service coordination",
+              "requirements": "Provide name and email of the business owner or project manager responsible for the source system",
+              "examples": ["John Smith (john.smith@company.com)", "Sarah Johnson - Project Manager", "Mike Wilson - Business Owner"]
             },
             "technicalContactSource": {
               "type": "string",
               "title": "Technical Contact (Source)",
-              "description": "Primary technical contact for the source system",
-              "requirements": "Provide name and email of the technical lead or architect",
-              "examples": ["Mike Developer (mike.dev@company.com)", "Lisa Chen - System Admin"]
+              "description": "Primary technical contact for the source system during File Transfer Service implementation",
+              "requirements": "Provide name and email of the technical lead or architect who will handle File Transfer Service integration",
+              "examples": ["Mike Developer (mike.dev@company.com)", "Lisa Chen - System Admin", "David Tech - DevOps Engineer"]
             },
             "businessContactTarget": {
               "type": "string",
               "title": "Business Contact (Target)",
-              "description": "Primary business contact for the target system or organization",
-              "requirements": "Provide name and email of the business owner for the receiving system",
-              "examples": ["Jane Doe (jane.doe@target.com)", "Robert Wilson - Business Owner"]
+              "description": "Primary business contact for the target system or organization for File Transfer Service coordination",
+              "requirements": "Provide name and email of the business owner for the receiving system in the File Transfer Service flow",
+              "examples": ["Jane Doe (jane.doe@target.com)", "Robert Wilson - Business Owner", "Amanda Jones - Product Manager"]
             },
             "technicalContactTarget": {
               "type": "string",
               "title": "Technical Contact (Target)",
-              "description": "Primary technical contact for the target system",
-              "requirements": "Provide name and email of the technical lead for the receiving system",
-              "examples": ["Alice Engineer (alice.eng@target.com)", "David Kim - DevOps Lead"]
+              "description": "Primary technical contact for the target system during File Transfer Service implementation",
+              "requirements": "Provide name and email of the technical lead for the receiving system who will handle File Transfer Service integration",
+              "examples": ["Alice Engineer (alice.eng@target.com)", "David Kim - DevOps Lead", "Tom Richards - System Architect"]
             },
             "vendorContact": {
               "type": "string",
               "title": "Vendor Contact (if External)",
-              "description": "Contact information for external vendor if using third-party systems",
-              "requirements": "Required only for external applications - provide vendor representative details",
-              "examples": ["Vendor Support (support@vendor.com)", "Tom Anderson - Vendor Implementation"]
+              "description": "Contact information for external vendor if using third-party systems in the File Transfer Service flow",
+              "requirements": "Required only for external applications - provide vendor representative details who can assist with File Transfer Service integration",
+              "examples": ["Vendor Support (support@vendor.com)", "Tom Anderson - Vendor Implementation", "For File Transfer Service support: admin@fts.com or 222-345-1234"]
             }
           },
           "required": ["businessContactSource", "technicalContactSource", "businessContactTarget", "technicalContactTarget"]
