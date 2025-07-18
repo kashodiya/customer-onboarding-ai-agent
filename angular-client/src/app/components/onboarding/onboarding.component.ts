@@ -22,6 +22,7 @@ import { ChatService, ChatMessage, FormField } from '../../services/chat.service
 import { FormStorageService, FormSubmission } from '../../services/form-storage.service';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { AutosaveService } from '../../services/autosave.service';
 
 @Component({
     selector: 'app-onboarding',
@@ -61,7 +62,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   showWelcomeButtons = false; // Show buttons after welcome message
   private shouldScrollToBottom = false;
   isSubmitting = false; // Add loading state for form submission
-  isAutosaving = false; // Add autosaving state indicator
+  // isAutosaving = false; // Now handled by AutosaveService
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
@@ -80,7 +81,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     private chatService: ChatService,
     private formBuilder: FormBuilder,
     private snackBar: MatSnackBar,
-    private formStorageService: FormStorageService
+    private formStorageService: FormStorageService,
+    private autosaveService: AutosaveService
   ) {
     this.onboardingForm = this.createForm();
   }
@@ -134,12 +136,11 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
       // Section 4: File Transfer Information (Cloud)
       fileTransferInfo: this.formBuilder.group({
-        hasOutbound: [false], // Checkbox - no required validator needed
+        direction: [''], // 'outbound' or 'inbound'
         sourceAwsAccount: [''],
         sourceBucketArn: [''],
         sourceArchiveBucket: [''],
         sourceArchivePrefix: [''],
-        hasInbound: [false], // Checkbox - no required validator needed
         targetBucket: [''],
         targetPrefix: ['']
       }),
@@ -254,12 +255,16 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     return this.onboardingForm.get('applicationInfo.internalOrExternal')?.value === 'External';
   }
 
+  get fileTransferDirection() {
+    return this.onboardingForm.get('fileTransferInfo.direction')?.value;
+  }
+
   get hasOutbound() {
-    return this.onboardingForm.get('fileTransferInfo.hasOutbound')?.value;
+    return this.fileTransferDirection === 'outbound';
   }
 
   get hasInbound() {
-    return this.onboardingForm.get('fileTransferInfo.hasInbound')?.value;
+    return this.fileTransferDirection === 'inbound';
   }
 
   get requiresExternalVendorConnection() {
@@ -547,14 +552,14 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       
       // Trigger autosave if there's either a title or other form content
       if (hasTitleContent || hasOtherContent) {
-        this.isAutosaving = true;
+        this.autosaveService.setAutosaving(true);
         const formData = this.getCompleteFormData();
         const titleForDraft = formTitle.trim() || 'Untitled Draft';
         this.formStorageService.saveDraft(formData, titleForDraft);
         
         // Hide autosaving indicator after a longer delay for visibility
         setTimeout(() => {
-          this.isAutosaving = false;
+          this.autosaveService.setAutosaving(false);
         }, 2000); // Increased from 1000ms to 2000ms
       }
     }

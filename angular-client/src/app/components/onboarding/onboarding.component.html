@@ -225,12 +225,14 @@
             <mat-card class="section-card" formGroupName="fileTransferInfo">
               <mat-card-title class="section-title">Section 4: File Transfer Information (Cloud)</mat-card-title>
               <mat-card-content>
-                <mat-checkbox formControlName="hasOutbound"
-                              (change)="onFieldChange('fileTransferInfo.hasOutbound', $event.checked)"
-                              (focus)="onFieldFocus('fileTransferInfo.hasOutbound', 'Outbound Request (Cloud to On Site)')"
-                              style="margin-bottom: 16px;">
-                  Outbound Request (Cloud to On Site)?
-                </mat-checkbox>
+                <mat-radio-group formControlName="direction" class="radio-group" style="display: flex; gap: 24px; margin-bottom: 16px;">
+                  <mat-radio-button value="outbound" (focus)="onFieldFocus('fileTransferInfo.direction', 'Outbound Request (Cloud to On Site)')">
+                    Outbound Request (Cloud to On Site)
+                  </mat-radio-button>
+                  <mat-radio-button value="inbound" (focus)="onFieldFocus('fileTransferInfo.direction', 'Inbound Request (On Site to Cloud)')">
+                    Inbound Request (On Site to Cloud)
+                  </mat-radio-button>
+                </mat-radio-group>
 
                 <!-- Outbound Fields (Conditional) -->
                 <div *ngIf="hasOutbound" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
@@ -260,14 +262,6 @@
                   </mat-form-field>
                 </div>
 
-                <mat-checkbox formControlName="hasInbound"
-                              (change)="onFieldChange('fileTransferInfo.hasInbound', $event.checked)"
-                              (focus)="onFieldFocus('fileTransferInfo.hasInbound', 'Inbound Request (On Site to Cloud)')"
-                              style="margin: 16px 0;">
-                  Inbound Request (On Site to Cloud)?
-                </mat-checkbox>
-
-                <!-- Inbound Fields (Conditional) -->
                 <div *ngIf="hasInbound" style="margin-left: 20px; border-left: 3px solid #ccc; padding-left: 16px;">
                   <h4>Inbound Transfer Details</h4>
                   <mat-form-field appearance="outline" class="full-width">
