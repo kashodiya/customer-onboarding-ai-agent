@@ -18,7 +18,7 @@ export interface FormField {
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = '/api';
+  private apiUrl = 'http://localhost:8000/api';
   private ws?: WebSocket;
   private formUpdatesSubject = new Subject<any>();
   
@@ -28,7 +28,7 @@ export class ChatService {
 
   private initializeWebSocket() {
     const wsUrl = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = window.location.host.includes('7151') ? 'localhost:8000' : window.location.host;
+    const wsHost = window.location.host.includes('4200') ? 'localhost:8000' : window.location.host;
     this.ws = new WebSocket(`${wsUrl}//${wsHost}/ws`);
     
     this.ws.onmessage = (event) => {
