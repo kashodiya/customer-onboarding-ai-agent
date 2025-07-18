@@ -144,7 +144,7 @@ def start_agent(request: Request):
         context_prompt = f"Give a brief welcome back message. User has loaded existing form data: {json.dumps(current_form_state)}. Simply acknowledge the loaded data and mention you're ready to help. Keep it under 2 sentences. Do not ask for assistance preference."
     else:
         # Fresh start or empty draft - ask for assistance
-        context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance. Tell them to choose Yes or No using the buttons that will appear. Keep it under 2 sentences."
+        context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance with the process. Let the user know they can ask questions in the chat at any time, regardless of their choice. Keep it concise and under 3 sentences."
     
     answer = ask_agent(context_prompt, session_id=agent_session_id)
     return {
