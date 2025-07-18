@@ -14,7 +14,7 @@ app = FastAPI()
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://ec2-54-209-155-169.compute-1.amazonaws.com:7104", "http://ec2-54-209-155-169.compute-1.amazonaws.com:7151"],
+    allow_origins=["http://localhost:4200", "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -37,29 +37,19 @@ async def ask_agent_endpoint(prompt: str, request: Request):
         except Exception as e:
             print(f"Error parsing form data: {e}")
 
-    # Include form state in the prompt context
+    # Always include form state in the prompt context if available
     if current_form_state and any(current_form_state.values()):
-        # Check if this might be a manual mode response
-        if prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']:
-            context_prompt = f"User declined assistance and prefers manual mode. Simply acknowledge and inform them you'll only respond to direct questions. Do not ask follow-up questions or provide guidance."
-        else:
-            context_prompt = f"User asks: '{prompt}'. Current form state: {json.dumps(current_form_state)}. Respond considering what's already filled out."
+        context_prompt = f"User asks: '{prompt}'. Current form state: {json.dumps(current_form_state)}. Respond considering what's already filled out."
     else:
-        if prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']:
-            context_prompt = f"User declined assistance and prefers manual mode. Simply acknowledge and inform them you'll only respond to direct questions. Do not ask follow-up questions or provide guidance."
-        else:
-            context_prompt = prompt
-    
+        context_prompt = prompt
+
     answer = ask_agent(context_prompt, session_id=agent_session_id)
 
-    # Skip form updates if user chose manual mode
-    is_manual_mode_response = prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']
-    
-    # Check if the AI response contains proactive form updates (only if not manual mode)
+    # Check if the AI response contains proactive form updates
     changed = None
     clean_answer = answer  # Start with the original answer
-    
-    if not is_manual_mode_response and isinstance(answer, str) and "Form Update Available:" in answer:
+
+    if isinstance(answer, str) and "Form Update Available:" in answer:
         try:
             # Extract JSON from the response
             json_match = re.search(r'```json\s*(\{[^`]+\})\s*```', answer)
@@ -67,7 +57,6 @@ async def ask_agent_endpoint(prompt: str, request: Request):
                 json_str = json_match.group(1)
                 changed = json.loads(json_str)
                 print(f"Proactive form update found: {changed}")
-                
                 # Remove the form update section from the visible response
                 clean_answer = re.sub(r'\s*Form Update Available:\s*```json\s*\{[^`]+\}\s*```', '', answer)
                 clean_answer = clean_answer.strip()
@@ -75,17 +64,12 @@ async def ask_agent_endpoint(prompt: str, request: Request):
                 print("Form update marker found but no valid JSON extracted")
         except Exception as e:
             print(f"Error parsing proactive form update: {e}")
-    
-    # Note: Form updates are handled via "Form Update Available:" markers in AI responses
-    # Skip form updates if user chose manual mode
-    if is_manual_mode_response:
-        print("Skipping form updates - user chose manual mode")
-    
+
     # Debug logging
     print(f"Changed value: {changed}")
     print(f"Changed type: {type(changed)}")
     print(f"Connected clients: {len(connected_clients)}")
-    
+
     # Send WebSocket message if changed has a value
     if changed and str(changed).strip() != "{}":
         print(f"Sending WebSocket message for: {changed}")
@@ -95,7 +79,6 @@ async def ask_agent_endpoint(prompt: str, request: Request):
         }
         message_json = json.dumps(message_data)
         print(f"WebSocket message: {message_json}")
-        
         for client in connected_clients[:]:
             try:
                 await client.send_text(message_json)

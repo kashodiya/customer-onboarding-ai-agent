@@ -388,17 +388,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     this.addMessage(this.newMessage, true);
     this.isLoading = true;
 
-    // Check if user is responding to mode preference question
-    const message = this.newMessage.toLowerCase().trim();
-    const isManualResponse = message.includes('manual') || message.includes('on-demand') || message.includes('on demand') || 
-                             message.includes('only respond') || message.includes('passive') ||
-                             (message.includes('no') && (message.includes('guide') || message.includes('help') || message.includes('assistance'))) ||
-                             message === 'no' || message === 'nope' || message === 'no thanks' || message === 'no thank you';
-    const isSmartGuideResponse = message.includes('smart guide') || message.includes('proactive') || 
-                                 message.includes('guide me') || message.includes('help me') ||
-                                 (message.includes('yes') && (message.includes('guide') || message.includes('help') || message.includes('assistance'))) ||
-                                 message === 'yes' || message === 'yeah' || message === 'yep' || message === 'sure' || message === 'ok' || message === 'okay';
-
     // Get current form state
     const currentFormData = this.getCompleteFormData();
 
@@ -406,31 +395,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       next: (response) => {
         this.addMessage(response.answer, false);
         this.isLoading = false;
-        
-        // Auto-toggle Smart Guide based on user's mode preference
-        if (isManualResponse && this.smartGuideEnabled) {
-          this.smartGuideEnabled = false;
-          // Notify backend about the mode change
-          this.chatService.toggleSmartGuide(false, currentFormData).subscribe({
-            next: (toggleResponse) => {
-              this.addMessage(toggleResponse.answer, false);
-            },
-            error: (error) => {
-              console.error('Error notifying backend about manual mode:', error);
-            }
-          });
-        } else if (isSmartGuideResponse && !this.smartGuideEnabled) {
-          this.smartGuideEnabled = true;
-          // Notify backend about the mode change
-          this.chatService.toggleSmartGuide(true, currentFormData).subscribe({
-            next: (toggleResponse) => {
-              this.addMessage(toggleResponse.answer, false);
-            },
-            error: (error) => {
-              console.error('Error notifying backend about smart guide mode:', error);
-            }
-          });
-        }
       },
       error: (error) => {
         console.error('Error sending message:', error);
@@ -445,6 +409,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   onFieldFocus(fieldPath: string, fieldLabel: string) {
     // Only provide context in Smart Guide mode
     if (!this.smartGuideEnabled) return;
+    // Suppress chat for the form title field
+    if (fieldPath === 'formTitle') return;
     
     const fieldData: FormField = { name: fieldPath, value: fieldLabel };
     const completeFormData = this.getCompleteFormData();
