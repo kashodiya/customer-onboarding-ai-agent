@@ -425,10 +425,16 @@
 
   <!-- Floating Chat Overlay -->
   <div class="chat-overlay" [class.expanded]="chatExpanded">
-    <div class="chat-header" (click)="toggleChat()">
-      <mat-icon>{{chatExpanded ? 'expand_more' : 'chat'}}</mat-icon>
-      <span *ngIf="!chatExpanded">AI Assistant</span>
-      <span *ngIf="chatExpanded">AI Assistant - Click to minimize</span>
+    <!-- Collapsed state - Chat icon logo -->
+    <div class="chat-icon-logo" *ngIf="!chatExpanded" (click)="toggleChat()">
+      <mat-icon>chat</mat-icon>
+      <div class="notification-dot" *ngIf="hasUnreadMessages"></div>
+    </div>
+    
+    <!-- Expanded state - Full header -->
+    <div class="chat-header" *ngIf="chatExpanded" (click)="toggleChat()">
+      <mat-icon>expand_more</mat-icon>
+      <span>AI Assistant - Click to minimize</span>
     </div>
     
     <div class="smart-guide-toggle" *ngIf="chatExpanded">

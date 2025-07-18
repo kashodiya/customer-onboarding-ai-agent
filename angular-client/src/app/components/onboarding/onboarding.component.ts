@@ -62,6 +62,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   showWelcomeButtons = false; // Show buttons after welcome message
   private shouldScrollToBottom = false;
   isSubmitting = false; // Add loading state for form submission
+  hasUnreadMessages = false; // Track unread messages for notification indicator
   // isAutosaving = false; // Now handled by AutosaveService
   
   onboardingForm: FormGroup;
@@ -477,6 +478,11 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     };
     this.chatMessages.push(message);
     this.shouldScrollToBottom = true;
+    
+    // Mark as unread if chat is collapsed and message is from AI
+    if (!this.chatExpanded && !isUser) {
+      this.hasUnreadMessages = true;
+    }
   }
 
   onEnterKeyPress(event: KeyboardEvent) {
@@ -488,6 +494,11 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   toggleChat() {
     this.chatExpanded = !this.chatExpanded;
+    
+    // Clear unread messages when expanding chat
+    if (this.chatExpanded) {
+      this.hasUnreadMessages = false;
+    }
   }
 
   onWelcomeButtonClick(wantsAssistance: boolean) {

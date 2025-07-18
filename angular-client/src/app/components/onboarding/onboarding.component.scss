@@ -225,17 +225,88 @@ div[style*="border-left: 3px solid #ccc"] {
   width: 370px;
   background: $card-bg;
   backdrop-filter: $card-blur;
-  border-radius: $border-radius;
+  border-radius: 50%;
   box-shadow: $card-shadow;
   z-index: 1000;
   transition: all $transition;
   border: none;
   &:not(.expanded) {
+    width: 60px;
     height: 60px;
-    overflow: hidden;
   }
   &.expanded {
     height: fit-content;
+    border-radius: 24px;
+  }
+}
+
+// Chat icon logo for collapsed state
+.chat-icon-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, $primary 0%, #5ac8fa 100%);
+  color: white;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 8px rgba(0, 122, 255, 0.3);
+  position: relative;
+  
+  &:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 12px rgba(0, 122, 255, 0.4);
+    background: linear-gradient(135deg, #5ac8fa 0%, $primary 100%);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+    transition: all 0.1s ease;
+  }
+  
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:hover mat-icon {
+    transform: scale(1.05);
+  }
+  
+  .notification-dot {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 12px;
+    height: 12px;
+    background: #ff3b30;
+    border-radius: 50%;
+    border: 2px solid white;
+    animation: pulse 2s infinite;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  &:hover .notification-dot {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
   }
 }
 
@@ -358,6 +429,11 @@ mat-checkbox {
     width: 320px;
     right: 15px;
     bottom: 15px;
+    
+    &:not(.expanded) {
+      width: 60px;
+      height: 60px;
+    }
   }
 }
 
@@ -375,6 +451,13 @@ mat-checkbox {
     width: calc(100vw - 30px);
     right: 15px;
     left: 15px;
+    
+    &:not(.expanded) {
+      width: 60px;
+      height: 60px;
+      right: 15px;
+      left: auto;
+    }
     
     &.expanded {
       height: 400px;
@@ -602,11 +685,28 @@ mat-checkbox {
 
 // Responsive
 @media (max-width: 600px) {
-  .form-container, .main-card, .section-card, .chat-overlay {
+  .form-container, .main-card, .section-card {
     max-width: 98vw;
     border-radius: 16px;
     padding: 0 4px;
   }
+  
+  .chat-overlay {
+    &:not(.expanded) {
+      width: 60px;
+      height: 60px;
+      right: 15px;
+      left: auto;
+      max-width: 60px;
+    }
+    
+    &.expanded {
+      max-width: 98vw;
+      border-radius: 16px;
+      padding: 0 4px;
+    }
+  }
+  
   .submit-button {
     min-width: 90vw;
     font-size: 16px;
