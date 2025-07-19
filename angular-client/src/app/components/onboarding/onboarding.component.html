@@ -432,41 +432,48 @@
     </div>
     
     <!-- Expanded state - Full header -->
-    <div class="chat-header" *ngIf="chatExpanded" (click)="toggleChat()">
-      <mat-icon>expand_more</mat-icon>
-      <span>AI Assistant - Click to minimize</span>
-    </div>
-    
-    <div class="smart-guide-toggle" *ngIf="chatExpanded">
-      <mat-slide-toggle 
-        [(ngModel)]="smartGuideEnabled"
-        (change)="onSmartGuideToggle($event.checked)"
-        color="primary">
-        <span class="toggle-label">Smart Guide</span>
-      </mat-slide-toggle>
-      <mat-icon 
-        class="info-icon" 
-        matTooltip="When enabled, AI provides context and requirements when you click on form fields. When disabled, AI only responds to your questions (Manual mode)."
-        matTooltipPosition="left">
-        info_outline
-      </mat-icon>
+    <div class="chat-header" *ngIf="chatExpanded">
+      <div class="header-left" (click)="toggleChat()">
+        <mat-icon>expand_more</mat-icon>
+        <span>AI Assistant</span>
+      </div>
+      <div class="header-actions">
+        <div class="smart-guide-toggle-compact">
+          <mat-slide-toggle 
+            [(ngModel)]="smartGuideEnabled"
+            (change)="onSmartGuideToggle($event.checked)"
+            color="primary">
+            <span class="toggle-label">Smart Guide</span>
+          </mat-slide-toggle>
+          <mat-icon 
+            class="info-icon" 
+            matTooltip="When enabled, AI provides context and requirements when you click on form fields. When disabled, AI only responds to your questions (Manual mode)."
+            matTooltipPosition="left">
+            info_outline
+          </mat-icon>
+        </div>
+      </div>
     </div>
     
     <div class="chat-content" *ngIf="chatExpanded">
       <div class="chat-messages" #chatMessagesContainer>
-        <div *ngFor="let message of chatMessages; let i = index" class="message-card"
-             [ngClass]="{'user-message': message.isUser, 'ai-message': !message.isUser}">
-          <div class="message-text">{{message.text}}</div>
-          <div class="message-time">{{message.timestamp | date:'short'}}</div>
-          
-          <!-- Yes/No buttons for welcome message -->
-          <div *ngIf="!message.isUser && i === 0 && showWelcomeButtons" class="welcome-buttons">
-            <button color="primary" (click)="onWelcomeButtonClick(true)" class="welcome-btn">
-              Yes, I'd like assistance
-            </button>
-            <button color="accent" (click)="onWelcomeButtonClick(false)" class="welcome-btn">
-              No, I'll do it myself
-            </button>
+        <div *ngFor="let message of chatMessages; let i = index" class="message-container">
+          <div class="message-card"
+               [ngClass]="{'user-message': message.isUser, 'ai-message': !message.isUser}">
+            <div class="message-text">{{message.text}}</div>
+            
+            <!-- Yes/No buttons for welcome message -->
+            <div *ngIf="!message.isUser && i === 0 && showWelcomeButtons" class="welcome-buttons">
+              <button color="primary" (click)="onWelcomeButtonClick(true)" class="welcome-btn">
+                Yes, I'd like assistance
+              </button>
+              <button color="accent" (click)="onWelcomeButtonClick(false)" class="welcome-btn">
+                No, I'll do it myself
+              </button>
+            </div>
+          </div>
+          <div class="message-time" [ngClass]="{'user-time': message.isUser, 'ai-time': !message.isUser}">
+            {{message.timestamp | date:'short'}}
           </div>
         </div>
         
