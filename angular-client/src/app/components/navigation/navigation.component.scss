@@ -59,15 +59,8 @@
 }
 
 .submissions-button:hover, .submissions-button.cdk-program-focused {
-  background: linear-gradient(90deg, #1565c0 0%, #42a5f5 100%);
-  color: #e3f2fd;
   box-shadow: 0 8px 32px rgba(25, 118, 210, 0.22);
   transform: scale(1.04);
-  border-color: #1976d2;
-  &::after {
-    transform: translateY(2px) scale(1.15);
-    color: #e3f2fd;
-  }
 }
 
 .badge-container {
@@ -177,7 +170,7 @@
   font-weight: 500;
   flex: 1;
   color: #222;
-}
+}s
 
 .submission-meta {
   display: flex;
@@ -221,8 +214,8 @@
   color: #1976d2;
   font-weight: 600;
   border-radius: 999px;
-  padding: 8px 22px;
   margin: 10px 12px 0 12px;
+  width: fit-content;
   background: #e3f2fd;
   transition: background 0.2s, color 0.2s;
   font-size: 15px;
@@ -249,14 +242,13 @@
   padding: 10px 28px 10px 18px;
   box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
   margin-left: 8px;
-  transition: background 0.3s, box-shadow 0.3s, color 0.3s;
+  transition: background 0.3s, box-shadow 0.3s, color 0.3s, transform 0.2s;
   border: none;
 }
 
 .new-form-button:hover {
-  background: linear-gradient(90deg, #5ac8fa 0%, #1976d2 100%);
-  color: #e3f2fd;
   box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18);
+  transform: scale(1.04);
 }
 
 .delete-button {
