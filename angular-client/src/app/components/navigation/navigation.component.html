@@ -36,6 +36,13 @@
             {{submission.status === 'template' ? 'content_copy' : 'description'}}
           </mat-icon>
           <span class="submission-name">{{submission.name}}</span>
+          <button mat-icon-button 
+                  class="delete-button" 
+                  (click)="onDeleteSubmission(submission.id, submission.name, $event)"
+                  matTooltip="Delete submission"
+                  matTooltipPosition="left">
+            <mat-icon>delete</mat-icon>
+          </button>
         </div>
         <div class="submission-meta">
           <span class="submission-date">{{submission.timestamp | date:'short'}}</span>
@@ -44,13 +51,6 @@
           </span>
         </div>
       </div>
-      <button mat-icon-button 
-              class="delete-button" 
-              (click)="onDeleteSubmission(submission.id, submission.name, $event)"
-              matTooltip="Delete submission"
-              matTooltipPosition="left">
-        <mat-icon>delete</mat-icon>
-      </button>
     </button>
     
     <mat-divider></mat-divider>
