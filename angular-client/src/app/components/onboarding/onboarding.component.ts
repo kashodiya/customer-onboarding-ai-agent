@@ -56,6 +56,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   chatMessages: ChatMessage[] = [];
   newMessage = '';
   isLoading = false;
+  isFieldContextLoading = false; // Add a lock for field context requests
   messageCounter = 0;
   chatExpanded = true;
   smartGuideEnabled = true; // Smart Guide is enabled by default
@@ -171,8 +172,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   ngOnInit() {
-    console.log('OnboardingComponent ngOnInit called');
-    
     // Check if we're loading a template
     this.isLoadingTemplate = sessionStorage.getItem('isLoadingTemplate') === 'true';
     if (this.isLoadingTemplate) {
@@ -191,7 +190,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       const navigation = this.router.getCurrentNavigation();
       const state = navigation?.extras?.state;
       if (state && state['clearDraft']) {
-        console.log('Clearing draft due to navigation state');
         this.formStorageService.clearCurrentDraft();
       }
     } catch (error) {
@@ -203,8 +201,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (!currentDraft || !this.hasFormContent(currentDraft.formData)) {
       this.startAgent();
     }
-    
-    console.log('OnboardingComponent ngOnInit completed');
   }
 
   ngOnDestroy() {
@@ -384,7 +380,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   sendMessage() {
-    if (!this.newMessage.trim()) return;
+    if (!this.newMessage.trim() || this.isLoading) return; // Prevent if already loading
 
     this.addMessage(this.newMessage, true);
     this.isLoading = true;
@@ -409,19 +405,20 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   onFieldFocus(fieldPath: string, fieldLabel: string) {
     // Only provide context in Smart Guide mode
-    if (!this.smartGuideEnabled) return;
+    if (!this.smartGuideEnabled || this.isFieldContextLoading) return; // Prevent if already loading
     // Suppress chat for the form title field
     if (fieldPath === 'formTitle') return;
-    
+    this.isFieldContextLoading = true;
     const fieldData: FormField = { name: fieldPath, value: fieldLabel };
     const completeFormData = this.getCompleteFormData();
-    
     this.chatService.getFieldContext(fieldData, completeFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
+        this.isFieldContextLoading = false;
       },
       error: (error) => {
         console.error('Error getting field context:', error);
+        this.isFieldContextLoading = false;
       }
     });
   }
@@ -631,7 +628,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   private subscribeToDraftChanges(): void {
     this.draftSubscription = this.formStorageService.currentDraft$.subscribe(draft => {
       if (draft) {
-        console.log('Draft changed, loading into form:', draft.name);
         this.loadFormData(draft.formData, draft.name);
         
         // Only show message if we're actively loading a template
@@ -640,7 +636,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
           this.isLoadingTemplate = false; // Reset flag after showing message
         }
       } else {
-        console.log('Draft cleared, resetting form');
         this.resetForm();
       }
     });

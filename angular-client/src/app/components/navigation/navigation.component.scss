@@ -33,7 +33,7 @@
 .submissions-button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border-radius: 999px;
   background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
   color: #fff;
@@ -41,19 +41,24 @@
   font-size: 15px;
   border: none;
   box-shadow: 0 4px 16px rgba(25, 118, 210, 0.13);
-  padding: 14px 32px 14px 18px;
+  padding: 16px;
   margin-right: 18px;
   transition: background 0.3s, box-shadow 0.3s, color 0.3s, transform 0.2s;
   position: relative;
   cursor: pointer;
+
   &::after {
     content: '\25BC';
     display: inline-block;
-    margin-left: 10px;
+    margin-left: 16px;
     font-size: 13px;
     color: #fff;
     opacity: 0.85;
     transition: transform 0.2s;
+  }
+
+  .mat-icon {
+    margin: 0 !important;
   }
 }
 
@@ -104,15 +109,17 @@
   gap: 15px;
 }
 
-mat-mdc-menu-content {
+.mat-mdc-menu-content {
   width: fit-content;
   height: fit-content;
+  padding: 0px !important;
 }
 
 .menu-header {
-  padding: 20px 24px 12px 24px;
+  padding: 10px 24px 12px 24px;
   border-bottom: 1.5px solid #e3f2fd;
   background: transparent;
+
   h3 {
     margin: 0;
     color: #1976d2;
@@ -225,8 +232,8 @@ mat-mdc-menu-content {
   color: #1976d2;
   font-weight: 600;
   border-radius: 999px;
-  margin: 10px 12px 0 12px;
-  width: 100%;
+  margin: 8px auto !important;
+  width: fit-content;
   background: #e3f2fd;
   transition: background 0.2s, color 0.2s;
   font-size: 15px;
@@ -234,6 +241,10 @@ mat-mdc-menu-content {
     background: #bbdefb;
     color: #0d47a1;
   }
+}
+
+.clear-draft-button {
+  margin-bottom: 2px !important;
 }
 
 .mat-divider {
@@ -244,18 +255,21 @@ mat-mdc-menu-content {
 .new-form-button {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   border-radius: 999px;
   background: #e3f2fd;
-  color: #1976d2;
+  color: #1976d2 !important;
   font-weight: 600;
   font-size: 16px;
   border: 2px solid #1976d2;
   box-shadow: 0 4px 16px rgba(25, 118, 210, 0.10);
-  padding: 14px 28px 14px 18px;
-  margin-left: 8px;
+  padding: 16px;
   transition: background 0.3s, box-shadow 0.3s, color 0.3s, transform 0.2s, border-color 0.2s;
   cursor: pointer;
+
+  .mat-icon {
+    margin: 0 !important;
+  }
 }
 
 .new-form-button:hover {
