@@ -264,6 +264,7 @@ div[style*="border-left: 3px solid #ccc"] {
     0 8px 16px rgba(102, 126, 234, 0.3),
     0 0 0 1px rgba(255, 255, 255, 0.1);
   position: relative;
+  z-index: 999;
   
   &:hover {
     transform: scale(1.1);
@@ -940,4 +941,21 @@ mat-checkbox {
       color: #1976d2;
     }
   }
-} 
+}
+
+.mat-mdc-form-field-infix {
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  background: white;
+}
+
+.mat-mdc-form-field-input-control.mat-mdc-form-field-input-control {
+  border-radius: 0px !important;
+  width: 100%;
+  height: fit-content;
+}
+
+.mdc-text-field {
+  background: white;
+}
