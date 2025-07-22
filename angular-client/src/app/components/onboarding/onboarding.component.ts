@@ -498,6 +498,7 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     // Clear unread messages when expanding chat
     if (this.chatExpanded) {
       this.hasUnreadMessages = false;
+      this.shouldScrollToBottom = true;
     }
   }
 
