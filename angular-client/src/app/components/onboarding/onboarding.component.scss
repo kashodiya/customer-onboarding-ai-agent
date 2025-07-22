@@ -530,6 +530,7 @@ div[style*="border-left: 3px solid #ccc"] {
   
   &:first-child {
     margin-top: 0px;
+    padding-top: 0px;
   }
 }
 
@@ -541,14 +542,10 @@ div[style*="border-left: 3px solid #ccc"] {
   word-wrap: break-word;
   position: relative;
   transition: all 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-1px);
-  }
 }
 
 .user-message {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
   margin-left: auto;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
@@ -562,7 +559,6 @@ div[style*="border-left: 3px solid #ccc"] {
 .ai-message {
   background: white;
   margin-right: auto;
-  margin-top: 16px;
   border: 1px solid #e2e8f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
   
@@ -687,14 +683,13 @@ div[style*="border-left: 3px solid #ccc"] {
     letter-spacing: 0.025em;
     
     &:first-child {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
       color: white;
       box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
       
       &:hover {
         // background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        transform: translateY(-1px);
       }
     }
     
@@ -708,7 +703,6 @@ div[style*="border-left: 3px solid #ccc"] {
         background: #f8fafc;
         color: #475569;
         border-color: #cbd5e1;
-        transform: translateY(-1px);
       }
     }
   }

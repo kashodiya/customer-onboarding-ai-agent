@@ -457,10 +457,12 @@
             {{message.timestamp | date:'short'}}
           </div>
         </div>
-
-        <div *ngIf="isLoading" class="message-card ai-message">
-          <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-          <div class="message-text">AI is thinking...</div>
+        
+        <div *ngIf="isLoading" class="message-container">
+          <div class="message-card ai-message">
+            <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            <div class="message-text">AI is thinking...</div>
+          </div>
         </div>
       </div>
 
