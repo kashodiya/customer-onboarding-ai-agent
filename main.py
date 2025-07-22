@@ -193,16 +193,13 @@ async def get_field_context(request: Request):
     data = await request.json()
     field_name = data.get('name', '')
     field_label = data.get('value', '')  # Using value field to pass the field label
-    complete_form_data = data.get('completeFormData', {})
-    
-    # Create context prompt for field assistance
+
+    # Only include field name/label in the prompt, not the full form state
     context_prompt = f"""
 FIELD CONTEXT REQUEST:
-The user is focusing on the field: "{field_label}" (path: {field_name})
+The user is focusing on the field: \"{field_label}\" (path: {field_name})
 
-Current form state: {json.dumps(complete_form_data)}
-
-Provide helpful context about the "{field_label}" field. Explain what it's for, mention any requirements, and give examples if helpful. Be specific and mention the field name explicitly instead of saying "This field". Keep it natural and under 2 sentences.
+Provide helpful context about the \"{field_label}\" field. Explain what it's for, mention any requirements, and give examples if helpful. Be specific and mention the field name explicitly instead of saying \"This field\". Keep it natural and under 2 sentences.
 """
     
     answer = ask_agent(context_prompt, session_id=agent_session_id)

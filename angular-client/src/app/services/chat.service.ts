@@ -27,9 +27,12 @@ export class ChatService {
   }
 
   private initializeWebSocket() {
+    const isDev = window.location.port === '7151';
     const wsUrl = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsHost = window.location.host.includes('7151') ? 'localhost:8000' : window.location.host;
-    this.ws = new WebSocket(`${wsUrl}//${wsHost}/ws`);
+    const wsPath = isDev ? `${wsUrl}//${window.location.host}/ws` : `${wsUrl}//ec2-54-209-155-169.compute-1.amazonaws.com:7104/proxy/8000/ws`;
+    
+    this.ws = new WebSocket(wsPath);
+    
     
     this.ws.onmessage = (event) => {
       try {
