@@ -241,6 +241,14 @@ div[style*="border-left: 3px solid #ccc"] {
     width: 64px;
     height: 64px;
     border-radius: 50%;
+    overflow: visible;
+
+    &:hover {
+      transform: scale(1.1);
+      box-shadow: 
+        0 12px 24px rgba(102, 126, 234, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.2);
+    }
   }
   
   &.expanded {
@@ -253,25 +261,21 @@ div[style*="border-left: 3px solid #ccc"] {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
   color: white;
   cursor: pointer;
   border-radius: 50%;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 
-    0 8px 16px rgba(102, 126, 234, 0.3),
-    0 0 0 1px rgba(255, 255, 255, 0.1);
+    0 0px 1px 1px rgba(102, 126, 234, 0.3);
+    // 0 0 0 1px rgba(255, 255, 255, 0.1);
   position: relative;
   z-index: 999;
   
   &:hover {
     transform: scale(1.1);
-    box-shadow: 
-      0 12px 24px rgba(102, 126, 234, 0.4),
-      0 0 0 1px rgba(255, 255, 255, 0.2);
-    background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
   }
   
   &:active {
@@ -722,17 +726,6 @@ mat-checkbox {
 @media (max-width: 1200px) {
   .form-container {
     max-width: 700px;
-  }
-  
-  .chat-overlay {
-    width: 340px;
-    right: 16px;
-    bottom: 16px;
-    
-    &:not(.expanded) {
-      width: 64px;
-      height: 64px;
-    }
   }
 }
 
