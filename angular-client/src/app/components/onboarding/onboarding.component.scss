@@ -352,7 +352,7 @@ div[style*="border-left: 3px solid #ccc"] {
   }
   
   .info-icon {
-    color: #667eea;
+    color: #1976d2;
     cursor: help;
     width: 16px;
     height: 16px;
@@ -361,7 +361,7 @@ div[style*="border-left: 3px solid #ccc"] {
     opacity: 0.8;
     
     &:hover {
-      color: #5a67d8;
+      color: #1976d2;
       opacity: 1;
       transform: scale(1.1);
     }
@@ -372,7 +372,7 @@ div[style*="border-left: 3px solid #ccc"] {
     align-items: center;
     
     ::ng-deep .mdc-switch {
-      --mdc-switch-selected-track-color: #667eea;
+      --mdc-switch-selected-track-color: #1976d2;
       --mdc-switch-selected-handle-color: #ffffff;
       --mdc-switch-unselected-track-color: #cbd5e1;
       --mdc-switch-unselected-handle-color: #ffffff;
@@ -482,7 +482,7 @@ div[style*="border-left: 3px solid #ccc"] {
         
         ::ng-deep .mdc-switch {
           --mdc-switch-selected-track-color: rgba(255, 255, 255, 0.8);
-          --mdc-switch-selected-handle-color: #667eea;
+          --mdc-switch-selected-handle-color: #1976d2;
           --mdc-switch-unselected-track-color: rgba(255, 255, 255, 0.3);
           --mdc-switch-unselected-handle-color: rgba(255, 255, 255, 0.8);
         }
