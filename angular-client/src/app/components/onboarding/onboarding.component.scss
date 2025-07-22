@@ -393,7 +393,6 @@ div[style*="border-left: 3px solid #ccc"] {
   padding: 16px 20px;
   background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
   color: white;
-  cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   
@@ -410,6 +409,8 @@ div[style*="border-left: 3px solid #ccc"] {
       font-size: 20px;
       width: 20px;
       height: 20px;
+      scale: 1.25;
+      cursor: pointer;
     }
     
     span {
