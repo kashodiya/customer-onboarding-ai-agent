@@ -37,29 +37,19 @@ async def ask_agent_endpoint(prompt: str, request: Request):
         except Exception as e:
             print(f"Error parsing form data: {e}")
 
-    # Include form state in the prompt context
+    # Always include form state in the prompt context if available
     if current_form_state and any(current_form_state.values()):
-        # Check if this might be a manual mode response
-        if prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']:
-            context_prompt = f"User declined assistance and prefers manual mode. Simply acknowledge and inform them you'll only respond to direct questions. Do not ask follow-up questions or provide guidance."
-        else:
-            context_prompt = f"User asks: '{prompt}'. Current form state: {json.dumps(current_form_state)}. Respond considering what's already filled out."
+        context_prompt = f"User asks: '{prompt}'. Current form state: {json.dumps(current_form_state)}. Respond considering what's already filled out."
     else:
-        if prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']:
-            context_prompt = f"User declined assistance and prefers manual mode. Simply acknowledge and inform them you'll only respond to direct questions. Do not ask follow-up questions or provide guidance."
-        else:
-            context_prompt = prompt
-    
+        context_prompt = prompt
+
     answer = ask_agent(context_prompt, session_id=agent_session_id)
 
-    # Skip form updates if user chose manual mode
-    is_manual_mode_response = prompt.lower() in ['no', 'nope', 'no thanks', 'no thank you', 'manual']
-    
-    # Check if the AI response contains proactive form updates (only if not manual mode)
+    # Check if the AI response contains proactive form updates
     changed = None
     clean_answer = answer  # Start with the original answer
-    
-    if not is_manual_mode_response and isinstance(answer, str) and "Form Update Available:" in answer:
+
+    if isinstance(answer, str) and "Form Update Available:" in answer:
         try:
             # Extract JSON from the response
             json_match = re.search(r'```json\s*(\{[^`]+\})\s*```', answer)
@@ -67,7 +57,6 @@ async def ask_agent_endpoint(prompt: str, request: Request):
                 json_str = json_match.group(1)
                 changed = json.loads(json_str)
                 print(f"Proactive form update found: {changed}")
-                
                 # Remove the form update section from the visible response
                 clean_answer = re.sub(r'\s*Form Update Available:\s*```json\s*\{[^`]+\}\s*```', '', answer)
                 clean_answer = clean_answer.strip()
@@ -75,17 +64,12 @@ async def ask_agent_endpoint(prompt: str, request: Request):
                 print("Form update marker found but no valid JSON extracted")
         except Exception as e:
             print(f"Error parsing proactive form update: {e}")
-    
-    # Note: Form updates are handled via "Form Update Available:" markers in AI responses
-    # Skip form updates if user chose manual mode
-    if is_manual_mode_response:
-        print("Skipping form updates - user chose manual mode")
-    
+
     # Debug logging
     print(f"Changed value: {changed}")
     print(f"Changed type: {type(changed)}")
     print(f"Connected clients: {len(connected_clients)}")
-    
+
     # Send WebSocket message if changed has a value
     if changed and str(changed).strip() != "{}":
         print(f"Sending WebSocket message for: {changed}")
@@ -95,7 +79,6 @@ async def ask_agent_endpoint(prompt: str, request: Request):
         }
         message_json = json.dumps(message_data)
         print(f"WebSocket message: {message_json}")
-        
         for client in connected_clients[:]:
             try:
                 await client.send_text(message_json)
@@ -161,7 +144,7 @@ def start_agent(request: Request):
         context_prompt = f"Give a brief welcome back message. User has loaded existing form data: {json.dumps(current_form_state)}. Simply acknowledge the loaded data and mention you're ready to help. Keep it under 2 sentences. Do not ask for assistance preference."
     else:
         # Fresh start or empty draft - ask for assistance
-        context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance. Tell them to choose Yes or No using the buttons that will appear. Keep it under 2 sentences."
+        context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance with the process. Let the user know they can ask questions in the chat at any time, regardless of their choice. Keep it concise and under 3 sentences."
     
     answer = ask_agent(context_prompt, session_id=agent_session_id)
     return {
@@ -210,16 +193,13 @@ async def get_field_context(request: Request):
     data = await request.json()
     field_name = data.get('name', '')
     field_label = data.get('value', '')  # Using value field to pass the field label
-    complete_form_data = data.get('completeFormData', {})
-    
-    # Create context prompt for field assistance
+
+    # Only include field name/label in the prompt, not the full form state
     context_prompt = f"""
 FIELD CONTEXT REQUEST:
-The user is focusing on the field: "{field_label}" (path: {field_name})
+The user is focusing on the field: \"{field_label}\" (path: {field_name})
 
-Current form state: {json.dumps(complete_form_data)}
-
-Provide helpful context about the "{field_label}" field. Explain what it's for, mention any requirements, and give examples if helpful. Be specific and mention the field name explicitly instead of saying "This field". Keep it natural and under 2 sentences.
+Provide helpful context about the \"{field_label}\" field. Explain what it's for, mention any requirements, and give examples if helpful. Be specific and mention the field name explicitly instead of saying \"This field\". Keep it natural and under 2 sentences.
 """
     
     answer = ask_agent(context_prompt, session_id=agent_session_id)

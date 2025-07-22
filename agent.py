@@ -31,9 +31,8 @@ def init_agent():
     print("Initializing agent...")
     
     _llm_instance = ChatBedrock(
-        model="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        region="us-west-2",
-        model_kwargs={"max_tokens": 4096, "temperature": 0.5, "top_p": 0.9}
+        model="anthropic.claude-3-sonnet-20240229-v1:0",
+        region="us-west-2"
     )
 
     with open("SYSTEM_PROMPT.md", "r") as f:

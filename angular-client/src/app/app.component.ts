@@ -6,6 +6,8 @@ import { MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { NavigationComponent } from './components/navigation/navigation.component';
 import { FormStorageService } from './services/form-storage.service';
+import { AutosaveService } from './services/autosave.service';
+import { Subscription } from 'rxjs';
 
 @Component({
     selector: 'app-root',
@@ -16,11 +18,22 @@ import { FormStorageService } from './services/form-storage.service';
 })
 export class AppComponent {
   title = 'Customer Onboarding';
+  isAutosaving = false;
+  private autosaveSub?: Subscription;
 
   constructor(
     private router: Router,
-    private formStorageService: FormStorageService
-  ) {}
+    private formStorageService: FormStorageService,
+    private autosaveService: AutosaveService
+  ) {
+    this.autosaveSub = this.autosaveService.autosaving$.subscribe(val => {
+      this.isAutosaving = val;
+    });
+  }
+
+  ngOnDestroy() {
+    this.autosaveSub?.unsubscribe();
+  }
 
   onLoadSubmission(submissionId: string): void {
     // Set flag to indicate we're loading a template
@@ -41,10 +54,5 @@ export class AppComponent {
   onClearDraft(): void {
     // Clear current draft - the onboarding component will handle the UI update
     this.formStorageService.clearCurrentDraft();
-  }
-
-  get isAutosaving(): boolean {
-    // This will need to be handled differently with router outlet
-    return false;
   }
 } 

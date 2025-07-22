@@ -22,6 +22,7 @@ import { ChatService, ChatMessage, FormField } from '../../services/chat.service
 import { FormStorageService, FormSubmission } from '../../services/form-storage.service';
 import { Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { AutosaveService } from '../../services/autosave.service';
 
 @Component({
     selector: 'app-onboarding',
@@ -55,13 +56,15 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   chatMessages: ChatMessage[] = [];
   newMessage = '';
   isLoading = false;
+  isFieldContextLoading = false; // Add a lock for field context requests
   messageCounter = 0;
   chatExpanded = true;
   smartGuideEnabled = true; // Smart Guide is enabled by default
   showWelcomeButtons = false; // Show buttons after welcome message
   private shouldScrollToBottom = false;
   isSubmitting = false; // Add loading state for form submission
-  isAutosaving = false; // Add autosaving state indicator
+  hasUnreadMessages = false; // Track unread messages for notification indicator
+  // isAutosaving = false; // Now handled by AutosaveService
   
   onboardingForm: FormGroup;
   formUpdatesSubscription?: Subscription;
@@ -80,7 +83,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     private chatService: ChatService,
     private formBuilder: FormBuilder,
     private snackBar: MatSnackBar,
-    private formStorageService: FormStorageService
+    private formStorageService: FormStorageService,
+    private autosaveService: AutosaveService
   ) {
     this.onboardingForm = this.createForm();
   }
@@ -134,12 +138,11 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
       // Section 4: File Transfer Information (Cloud)
       fileTransferInfo: this.formBuilder.group({
-        hasOutbound: [false], // Checkbox - no required validator needed
+        direction: [''], // 'outbound' or 'inbound'
         sourceAwsAccount: [''],
         sourceBucketArn: [''],
         sourceArchiveBucket: [''],
         sourceArchivePrefix: [''],
-        hasInbound: [false], // Checkbox - no required validator needed
         targetBucket: [''],
         targetPrefix: ['']
       }),
@@ -169,8 +172,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   ngOnInit() {
-    console.log('OnboardingComponent ngOnInit called');
-    
     // Check if we're loading a template
     this.isLoadingTemplate = sessionStorage.getItem('isLoadingTemplate') === 'true';
     if (this.isLoadingTemplate) {
@@ -189,7 +190,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       const navigation = this.router.getCurrentNavigation();
       const state = navigation?.extras?.state;
       if (state && state['clearDraft']) {
-        console.log('Clearing draft due to navigation state');
         this.formStorageService.clearCurrentDraft();
       }
     } catch (error) {
@@ -201,8 +201,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     if (!currentDraft || !this.hasFormContent(currentDraft.formData)) {
       this.startAgent();
     }
-    
-    console.log('OnboardingComponent ngOnInit completed');
   }
 
   ngOnDestroy() {
@@ -254,12 +252,16 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     return this.onboardingForm.get('applicationInfo.internalOrExternal')?.value === 'External';
   }
 
+  get fileTransferDirection() {
+    return this.onboardingForm.get('fileTransferInfo.direction')?.value;
+  }
+
   get hasOutbound() {
-    return this.onboardingForm.get('fileTransferInfo.hasOutbound')?.value;
+    return this.fileTransferDirection === 'outbound';
   }
 
   get hasInbound() {
-    return this.onboardingForm.get('fileTransferInfo.hasInbound')?.value;
+    return this.fileTransferDirection === 'inbound';
   }
 
   get requiresExternalVendorConnection() {
@@ -378,21 +380,10 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   }
 
   sendMessage() {
-    if (!this.newMessage.trim()) return;
+    if (!this.newMessage.trim() || this.isLoading) return; // Prevent if already loading
 
     this.addMessage(this.newMessage, true);
     this.isLoading = true;
-
-    // Check if user is responding to mode preference question
-    const message = this.newMessage.toLowerCase().trim();
-    const isManualResponse = message.includes('manual') || message.includes('on-demand') || message.includes('on demand') || 
-                             message.includes('only respond') || message.includes('passive') ||
-                             (message.includes('no') && (message.includes('guide') || message.includes('help') || message.includes('assistance'))) ||
-                             message === 'no' || message === 'nope' || message === 'no thanks' || message === 'no thank you';
-    const isSmartGuideResponse = message.includes('smart guide') || message.includes('proactive') || 
-                                 message.includes('guide me') || message.includes('help me') ||
-                                 (message.includes('yes') && (message.includes('guide') || message.includes('help') || message.includes('assistance'))) ||
-                                 message === 'yes' || message === 'yeah' || message === 'yep' || message === 'sure' || message === 'ok' || message === 'okay';
 
     // Get current form state
     const currentFormData = this.getCompleteFormData();
@@ -401,31 +392,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       next: (response) => {
         this.addMessage(response.answer, false);
         this.isLoading = false;
-        
-        // Auto-toggle Smart Guide based on user's mode preference
-        if (isManualResponse && this.smartGuideEnabled) {
-          this.smartGuideEnabled = false;
-          // Notify backend about the mode change
-          this.chatService.toggleSmartGuide(false, currentFormData).subscribe({
-            next: (toggleResponse) => {
-              this.addMessage(toggleResponse.answer, false);
-            },
-            error: (error) => {
-              console.error('Error notifying backend about manual mode:', error);
-            }
-          });
-        } else if (isSmartGuideResponse && !this.smartGuideEnabled) {
-          this.smartGuideEnabled = true;
-          // Notify backend about the mode change
-          this.chatService.toggleSmartGuide(true, currentFormData).subscribe({
-            next: (toggleResponse) => {
-              this.addMessage(toggleResponse.answer, false);
-            },
-            error: (error) => {
-              console.error('Error notifying backend about smart guide mode:', error);
-            }
-          });
-        }
       },
       error: (error) => {
         console.error('Error sending message:', error);
@@ -439,17 +405,20 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   onFieldFocus(fieldPath: string, fieldLabel: string) {
     // Only provide context in Smart Guide mode
-    if (!this.smartGuideEnabled) return;
-    
+    if (!this.smartGuideEnabled || this.isFieldContextLoading) return; // Prevent if already loading
+    // Suppress chat for the form title field
+    if (fieldPath === 'formTitle') return;
+    this.isFieldContextLoading = true;
     const fieldData: FormField = { name: fieldPath, value: fieldLabel };
     const completeFormData = this.getCompleteFormData();
-    
     this.chatService.getFieldContext(fieldData, completeFormData).subscribe({
       next: (response) => {
         this.addMessage(response.answer, false);
+        this.isFieldContextLoading = false;
       },
       error: (error) => {
         console.error('Error getting field context:', error);
+        this.isFieldContextLoading = false;
       }
     });
   }
@@ -506,6 +475,11 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     };
     this.chatMessages.push(message);
     this.shouldScrollToBottom = true;
+    
+    // Mark as unread if chat is collapsed and message is from AI
+    if (!this.chatExpanded && !isUser) {
+      this.hasUnreadMessages = true;
+    }
   }
 
   onEnterKeyPress(event: KeyboardEvent) {
@@ -517,6 +491,12 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   toggleChat() {
     this.chatExpanded = !this.chatExpanded;
+    
+    // Clear unread messages when expanding chat
+    if (this.chatExpanded) {
+      this.hasUnreadMessages = false;
+      this.shouldScrollToBottom = true;
+    }
   }
 
   onWelcomeButtonClick(wantsAssistance: boolean) {
@@ -547,14 +527,14 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       
       // Trigger autosave if there's either a title or other form content
       if (hasTitleContent || hasOtherContent) {
-        this.isAutosaving = true;
+        this.autosaveService.setAutosaving(true);
         const formData = this.getCompleteFormData();
         const titleForDraft = formTitle.trim() || 'Untitled Draft';
         this.formStorageService.saveDraft(formData, titleForDraft);
         
         // Hide autosaving indicator after a longer delay for visibility
         setTimeout(() => {
-          this.isAutosaving = false;
+          this.autosaveService.setAutosaving(false);
         }, 2000); // Increased from 1000ms to 2000ms
       }
     }
@@ -648,7 +628,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   private subscribeToDraftChanges(): void {
     this.draftSubscription = this.formStorageService.currentDraft$.subscribe(draft => {
       if (draft) {
-        console.log('Draft changed, loading into form:', draft.name);
         this.loadFormData(draft.formData, draft.name);
         
         // Only show message if we're actively loading a template
@@ -657,7 +636,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
           this.isLoadingTemplate = false; // Reset flag after showing message
         }
       } else {
-        console.log('Draft cleared, resetting form');
         this.resetForm();
       }
     });
