@@ -2,12 +2,12 @@
   <div class="progress-content">
     <mat-card class="progress-card glass-card">
       <div class="progress-header">
-        <div class="icon-circle">
-          <mat-icon class="success-icon">check_circle</mat-icon>
-        </div>
         <div class="progress-title">Form Submitted Successfully!</div>
         <div class="progress-subtitle" *ngIf="currentSubmission">
           Submission: {{ currentSubmission.name }}
+        </div>
+        <div class="progress-transfer-id">
+          File Transfer ID: <strong>{{ fileTransferId }}</strong>
         </div>
       </div>
       <mat-card-content>
