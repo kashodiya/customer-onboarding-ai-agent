@@ -28,6 +28,8 @@ export class ProgressComponent implements OnInit {
   currentSubmission: any = null;
   templateSaved: boolean = false; // Track if template has been saved
   
+  fileTransferId: string = '';
+  
   progressSteps = [
     { id: 'submission', label: 'Submission', icon: 'assignment', completed: true, current: false },
     { id: 'validation', label: 'Validation', icon: 'verified', completed: false, current: true },
@@ -42,6 +44,8 @@ export class ProgressComponent implements OnInit {
   ) {}
 
   ngOnInit() {
+    // Generate a random 4-digit file transfer ID
+    this.fileTransferId = Math.floor(1000 + Math.random() * 9000).toString();
     // Get submission ID from navigation state
     const navigation = this.router.getCurrentNavigation();
     const state = navigation?.extras?.state;
