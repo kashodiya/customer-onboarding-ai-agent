@@ -35,7 +35,7 @@
   align-items: center;
   gap: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
+  background: #1976d2;
   color: #fff;
   font-weight: 600;
   font-size: 15px;
@@ -63,7 +63,6 @@
 }
 
 .submissions-button:hover, .submissions-button.cdk-program-focused {
-  background: linear-gradient(90deg, #5ac8fa 0%, #1976d2 100%);
   color: #e3f2fd;
   box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18);
   transform: scale(1.04);

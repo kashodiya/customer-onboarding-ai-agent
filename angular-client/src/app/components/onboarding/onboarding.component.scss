@@ -53,8 +53,8 @@ body, .page-container {
   border-radius: $border-radius;
   background: $card-bg;
   backdrop-filter: $card-blur;
-  box-shadow: $card-shadow;
-  border: none;
+  box-shadow: none;
+  border: 1px solid #e2e8f0;
   animation: fadeInUp 0.7s $transition;
   padding: 16px;
 }
@@ -118,7 +118,7 @@ mat-checkbox, mat-radio-button {
 }
 
 .checkbox-group {
-  margin: 18px 0;
+  margin-bottom: 30px;
   padding: 16px;
   border-radius: 18px;
   background: rgba(245,245,247,0.7);
@@ -263,7 +263,7 @@ div[style*="border-left: 3px solid #ccc"] {
   justify-content: center;
   width: 64px;
   height: 64px;
-  background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
+  background: #1976d2;
   color: white;
   cursor: pointer;
   border-radius: 50%;
@@ -391,7 +391,7 @@ div[style*="border-left: 3px solid #ccc"] {
   align-items: center;
   justify-content: space-between;
   padding: 16px 20px;
-  background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
+  background: #1976d2;
   color: white;
   transition: all 0.3s ease;
   position: relative;
@@ -816,7 +816,6 @@ mat-checkbox {
 // Form Title Styling (Google Forms/Apple inspired)
 .form-title-field {
   width: 100%;
-  margin: 0 auto 32px auto;
   display: flex;
   justify-content: center;
   .mat-form-field-wrapper {
@@ -905,8 +904,9 @@ mat-checkbox {
 
 /* Title Section Styling */
 .title-section {
-  margin-bottom: 24px;
   text-align: center;
+  border-radius: 16px 16px 0;
+  overflow: hidden;
   
   .title-field {
     width: 100%;
