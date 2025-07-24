@@ -143,7 +143,18 @@ export class FormStorageService {
     const submission = submissions.find(sub => sub.id === submissionId);
     
     if (submission) {
-      this.saveDraft(submission.formData, `Copy of ${submission.name}`);
+      if (submission.status === 'draft') {
+        // Set this draft as the current draft (no copy)
+        try {
+          localStorage.setItem(this.DRAFT_KEY, JSON.stringify(submission));
+          this.currentDraftSubject.next(submission);
+        } catch (error) {
+          console.error('Error setting draft as current:', error);
+        }
+      } else {
+        // For non-draft, create a copy as before
+        this.saveDraft(submission.formData, `Copy of ${submission.name}`);
+      }
       return true;
     }
     return false;

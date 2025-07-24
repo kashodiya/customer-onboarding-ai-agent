@@ -515,6 +515,11 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       .subscribe(() => {
         this.autosave();
       });
+
+    // Trigger autosave immediately when the draft name changes
+    this.onboardingForm.get('formTitle')?.valueChanges.subscribe(() => {
+      this.autosave();
+    });
   }
 
   // Autosave current form data
