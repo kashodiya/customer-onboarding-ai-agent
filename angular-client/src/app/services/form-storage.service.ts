@@ -187,11 +187,18 @@ export class FormStorageService {
           timestamp: new Date(),
           name: `Copy of ${submission.name}`
         };
-        try {
-          localStorage.setItem(this.DRAFT_KEY, JSON.stringify(newDraft));
+        // Only set as current draft if data is different from the original
+        const isChanged = JSON.stringify(submission.formData) !== JSON.stringify(newDraft.formData);
+        if (isChanged) {
+          try {
+            localStorage.setItem(this.DRAFT_KEY, JSON.stringify(newDraft));
+            this.currentDraftSubject.next(newDraft);
+          } catch (error) {
+            console.error('Error creating draft copy:', error);
+          }
+        } else {
+          // Set as current draft in memory only, but do not save to submissions
           this.currentDraftSubject.next(newDraft);
-        } catch (error) {
-          console.error('Error creating draft copy:', error);
         }
       }
       return true;
