@@ -83,29 +83,18 @@ export class FormStorageService {
       // If draft has content, also store in submissions list (update if already present)
       if (formData && Object.keys(formData).length > 0) {
         const currentSubmissions = this.submissionsSubject.value;
-        // If this is a copy draft (created from a past submission or template), always create a new draft
-        const isCopyDraft = draft.name.startsWith('Copy of ');
+        const draftIndex = currentSubmissions.findIndex(sub => sub.id === draft.id);
         let updatedSubmissions;
-        if (!isCopyDraft) {
-          const draftIndex = currentSubmissions.findIndex(sub => sub.id === draft.id);
-          if (draftIndex !== -1) {
-            // Update existing draft
-            updatedSubmissions = [
-              ...currentSubmissions.slice(0, draftIndex),
-              draft,
-              ...currentSubmissions.slice(draftIndex + 1)
-            ];
-          } else {
-            // Add new draft
-            updatedSubmissions = [...currentSubmissions, draft];
-          }
+        if (draftIndex !== -1) {
+          // Update existing draft
+          updatedSubmissions = [
+            ...currentSubmissions.slice(0, draftIndex),
+            draft,
+            ...currentSubmissions.slice(draftIndex + 1)
+          ];
         } else {
-          // Always add as a new draft with a new id
-          const newDraft = { ...draft, id: this.generateId(), timestamp: new Date() };
-          updatedSubmissions = [...currentSubmissions, newDraft];
-          // Also update current draft in memory/localStorage
-          localStorage.setItem(this.DRAFT_KEY, JSON.stringify(newDraft));
-          this.currentDraftSubject.next(newDraft);
+          // Add new draft
+          updatedSubmissions = [...currentSubmissions, draft];
         }
         this.saveSubmissions(updatedSubmissions);
       }
