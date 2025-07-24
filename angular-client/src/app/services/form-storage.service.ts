@@ -152,8 +152,20 @@ export class FormStorageService {
           console.error('Error setting draft as current:', error);
         }
       } else {
-        // For non-draft, create a copy as before
-        this.saveDraft(submission.formData, `Copy of ${submission.name}`);
+        // For non-draft (submitted/template), create a new draft copy with a new id
+        const newDraft = {
+          ...submission,
+          id: this.generateId(),
+          status: 'draft' as 'draft',
+          timestamp: new Date(),
+          name: `Copy of ${submission.name}`
+        };
+        try {
+          localStorage.setItem(this.DRAFT_KEY, JSON.stringify(newDraft));
+          this.currentDraftSubject.next(newDraft);
+        } catch (error) {
+          console.error('Error creating draft copy:', error);
+        }
       }
       return true;
     }
