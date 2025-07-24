@@ -191,6 +191,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       const state = navigation?.extras?.state;
       if (state && state['clearDraft']) {
         this.formStorageService.clearCurrentDraft();
+        this.onboardingForm.reset();
+        this.onboardingForm.markAsPristine();
       }
     } catch (error) {
       console.log('No navigation state available, continuing normally');
@@ -516,10 +518,12 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
         this.autosave();
       });
 
-    // Trigger autosave immediately when the draft name changes
-    this.onboardingForm.get('formTitle')?.valueChanges.subscribe(() => {
-      this.autosave();
-    });
+    // Trigger autosave with debounce when the draft name changes
+    this.onboardingForm.get('formTitle')?.valueChanges
+      .pipe(debounceTime(2000), distinctUntilChanged())
+      .subscribe(() => {
+        this.autosave();
+      });
   }
 
   // Autosave current form data
@@ -714,6 +718,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
         });
       }, 1000); // Small delay to show the message
       
+      // Prevent autosave from running after submission
+      this.onboardingForm.markAsPristine();
+      this.formStorageService.clearCurrentDraft();
     } catch (error) {
       console.error('Error submitting form:', error);
       this.snackBar.open('Error submitting form. Please try again.', 'Close', {
