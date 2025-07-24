@@ -124,9 +124,17 @@ export class FormStorageService {
       status: 'submitted'
     };
 
-    // Add to submissions list
+    // Add to submissions list, replacing any current draft
     const currentSubmissions = this.submissionsSubject.value;
-    const updatedSubmissions = [...currentSubmissions, submission];
+    let updatedSubmissions;
+    const currentDraft = this.getCurrentDraft();
+    if (currentDraft) {
+      // Remove the draft from submissions if it exists
+      updatedSubmissions = currentSubmissions.filter(sub => sub.id !== currentDraft.id);
+    } else {
+      updatedSubmissions = [...currentSubmissions];
+    }
+    updatedSubmissions = [...updatedSubmissions, submission];
     this.saveSubmissions(updatedSubmissions);
 
     // Clear current draft
