@@ -17,7 +17,7 @@
     <span>History</span>
   </button>
 
-  <mat-menu #historyMenu="matMenu" class="submissions-menu">
+  <mat-menu #historyMenu="matMenu" class="submissions-menu" xPosition="after" yPosition="below">
     <div class="menu-header">
       <h3>History</h3>
     </div>
@@ -25,29 +25,63 @@
       <mat-icon>inbox</mat-icon>
       <span>No submissions yet</span>
     </div>
-    <button mat-menu-item 
-            *ngFor="let submission of history$ | async" 
-            class="submission-item">
-      <div class="submission-content" (click)="onLoadSubmission(submission.id)">
-        <div class="submission-header">
-          <mat-icon class="submission-icon">description</mat-icon>
-          <span class="submission-name">{{submission.name}}</span>
-          <button mat-icon-button 
-                  class="delete-button" 
-                  (click)="onDeleteHistorySubmission(submission.id, submission.name, $event)"
-                  matTooltip="Delete submission"
-                  matTooltipPosition="left">
-            <mat-icon>delete</mat-icon>
-          </button>
-        </div>
-        <div class="submission-meta">
-          <span class="submission-date">{{submission.timestamp | date:'short'}}</span>
-          <span class="submission-status" [class]="submission.status">
-            {{submission.status}}
-          </span>
-        </div>
-      </div>
-    </button>
+    <!-- Drafts on top -->
+    <ng-container *ngIf="history$ | async as allHistory">
+      <ng-container *ngFor="let draft of getDrafts(allHistory)">
+        <button mat-menu-item 
+                class="submission-item" 
+                [ngClass]="{'current-draft': draft.id === currentDraftId}"
+                (click)="onLoadSubmission(draft.id)">
+          <div class="submission-content">
+            <div class="submission-header">
+              <mat-icon class="submission-icon">description</mat-icon>
+              <span class="submission-name">{{draft.name}}</span>
+              <button mat-icon-button 
+                      class="delete-button" 
+                      (click)="onDeleteHistorySubmission(draft.id, draft.name, $event)"
+                      matTooltip="Delete draft"
+                      matTooltipPosition="left">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="submission-meta">
+              <span class="submission-date">{{draft.timestamp | date:'short'}}</span>
+              <span class="submission-status" [class]="draft.status">
+                {{draft.status}}
+              </span>
+            </div>
+          </div>
+        </button>
+      </ng-container>
+      <!-- Divider if there are both drafts and submissions -->
+      <mat-divider *ngIf="getDrafts(allHistory).length > 0 && getPastSubmissions(allHistory).length > 0"></mat-divider>
+      <!-- Past submissions on bottom -->
+      <ng-container *ngFor="let submission of getPastSubmissions(allHistory)">
+        <button mat-menu-item 
+                class="submission-item"
+                (click)="onLoadSubmission(submission.id)">
+          <div class="submission-content">
+            <div class="submission-header">
+              <mat-icon class="submission-icon">description</mat-icon>
+              <span class="submission-name">{{submission.name}}</span>
+              <button mat-icon-button 
+                      class="delete-button" 
+                      (click)="onDeleteHistorySubmission(submission.id, submission.name, $event)"
+                      matTooltip="Delete submission"
+                      matTooltipPosition="left">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+            <div class="submission-meta">
+              <span class="submission-date">{{submission.timestamp | date:'short'}}</span>
+              <span class="submission-status" [class]="submission.status">
+                {{submission.status}}
+              </span>
+            </div>
+          </div>
+        </button>
+      </ng-container>
+    </ng-container>
   </mat-menu>
   
   <!-- Templates Dropdown -->

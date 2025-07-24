@@ -40,6 +40,7 @@ export class NavigationComponent implements OnInit {
 
   templates$: Observable<FormSubmission[]>;
   history$: Observable<FormSubmission[]>;
+  currentDraftId: string | null = null;
 
   constructor(
     private formStorageService: FormStorageService,
@@ -57,7 +58,10 @@ export class NavigationComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Component initialization
+    // Subscribe to current draft changes
+    this.formStorageService.currentDraft$.subscribe(draft => {
+      this.currentDraftId = draft ? draft.id : null;
+    });
   }
 
   onLoadSubmission(submissionId: string): void {
@@ -146,5 +150,13 @@ export class NavigationComponent implements OnInit {
         });
       }
     });
+  }
+
+  getDrafts(submissions: FormSubmission[]): FormSubmission[] {
+    return submissions.filter(sub => sub.status === 'draft');
+  }
+
+  getPastSubmissions(submissions: FormSubmission[]): FormSubmission[] {
+    return submissions.filter(sub => sub.status === 'submitted');
   }
 } 

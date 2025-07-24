@@ -104,7 +104,7 @@
   backdrop-filter: blur(12px);
   border: 1.5px solid #e3f2fd;
   padding: 12px;
-  margin-top: 8px;
+  margin-top: 52px;
   gap: 15px;
 }
 
@@ -295,6 +295,12 @@
 
 .submission-item:hover .delete-button {
   opacity: 1;
+}
+
+.current-draft {
+  background: #e3f2fd !important;
+  border: 2px solid #1976d2 !important;
+  box-shadow: 0 0 0 2px #1976d233 !important;
 }
 
 // Responsive adjustments
