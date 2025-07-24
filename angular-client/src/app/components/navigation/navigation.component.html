@@ -8,6 +8,47 @@
     <mat-spinner diameter="16" color="gray"></mat-spinner>
     <span>Autosaving...</span>
   </div>
+
+  
+
+  <!-- History Dropdown -->
+  <button mat-button [matMenuTriggerFor]="historyMenu" class="submissions-button">
+    <mat-icon>history_toggle_off</mat-icon>
+    <span>History</span>
+  </button>
+
+  <mat-menu #historyMenu="matMenu" class="submissions-menu">
+    <div class="menu-header">
+      <h3>History</h3>
+    </div>
+    <div *ngIf="(history$ | async)?.length === 0" class="no-submissions">
+      <mat-icon>inbox</mat-icon>
+      <span>No submissions yet</span>
+    </div>
+    <button mat-menu-item 
+            *ngFor="let submission of history$ | async" 
+            class="submission-item">
+      <div class="submission-content" (click)="onLoadSubmission(submission.id)">
+        <div class="submission-header">
+          <mat-icon class="submission-icon">description</mat-icon>
+          <span class="submission-name">{{submission.name}}</span>
+          <button mat-icon-button 
+                  class="delete-button" 
+                  (click)="onDeleteHistorySubmission(submission.id, submission.name, $event)"
+                  matTooltip="Delete submission"
+                  matTooltipPosition="left">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </div>
+        <div class="submission-meta">
+          <span class="submission-date">{{submission.timestamp | date:'short'}}</span>
+          <span class="submission-status" [class]="submission.status">
+            {{submission.status}}
+          </span>
+        </div>
+      </div>
+    </button>
+  </mat-menu>
   
   <!-- Templates Dropdown -->
   <button mat-button [matMenuTriggerFor]="submissionsMenu" class="submissions-button">

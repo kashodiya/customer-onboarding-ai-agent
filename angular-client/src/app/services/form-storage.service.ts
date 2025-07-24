@@ -80,6 +80,15 @@ export class FormStorageService {
     try {
       localStorage.setItem(this.DRAFT_KEY, JSON.stringify(draft));
       this.currentDraftSubject.next(draft);
+      // If draft has content, also store in submissions list (if not already present)
+      if (formData && Object.keys(formData).length > 0) {
+        const currentSubmissions = this.submissionsSubject.value;
+        const exists = currentSubmissions.some(sub => sub.id === draft.id);
+        if (!exists) {
+          const updatedSubmissions = [...currentSubmissions, draft];
+          this.saveSubmissions(updatedSubmissions);
+        }
+      }
     } catch (error) {
       console.error('Error saving draft:', error);
     }

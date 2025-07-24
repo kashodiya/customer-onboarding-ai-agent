@@ -39,6 +39,7 @@ export class NavigationComponent implements OnInit {
   @Input() isAutosaving: boolean = false;
 
   templates$: Observable<FormSubmission[]>;
+  history$: Observable<FormSubmission[]>;
 
   constructor(
     private formStorageService: FormStorageService,
@@ -48,6 +49,10 @@ export class NavigationComponent implements OnInit {
     // Only show templates in the navigation
     this.templates$ = this.formStorageService.submissions$.pipe(
       map(submissions => submissions.filter(sub => sub.status === 'template'))
+    );
+    // Show only regular submissions (history)
+    this.history$ = this.formStorageService.submissions$.pipe(
+      map(submissions => submissions.filter(sub => sub.status === 'submitted' || sub.status === 'draft'))
     );
   }
 
@@ -111,6 +116,31 @@ export class NavigationComponent implements OnInit {
       if (result) {
         this.formStorageService.deleteSubmission(submissionId);
         this.snackBar.open('Template deleted successfully', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+      }
+    });
+  }
+
+  onDeleteHistorySubmission(submissionId: string, submissionName: string, event: Event): void {
+    // Prevent the menu item click from propagating
+    event.stopPropagation();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Delete Submission',
+        message: `Are you sure you want to delete "${submissionName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.formStorageService.deleteSubmission(submissionId);
+        this.snackBar.open('Submission deleted successfully', 'Close', {
           duration: 3000,
           panelClass: ['success-snackbar']
         });
