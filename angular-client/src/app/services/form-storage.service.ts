@@ -85,6 +85,16 @@ export class FormStorageService {
         const currentSubmissions = this.submissionsSubject.value;
         const draftIndex = currentSubmissions.findIndex(sub => sub.id === draft.id);
         let updatedSubmissions;
+        // If this is a copy draft, only save if data has changed from the original submission
+        if (draft.name.startsWith('Copy of ')) {
+          // Try to find the original submission by name (remove 'Copy of ' prefix)
+          const originalName = draft.name.replace(/^Copy of /, '');
+          const original = currentSubmissions.find(sub => sub.name === originalName && sub.status === 'submitted');
+          const isChanged = !original || JSON.stringify(original.formData) !== JSON.stringify(draft.formData);
+          if (!isChanged) {
+            return; // Don't save if data is unchanged
+          }
+        }
         if (draftIndex !== -1) {
           // Update existing draft
           updatedSubmissions = [
