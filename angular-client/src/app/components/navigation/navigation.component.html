@@ -9,6 +9,11 @@
     <span>Autosaving...</span>
   </div>
 
+  <!-- Draft Saved Indicator -->
+  <div *ngIf="!isAutosaving && isDraftSaved" class="draft-saved-indicator">
+    <span>Draft saved</span>
+  </div>
+
   
 
   <!-- History Dropdown -->
@@ -120,7 +125,6 @@
           </button>
         </div>
         <div class="submission-meta">
-          <span class="submission-date">{{submission.timestamp | date:'short'}}</span>
           <span class="submission-status" [class]="submission.status">
             {{submission.status}}
           </span>

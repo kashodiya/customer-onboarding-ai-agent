@@ -37,6 +37,7 @@ export class NavigationComponent implements OnInit {
   @Output() newForm = new EventEmitter<void>();
   @Output() clearDraft = new EventEmitter<void>();
   @Input() isAutosaving: boolean = false;
+  isDraftSaved: boolean = false;
 
   templates$: Observable<FormSubmission[]>;
   history$: Observable<FormSubmission[]>;
@@ -49,7 +50,10 @@ export class NavigationComponent implements OnInit {
   ) {
     // Only show templates in the navigation
     this.templates$ = this.formStorageService.submissions$.pipe(
-      map(submissions => submissions.filter(sub => sub.status === 'template'))
+      map(submissions => submissions
+        .filter(sub => sub.status === 'template')
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      )
     );
     // Show only regular submissions (history)
     this.history$ = this.formStorageService.submissions$.pipe(
@@ -61,6 +65,7 @@ export class NavigationComponent implements OnInit {
     // Subscribe to current draft changes
     this.formStorageService.currentDraft$.subscribe(draft => {
       this.currentDraftId = draft ? draft.id : null;
+      this.isDraftSaved = !!draft;
     });
   }
 
@@ -153,10 +158,14 @@ export class NavigationComponent implements OnInit {
   }
 
   getDrafts(submissions: FormSubmission[]): FormSubmission[] {
-    return submissions.filter(sub => sub.status === 'draft');
+    return submissions
+      .filter(sub => sub.status === 'draft')
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 
   getPastSubmissions(submissions: FormSubmission[]): FormSubmission[] {
-    return submissions.filter(sub => sub.status === 'submitted');
+    return submissions
+      .filter(sub => sub.status === 'submitted')
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 } 

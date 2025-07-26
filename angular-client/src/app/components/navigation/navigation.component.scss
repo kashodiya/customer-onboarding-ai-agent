@@ -227,6 +227,22 @@
   }
 }
 
+.draft-saved-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 18px;
+  color: #666;
+  font-size: 15px;
+  background: rgba(240,240,240,0.7);
+  border-radius: 999px;
+  padding: 4px 16px 4px 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0.95;
+  span {
+    font-weight: 400;
+  }
+}
+
 .import-button, .clear-draft-button {
   color: #1976d2;
   font-weight: 600;
