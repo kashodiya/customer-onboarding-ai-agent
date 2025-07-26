@@ -43,3 +43,7 @@ body {
 .mdc-text-field--outlined, .mdc-text-field {
   padding: 0px !important;
 }
+
+.cdk-overlay-connected-position-bounding-box {
+  max-height: 50vh;
+}

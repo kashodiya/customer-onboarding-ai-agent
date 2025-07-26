@@ -8,11 +8,10 @@
   min-height: 68px;
   display: flex;
   align-items: center;
-  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 0 rgba(25, 118, 210, 0.04);
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.2), 0 1.5px 0 rgba(25, 118, 210, 0.1);
   background: linear-gradient(90deg, rgba(224,231,239,0.85) 0%, rgba(250,253,255,0.85) 100%);
   backdrop-filter: blur(16px);
   border-radius: 0 0 24px 24px;
-  border-bottom: 2px solid #e3f2fd;
   padding: 0 32px;
 }
 
@@ -249,6 +248,11 @@
 .mat-divider {
   margin: 10px 0;
   border-top: 1.5px solid #e3f2fd;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  top: 51.72px !important;
+  max-height: 50vh;
 }
 
 .new-form-button {
