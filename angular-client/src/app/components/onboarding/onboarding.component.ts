@@ -528,7 +528,6 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   // Autosave current form data
   private autosave(): void {
-    
     if (this.onboardingForm.dirty) {
       const formTitle = this.onboardingForm.get('formTitle')?.value || '';
       const hasTitleContent = formTitle.trim().length > 0;
