@@ -198,10 +198,15 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       console.log('No navigation state available, continuing normally');
     }
     
-    // Check if there's an existing draft, if not start the agent
+    // Always start the agent to show welcome message and assistance buttons
+    this.startAgent();
+    
+    // Load existing draft if available (this will happen after the agent starts)
     const currentDraft = this.formStorageService.getCurrentDraft();
-    if (!currentDraft || !this.hasFormContent(currentDraft.formData)) {
-      this.startAgent();
+    if (currentDraft && this.hasFormContent(currentDraft.formData)) {
+      // Load the draft data but don't prevent the welcome message
+      this.loadFormData(currentDraft.formData, currentDraft.name);
+      this.addMessage(`Draft "${currentDraft.name}" loaded automatically.`, false);
     }
   }
 
