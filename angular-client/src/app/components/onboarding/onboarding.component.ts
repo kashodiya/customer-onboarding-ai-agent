@@ -449,6 +449,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     
     if (enabled) {
       this.addMessage('Great! Start filling out the form and I\'ll assist you along the way.', false);
+    } else {
+      this.addMessage('Smart Guide disabled. If you need assistance, feel free to ask me a question or switch Smart Guide back on.', false);
     }
   }
 

@@ -162,6 +162,13 @@
   text-align: left;
   flex: 1;
   cursor: pointer;
+
+  .submission-meta {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+  }
 }
 
 .submission-header {
@@ -184,12 +191,8 @@
   color: #222;
 }s
 
-.submission-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 12px;
-  color: #888;
+.submission-date {
+  margin-right: 10px;
 }
 
 .submission-status {
