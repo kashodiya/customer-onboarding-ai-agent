@@ -37,8 +37,11 @@ export class NavigationComponent implements OnInit {
   @Output() newForm = new EventEmitter<void>();
   @Output() clearDraft = new EventEmitter<void>();
   @Input() isAutosaving: boolean = false;
+  isDraftSaved: boolean = false;
 
   templates$: Observable<FormSubmission[]>;
+  history$: Observable<FormSubmission[]>;
+  currentDraftId: string | null = null;
 
   constructor(
     private formStorageService: FormStorageService,
@@ -47,12 +50,23 @@ export class NavigationComponent implements OnInit {
   ) {
     // Only show templates in the navigation
     this.templates$ = this.formStorageService.submissions$.pipe(
-      map(submissions => submissions.filter(sub => sub.status === 'template'))
+      map(submissions => submissions
+        .filter(sub => sub.status === 'template')
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+      )
+    );
+    // Show only regular submissions (history)
+    this.history$ = this.formStorageService.submissions$.pipe(
+      map(submissions => submissions.filter(sub => sub.status === 'submitted' || sub.status === 'draft'))
     );
   }
 
   ngOnInit(): void {
-    // Component initialization
+    // Subscribe to current draft changes
+    this.formStorageService.currentDraft$.subscribe(draft => {
+      this.currentDraftId = draft ? draft.id : null;
+      this.isDraftSaved = !!draft;
+    });
   }
 
   onLoadSubmission(submissionId: string): void {
@@ -116,5 +130,42 @@ export class NavigationComponent implements OnInit {
         });
       }
     });
+  }
+
+  onDeleteHistorySubmission(submissionId: string, submissionName: string, event: Event): void {
+    // Prevent the menu item click from propagating
+    event.stopPropagation();
+
+    const dialogRef = this.dialog.open(ConfirmationDialogComponent, {
+      width: '350px',
+      data: {
+        title: 'Delete Submission',
+        message: `Are you sure you want to delete "${submissionName}"? This action cannot be undone.`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.formStorageService.deleteSubmission(submissionId);
+        this.snackBar.open('Submission deleted successfully', 'Close', {
+          duration: 3000,
+          panelClass: ['success-snackbar']
+        });
+      }
+    });
+  }
+
+  getDrafts(submissions: FormSubmission[]): FormSubmission[] {
+    return submissions
+      .filter(sub => sub.status === 'draft')
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  }
+
+  getPastSubmissions(submissions: FormSubmission[]): FormSubmission[] {
+    return submissions
+      .filter(sub => sub.status === 'submitted')
+      .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
   }
 } 

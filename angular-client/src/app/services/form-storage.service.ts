@@ -80,6 +80,34 @@ export class FormStorageService {
     try {
       localStorage.setItem(this.DRAFT_KEY, JSON.stringify(draft));
       this.currentDraftSubject.next(draft);
+      // If draft has content, also store in submissions list (update if already present)
+      if (formData && Object.keys(formData).length > 0) {
+        const currentSubmissions = this.submissionsSubject.value;
+        const draftIndex = currentSubmissions.findIndex(sub => sub.id === draft.id);
+        let updatedSubmissions;
+        // If this is a copy draft, only save if data has changed from the original submission
+        if (draft.name.startsWith('Copy of ')) {
+          // Try to find the original submission by name (remove 'Copy of ' prefix)
+          const originalName = draft.name.replace(/^Copy of /, '');
+          const original = currentSubmissions.find(sub => sub.name === originalName && sub.status === 'submitted');
+          const isChanged = !original || JSON.stringify(original.formData) !== JSON.stringify(draft.formData);
+          if (!isChanged) {
+            return; // Don't save if data is unchanged
+          }
+        }
+        if (draftIndex !== -1) {
+          // Update existing draft
+          updatedSubmissions = [
+            ...currentSubmissions.slice(0, draftIndex),
+            draft,
+            ...currentSubmissions.slice(draftIndex + 1)
+          ];
+        } else {
+          // Add new draft
+          updatedSubmissions = [...currentSubmissions, draft];
+        }
+        this.saveSubmissions(updatedSubmissions);
+      }
     } catch (error) {
       console.error('Error saving draft:', error);
     }
@@ -96,9 +124,17 @@ export class FormStorageService {
       status: 'submitted'
     };
 
-    // Add to submissions list
+    // Add to submissions list, replacing any current draft
     const currentSubmissions = this.submissionsSubject.value;
-    const updatedSubmissions = [...currentSubmissions, submission];
+    let updatedSubmissions;
+    const currentDraft = this.getCurrentDraft();
+    if (currentDraft) {
+      // Remove the draft from submissions if it exists
+      updatedSubmissions = currentSubmissions.filter(sub => sub.id !== currentDraft.id);
+    } else {
+      updatedSubmissions = [...currentSubmissions];
+    }
+    updatedSubmissions = [...updatedSubmissions, submission];
     this.saveSubmissions(updatedSubmissions);
 
     // Clear current draft
@@ -134,7 +170,37 @@ export class FormStorageService {
     const submission = submissions.find(sub => sub.id === submissionId);
     
     if (submission) {
-      this.saveDraft(submission.formData, `Copy of ${submission.name}`);
+      if (submission.status === 'draft') {
+        // Set this draft as the current draft (no copy)
+        try {
+          localStorage.setItem(this.DRAFT_KEY, JSON.stringify(submission));
+          this.currentDraftSubject.next(submission);
+        } catch (error) {
+          console.error('Error setting draft as current:', error);
+        }
+      } else {
+        // For non-draft (submitted/template), create a new draft copy with a new id
+        const newDraft = {
+          ...submission,
+          id: this.generateId(),
+          status: 'draft' as 'draft',
+          timestamp: new Date(),
+          name: `Copy of ${submission.name}`
+        };
+        // Only set as current draft if data is different from the original
+        const isChanged = JSON.stringify(submission.formData) !== JSON.stringify(newDraft.formData);
+        if (isChanged) {
+          try {
+            localStorage.setItem(this.DRAFT_KEY, JSON.stringify(newDraft));
+            this.currentDraftSubject.next(newDraft);
+          } catch (error) {
+            console.error('Error creating draft copy:', error);
+          }
+        } else {
+          // Set as current draft in memory only, but do not save to submissions
+          this.currentDraftSubject.next(newDraft);
+        }
+      }
       return true;
     }
     return false;

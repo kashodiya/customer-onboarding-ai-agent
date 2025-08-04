@@ -8,11 +8,10 @@
   min-height: 68px;
   display: flex;
   align-items: center;
-  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.10), 0 1.5px 0 rgba(25, 118, 210, 0.04);
+  box-shadow: 0 8px 32px rgba(25, 118, 210, 0.2), 0 1.5px 0 rgba(25, 118, 210, 0.1);
   background: linear-gradient(90deg, rgba(224,231,239,0.85) 0%, rgba(250,253,255,0.85) 100%);
   backdrop-filter: blur(16px);
   border-radius: 0 0 24px 24px;
-  border-bottom: 2px solid #e3f2fd;
   padding: 0 32px;
 }
 
@@ -35,7 +34,7 @@
   align-items: center;
   gap: 10px;
   border-radius: 999px;
-  background: linear-gradient(90deg, #1976d2 0%, #5ac8fa 100%);
+  background: #1976d2;
   color: #fff;
   font-weight: 600;
   font-size: 15px;
@@ -63,7 +62,6 @@
 }
 
 .submissions-button:hover, .submissions-button.cdk-program-focused {
-  background: linear-gradient(90deg, #5ac8fa 0%, #1976d2 100%);
   color: #e3f2fd;
   box-shadow: 0 8px 32px rgba(25, 118, 210, 0.18);
   transform: scale(1.04);
@@ -93,7 +91,7 @@
   50% { transform: scale(1.2); opacity: 0.7; }
   100% { transform: scale(1); opacity: 1; }
 }
-
+.cdk-overlay-pane {
 .submissions-menu {
   display: flex;
   flex-direction: column;
@@ -105,14 +103,9 @@
   backdrop-filter: blur(12px);
   border: 1.5px solid #e3f2fd;
   padding: 12px;
-  margin-top: 8px;
+  margin-top: 52px;
   gap: 15px;
 }
-
-.mat-mdc-menu-content {
-  width: fit-content;
-  height: fit-content;
-  padding: 0px !important;
 }
 
 .menu-header {
@@ -145,7 +138,8 @@
 }
 
 .submission-item {
-  width: fit-content;
+  width: 100%;
+  max-width: 280px !important;
   height: auto;
   padding: 14px 18px 14px 14px;
   margin: 10px;
@@ -228,11 +222,27 @@
   }
 }
 
+.draft-saved-indicator {
+  display: flex;
+  align-items: center;
+  margin-right: 18px;
+  color: #666;
+  font-size: 15px;
+  background: rgba(240,240,240,0.7);
+  border-radius: 999px;
+  padding: 4px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  opacity: 0.95;
+  span {
+    font-weight: 400;
+  }
+}
+
 .import-button, .clear-draft-button {
   color: #1976d2;
   font-weight: 600;
   border-radius: 999px;
-  margin: 8px auto !important;
+  margin: 8px 12px !important;
   width: fit-content;
   background: #e3f2fd;
   transition: background 0.2s, color 0.2s;
@@ -250,6 +260,22 @@
 .mat-divider {
   margin: 10px 0;
   border-top: 1.5px solid #e3f2fd;
+}
+
+.mat-mdc-menu-panel {
+  width: fit-content !important;
+  max-width: none !important;
+}
+
+.mat-mdc-menu-content {
+  width: fit-content !important;
+  max-width: none !important;
+  padding: 0px !important;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  top: 51.72px !important;
+  max-height: 50vh;
 }
 
 .new-form-button {
@@ -296,6 +322,12 @@
 
 .submission-item:hover .delete-button {
   opacity: 1;
+}
+
+.current-draft {
+  background: #e3f2fd !important;
+  border: 2px solid #1976d2 !important;
+  box-shadow: 0 0 0 2px #1976d233 !important;
 }
 
 // Responsive adjustments

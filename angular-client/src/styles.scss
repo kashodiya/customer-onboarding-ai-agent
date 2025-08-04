@@ -29,3 +29,21 @@ body {
   padding: 16px;
   border-top: 1px solid #e0e0e0;
 } 
+
+.mat-mdc-form-field-subscript-wrapper {
+  margin-bottom: 8px;
+}
+
+.mat-mdc-form-field-infix {
+  padding: 16px !important;
+  width: 100%;
+  background: white;
+}
+
+.mdc-text-field--outlined, .mdc-text-field {
+  padding: 0px !important;
+}
+
+.cdk-overlay-connected-position-bounding-box {
+  max-height: 50vh;
+}

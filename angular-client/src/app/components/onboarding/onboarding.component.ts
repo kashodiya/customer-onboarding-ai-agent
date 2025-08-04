@@ -191,15 +191,22 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       const state = navigation?.extras?.state;
       if (state && state['clearDraft']) {
         this.formStorageService.clearCurrentDraft();
+        this.onboardingForm.reset();
+        this.onboardingForm.markAsPristine();
       }
     } catch (error) {
       console.log('No navigation state available, continuing normally');
     }
     
-    // Check if there's an existing draft, if not start the agent
+    // Always start the agent to show welcome message and assistance buttons
+    this.startAgent();
+    
+    // Load existing draft if available (this will happen after the agent starts)
     const currentDraft = this.formStorageService.getCurrentDraft();
-    if (!currentDraft || !this.hasFormContent(currentDraft.formData)) {
-      this.startAgent();
+    if (currentDraft && this.hasFormContent(currentDraft.formData)) {
+      // Load the draft data but don't prevent the welcome message
+      this.loadFormData(currentDraft.formData, currentDraft.name);
+      this.addMessage(`Draft "${currentDraft.name}" loaded automatically.`, false);
     }
   }
 
@@ -515,11 +522,17 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
       .subscribe(() => {
         this.autosave();
       });
+
+    // Trigger autosave with debounce when the draft name changes
+    this.onboardingForm.get('formTitle')?.valueChanges
+      .pipe(debounceTime(2000), distinctUntilChanged())
+      .subscribe(() => {
+        this.autosave();
+      });
   }
 
   // Autosave current form data
   private autosave(): void {
-    
     if (this.onboardingForm.dirty) {
       const formTitle = this.onboardingForm.get('formTitle')?.value || '';
       const hasTitleContent = formTitle.trim().length > 0;
@@ -709,6 +722,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
         });
       }, 1000); // Small delay to show the message
       
+      // Prevent autosave from running after submission
+      this.onboardingForm.markAsPristine();
+      this.formStorageService.clearCurrentDraft();
     } catch (error) {
       console.error('Error submitting form:', error);
       this.snackBar.open('Error submitting form. Please try again.', 'Close', {
