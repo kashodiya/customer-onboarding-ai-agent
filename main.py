@@ -1,126 +1,209 @@
-from fastapi import FastAPI, WebSocket, HTTPException, Depends, Header
+from fastapi import FastAPI, WebSocket, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse
+from fastapi.middleware.cors import CORSMiddleware
 import json
-from agent import ask_agent, init_agent
+import re
+from agent import ask_agent
 import random
-import os
-
-SESSIONS_FILE = "active_sessions.json"
- 
-def load_sessions():
-    try:
-        with open(SESSIONS_FILE, 'r') as f:
-            print(f"Loading active sessions from {SESSIONS_FILE}")
-            return set(json.load(f))
-    except FileNotFoundError:
-        return set()
-
-def save_sessions():
-    global active_sessions
-    with open(SESSIONS_FILE, 'w') as f:
-        json.dump(list(active_sessions), f)
+from urllib.parse import unquote
 
 # Initialize FastAPI application
 app = FastAPI()
- 
-# User session data
-user_sessions = {}  # {token: {"agent_session_id": str, "form_data": dict, "websockets": list}}
-active_sessions = load_sessions()
 
-def check_auth(authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
-    if not token or token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    return token
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200", "http://localhost:8000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-@app.post("/api/login")
-async def login(credentials: dict):
-    password = os.getenv("PASS", "123456")
-    if credentials.get("password") == password:
-        session_token = str(random.randint(100000000, 999999999))
-        active_sessions.add(session_token)
-        user_sessions[session_token] = {
-            "agent_session_id": str(random.randint(10000000, 99999999)),
-            "form_data": {},
-            "websockets": []
-        }
-        save_sessions()
-        return {"token": session_token, "success": True}
-    raise HTTPException(status_code=401, detail="Invalid password")
-
-@app.post("/api/logout")
-async def logout(authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
-    if token and token in active_sessions:
-        active_sessions.remove(token)
-        if token in user_sessions:
-            del user_sessions[token]
-        save_sessions()
-    return {"success": True}
+# items = []
+connected_clients = []
+form_data = {}
+agent_session_id = str(random.randint(10000000, 99999999))
 
 @app.get("/api/ask-agent/{prompt}")
-async def ask_agent_endpoint(prompt: str, authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
-    if not token or token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_session = user_sessions[token]
-    answer = ask_agent(prompt, session_id=user_session["agent_session_id"])
-    changed = ask_agent("REPORT-LAST-ANSWER", session_id=user_session["agent_session_id"])
-    
-    print(f"Anything changed?\n {changed}")
-    print(f"WebSocket connections for user: {len(user_session['websockets'])}")
-    
-    # Send WebSocket message only to this user's connections
-    if changed and changed.strip() != "{}":
-        print(f"Sending to {len(user_session['websockets'])} WebSocket connections")
-        for client in user_session["websockets"][:]:
-            try:
-                print(f"Sending update to client: {client}")
-                await client.send_text(json.dumps({
-                    "type": "update-form",
-                    "payload": changed
-                }))
-            except:
-                user_session["websockets"].remove(client)
+async def ask_agent_endpoint(prompt: str, request: Request):
+    # Check if form data is provided in query parameters
+    form_data_param = request.query_params.get('formData')
+    current_form_state = {}
+    if form_data_param:
+        try:
+            current_form_state = json.loads(unquote(form_data_param))
+            print(f"Received form state: {current_form_state}")
+        except Exception as e:
+            print(f"Error parsing form data: {e}")
 
-    return {"answer": answer}
+    # Always include form state in the prompt context if available
+    if current_form_state and any(current_form_state.values()):
+        context_prompt = f"User asks: '{prompt}'. Current form state: {json.dumps(current_form_state)}. Respond considering what's already filled out."
+    else:
+        context_prompt = prompt
+
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
+
+    # Check if the AI response contains proactive form updates
+    changed = None
+    clean_answer = answer  # Start with the original answer
+
+    if isinstance(answer, str) and "Form Update Available:" in answer:
+        try:
+            # Extract JSON from the response
+            json_match = re.search(r'```json\s*(\{[^`]+\})\s*```', answer)
+            if json_match:
+                json_str = json_match.group(1)
+                changed = json.loads(json_str)
+                print(f"Proactive form update found: {changed}")
+                # Remove the form update section from the visible response
+                clean_answer = re.sub(r'\s*Form Update Available:\s*```json\s*\{[^`]+\}\s*```', '', answer)
+                clean_answer = clean_answer.strip()
+            else:
+                print("Form update marker found but no valid JSON extracted")
+        except Exception as e:
+            print(f"Error parsing proactive form update: {e}")
+
+    # Debug logging
+    print(f"Changed value: {changed}")
+    print(f"Changed type: {type(changed)}")
+    print(f"Connected clients: {len(connected_clients)}")
+
+    # Send WebSocket message if changed has a value
+    if changed and str(changed).strip() != "{}":
+        print(f"Sending WebSocket message for: {changed}")
+        message_data = {
+            "type": "update-form",
+            "payload": changed
+        }
+        message_json = json.dumps(message_data)
+        print(f"WebSocket message: {message_json}")
+        for client in connected_clients[:]:
+            try:
+                await client.send_text(message_json)
+                print(f"✅ Message sent to client")
+            except Exception as e:
+                print(f"❌ Failed to send message to client: {e}")
+                connected_clients.remove(client)
+    else:
+        print(f"No WebSocket message sent. Changed: {changed}")
+
+    return {"answer": clean_answer}
+
+def has_meaningful_form_content(form_data):
+    """Check if form data contains meaningful content beyond empty fields"""
+    # Handle None/null
+    if form_data is None:
+        return False
+    
+    # Handle strings - meaningful if not empty after stripping
+    if isinstance(form_data, str):
+        return len(form_data.strip()) > 0
+    
+    # Handle numbers - meaningful if not 0 (though 0 could be meaningful in some contexts)
+    if isinstance(form_data, (int, float)):
+        return form_data != 0
+    
+    # Handle booleans - meaningful if True (False is typically default)
+    if isinstance(form_data, bool):
+        return form_data is True
+    
+    # Handle lists/arrays - meaningful if not empty and contains meaningful values
+    if isinstance(form_data, list):
+        return len(form_data) > 0 and any(has_meaningful_form_content(item) for item in form_data)
+    
+    # Handle dictionaries/objects - meaningful if any property has meaningful value
+    if isinstance(form_data, dict):
+        return any(has_meaningful_form_content(prop) for prop in form_data.values())
+    
+    # For any other type, consider it meaningful if it exists
+    return True
 
 @app.get("/api/start-agent")
-def start_agent(authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
-    if not token or token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Not authenticated")
+def start_agent(request: Request):
+    print(f"Starting agent with session ID: {agent_session_id}")
     
-    if token not in user_sessions:
-        user_sessions[token] = {
-            "agent_session_id": str(random.randint(10000000, 99999999)),
-            "form_data": {},
-            "websockets": []
-        }
+    # Check if form data is provided in query parameters
+    form_data_param = request.query_params.get('formData')
+    current_form_state = {}
+    if form_data_param:
+        try:
+            current_form_state = json.loads(unquote(form_data_param))
+            print(f"Initial form state: {current_form_state}")
+        except Exception as e:
+            print(f"Error parsing form data: {e}")
     
-    user_session = user_sessions[token]
-    user_session["agent_session_id"] = str(random.randint(10000000, 99999999))
-    print(f"Starting agent with session ID: {user_session['agent_session_id']}")
-    init_agent()
-    answer = ask_agent("Greet user and start asking questions.", session_id=user_session["agent_session_id"])
-    return {"answer": answer}
+    # Determine if this is asking for assistance based on meaningful content
+    has_meaningful_content = has_meaningful_form_content(current_form_state)
+    is_asking_for_assistance = not has_meaningful_content  # Ask for assistance if no meaningful content
+    
+    # Include form state in the welcome context
+    if has_meaningful_content:
+        # User has existing meaningful form data (real draft/loaded submission)
+        context_prompt = f"Give a brief welcome back message. User has loaded existing form data: {json.dumps(current_form_state)}. Simply acknowledge the loaded data and mention you're ready to help. Keep it under 2 sentences. Do not ask for assistance preference."
+    else:
+        # Fresh start or empty draft - ask for assistance
+        context_prompt = "Give a brief welcome to the customer onboarding process. Ask if they would like assistance with the process. Let the user know they can ask questions in the chat at any time, regardless of their choice. Keep it concise and under 3 sentences."
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
+    return {
+        "answer": answer,
+        "showAssistanceButtons": is_asking_for_assistance
+    }
 
 
 @app.post("/api/update-form-field")
-async def update_form_field(field_data: dict, authorization: str = Header(None)):
-    token = authorization.replace("Bearer ", "") if authorization else None
-    if not token or token not in active_sessions:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-    
-    user_session = user_sessions[token]
-    user_session["form_data"][field_data["name"]] = field_data["value"]
-    print(f"Form data updated: {user_session['form_data']}")
+async def update_form_field(field_data: dict):
+    # Update form data
+    form_data[field_data["name"]] = field_data["value"]
+    print(f"Form data updated: {form_data}")
 
-    answer = ask_agent(f"User has updated the form field '{field_data['name']}' with value '{field_data['value']}'. Briefly confrm it in simple English. What should user do next?", session_id=user_session["agent_session_id"])
+    # Get complete form state if provided
+    complete_form_data = field_data.get("completeFormData", {})
+    
+    # Include complete form state in the prompt context
+    if complete_form_data and any(complete_form_data.values()):
+        context_prompt = f"User updated '{field_data['name']}' to '{field_data['value']}'. Current complete form state: {json.dumps(complete_form_data)}. Give brief confirmation, then ask for the next UNFILLED field. Keep under 2 sentences."
+    else:
+        context_prompt = f"User updated '{field_data['name']}' to '{field_data['value']}'. Give brief confirmation, then ask for the next field. Keep under 2 sentences."
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
     return {"answer": answer}
 
+
+@app.post("/api/toggle-smart-guide")
+async def toggle_smart_guide(toggle_data: dict):
+    enabled = toggle_data.get("enabled", True)
+    form_data_provided = toggle_data.get("formData", {})
+    print(f"Smart Guide toggled: {enabled}")
+    print(f"Form data provided: {form_data_provided}")
+    
+    if enabled:
+        context_prompt = "Great! Start filling out the form and I'll assist you along the way. Click on any field for context and requirements."
+        answer = ask_agent(context_prompt, session_id=agent_session_id)
+    else:
+        answer = ask_agent("Briefly confirm Manual mode is active. Keep it under 1 sentence.", session_id=agent_session_id)
+    
+    return {"answer": answer}
+
+
+@app.post("/api/get-field-context")
+async def get_field_context(request: Request):
+    data = await request.json()
+    field_name = data.get('name', '')
+    field_label = data.get('value', '')  # Using value field to pass the field label
+
+    # Only include field name/label in the prompt, not the full form state
+    context_prompt = f"""
+FIELD CONTEXT REQUEST:
+The user is focusing on the field: \"{field_label}\" (path: {field_name})
+
+Provide helpful context about the \"{field_label}\" field. Explain what it's for, mention any requirements, and give examples if helpful. Be specific and mention the field name explicitly instead of saying \"This field\". Keep it natural and under 2 sentences.
+"""
+    
+    answer = ask_agent(context_prompt, session_id=agent_session_id)
+    return {"answer": answer}
 
 
     #             "form_state": form_data
@@ -144,43 +227,23 @@ async def update_form_field(field_data: dict, authorization: str = Header(None))
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
-    print("WebSocket connection accepted")
-    
-    # Get token from first message
-    try:
-        message = await websocket.receive_text()
-        auth_data = json.loads(message)
-        token = auth_data.get("token")
-        print(f"Received token: {token}")
-    except Exception as e:
-        print(f"Failed to get token: {e}")
-        await websocket.close()
-        return
-    
-    if not token or token not in active_sessions:
-        print(f"Invalid token or session: {token}")
-        await websocket.close()
-        return
-    
-    if token not in user_sessions:
-        print(f"Token not in user_sessions: {token}")
-        await websocket.close()
-        return
-    
-    user_sessions[token]["websockets"].append(websocket)
-    print(f"WebSocket connected for token {token}. Total connections: {len(user_sessions[token]['websockets'])}")
-    
+    connected_clients.append(websocket)
     try:
         while True:
             await websocket.receive_text()
-    except Exception as e:
-        print(f"WebSocket error: {e}")
-        if token in user_sessions and websocket in user_sessions[token]["websockets"]:
-            user_sessions[token]["websockets"].remove(websocket)
-            print(f"WebSocket disconnected for token {token}. Remaining connections: {len(user_sessions[token]['websockets'])}")
+    except:
+        if websocket in connected_clients:
+            connected_clients.remove(websocket)
 
 
 
 # Mount static files
-# app.mount("/", StaticFiles(directory="client/dist", html=True), name="static")
-app.mount("/", StaticFiles(directory="client1", html=True), name="static")
+# Temporarily serve Vue app until Angular is built for production
+app.mount("/", StaticFiles(directory="angular-client/dist/customer-onboarding-angular", html=True), name="static")
+# For production Angular build, use: angular-client/dist/customer-onboarding-angular
+
+# Add server startup code
+if __name__ == "__main__":
+    import uvicorn
+    print("Starting FastAPI server on http://localhost:8000")
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

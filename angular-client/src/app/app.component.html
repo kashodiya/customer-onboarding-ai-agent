@@ -1,0 +1,14 @@
+<div class="app-container">
+  <!-- Navigation -->
+  <app-navigation 
+    [isAutosaving]="isAutosaving"
+    (loadSubmission)="onLoadSubmission($event)"
+    (newForm)="onNewForm()"
+    (clearDraft)="onClearDraft()">
+  </app-navigation>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <router-outlet></router-outlet>
+  </div>
+</div> 

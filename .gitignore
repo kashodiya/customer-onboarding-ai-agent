@@ -35,3 +35,29 @@ Desktop.ini
 
 # Linux
 *~
+
+# Node.js and Angular
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Angular build outputs
+dist/
+tmp/
+out-tsc/
+
+# Angular cache
+.angular/
+.sass-cache/
+
+# TypeScript
+*.tsbuildinfo
+
+# Angular client specific
+angular-client/node_modules/
+angular-client/dist/
+angular-client/.angular/
+angular-client/tmp/
+angular-client/out-tsc/

@@ -1,8 +1,13 @@
 from langchain_aws import ChatBedrock
 from langchain.memory import ConversationBufferMemory
-from langchain.schema import SystemMessage
+from langchain.schema import SystemMessage, HumanMessage, BaseMessage
 from jinja2 import Environment, BaseLoader
 from datetime import datetime
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Global memory instances per session
 _memories = {}
@@ -26,11 +31,9 @@ def init_agent():
     print("Initializing agent...")
     
     _llm_instance = ChatBedrock(
-        model_id="anthropic.claude-3-5-sonnet-20240620-v1:0",
-        region_name="us-east-1",
-        model_kwargs={"max_tokens": 4096, "temperature": 0.5, "top_p": 0.9}
+        model="anthropic.claude-3-sonnet-20240229-v1:0",
+        region="us-west-2"
     )
-    
     with open("SYSTEM_PROMPT.md", "r") as f:
         system_prompt = f.read().strip()
     
@@ -40,11 +43,11 @@ def init_agent():
     with open("questions_schema.json", "r") as f:
         questions_schema = f.read().strip()
         
-    env = Environment(loader=BaseLoader)
+    env = Environment(loader=BaseLoader())
     template = env.from_string(system_prompt)
     # Current date and time
     current_date_time = datetime.now().strftime("%Y-%m-%d %H:%M")
-    _system_prompt = template.render({"questions_schema": questions_schema, "date_time": current_date_time, "knowledgebase": knowledgebase})
+    _system_prompt = template.render({"questions_schema": questions_schema, "date_time": current_date_time })
 
 
 def get_llm():
@@ -84,6 +87,8 @@ def ask_agent(prompt, session_id="default", debug=False, role="user"):
     try:
         memory = get_memory(session_id)
         llm = get_llm()
+        if llm is None:
+            raise RuntimeError("Failed to initialize LLM")
         system_prompt = get_system_prompt()
         
         print(f"\n🔍 Asking agent in session '{session_id}': {prompt}")
@@ -92,10 +97,14 @@ def ask_agent(prompt, session_id="default", debug=False, role="user"):
             print(f"\n--- BEFORE: Session '{session_id}' ---")
             debug_memory_state(session_id)
         
+        # Ensure system_prompt is not None
+        if system_prompt is None:
+            system_prompt = "You are a helpful AI assistant."
+        
         # Build messages: system + conversation history + new prompt
-        messages = [SystemMessage(content=system_prompt)]
+        messages: list[BaseMessage] = [SystemMessage(content=system_prompt)]
         messages.extend(memory.chat_memory.messages)
-        messages.append({"role": role, "content": prompt})
+        messages.append(HumanMessage(content=prompt))
         
         response = llm.invoke(messages)
         

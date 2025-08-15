@@ -1,0 +1,19 @@
+<div class="confirmation-dialog">
+  <div class="dialog-header">
+    <div class="icon-circle">
+      <mat-icon class="warning-icon">warning</mat-icon>
+    </div>
+    <h2 mat-dialog-title>{{ data.title }}</h2>
+  </div>
+
+  <mat-dialog-content>
+    <p>{{ data.message }}</p>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="center">
+    <button mat-stroked-button class="cancel-btn" (click)="onCancel()">{{ data.cancelText }}</button>
+    <button mat-raised-button color="warn" class="confirm-btn" (click)="onConfirm()" cdkFocusInitial>
+      {{ data.confirmText }}
+    </button>
+  </mat-dialog-actions>
+</div> 
