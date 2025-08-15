@@ -47,3 +47,8 @@ body {
 .cdk-overlay-connected-position-bounding-box {
   max-height: 50vh;
 }
+
+.mat-mdc-menu-panel {
+  width: fit-content !important;
+  max-width: none !important;
+}

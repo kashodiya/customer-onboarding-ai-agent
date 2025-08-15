@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked } from '@angular/core';
-import { Router } from '@angular/router';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewChecked, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormArray, FormControl } from '@angular/forms';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -29,6 +29,7 @@ import { AutosaveService } from '../../services/autosave.service';
     standalone: true,
     imports: [
         CommonModule,
+        RouterModule,
         FormsModule,
         ReactiveFormsModule,
         MatCardModule,
@@ -70,6 +71,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   formUpdatesSubscription?: Subscription;
   draftSubscription?: Subscription;
   isLoadingTemplate: boolean = false; // Track if we're loading a template
+  private isApplyingDraft: boolean = false; // Prevent autosave during programmatic form loads
+  private lastSavedHash: string | null = null; // Track last saved snapshot (title + data)
 
   // Data arrays for dropdowns
   internalExternalOptions = ['Internal', 'External'];
@@ -78,8 +81,9 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   backupRegionOptions = ['NORTH', 'SOUTH', 'None'];
   networkLocationOptions = ['On Site', 'Cloud'];
 
+  private router = inject(Router);
+
   constructor(
-    private router: Router,
     private chatService: ChatService,
     private formBuilder: FormBuilder,
     private snackBar: MatSnackBar,
@@ -449,6 +453,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     
     if (enabled) {
       this.addMessage('Great! Start filling out the form and I\'ll assist you along the way.', false);
+    } else {
+      this.addMessage('Smart Guide disabled. If you need assistance, feel free to ask me a question or switch Smart Guide back on.', false);
     }
   }
 
@@ -533,24 +539,55 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   // Autosave current form data
   private autosave(): void {
-    if (this.onboardingForm.dirty) {
-      const formTitle = this.onboardingForm.get('formTitle')?.value || '';
-      const hasTitleContent = formTitle.trim().length > 0;
-      const hasOtherContent = this.hasFormContent();
-      
-      // Trigger autosave if there's either a title or other form content
-      if (hasTitleContent || hasOtherContent) {
-        this.autosaveService.setAutosaving(true);
-        const formData = this.getCompleteFormData();
-        const titleForDraft = formTitle.trim() || 'Untitled Draft';
-        this.formStorageService.saveDraft(formData, titleForDraft);
-        
-        // Hide autosaving indicator after a longer delay for visibility
-        setTimeout(() => {
-          this.autosaveService.setAutosaving(false);
-        }, 2000); // Increased from 1000ms to 2000ms
-      }
+    // Do not autosave if we're programmatically applying a draft
+    if (this.isApplyingDraft) {
+      return;
     }
+
+    const formTitleRaw = this.onboardingForm.get('formTitle')?.value ?? '';
+    const titleForDraft = (typeof formTitleRaw === 'string' ? formTitleRaw : String(formTitleRaw)).trim() || 'Untitled Draft';
+    const formData = this.getCompleteFormData();
+
+    // Compute current snapshot hash
+    const currentHash = JSON.stringify({ t: titleForDraft, d: formData });
+
+    // Special case: brand new draft where only the title was edited
+    if (this.lastSavedHash === null && titleForDraft !== 'Untitled Draft') {
+      this.autosaveService.setAutosaving(true);
+      this.formStorageService.saveDraft(formData, titleForDraft);
+      this.onboardingForm.markAsPristine();
+      this.lastSavedHash = currentHash;
+      setTimeout(() => {
+        this.autosaveService.setAutosaving(false);
+      }, 2000);
+      return;
+    }
+
+    // Skip only if hash is identical to our last saved snapshot
+    if (this.lastSavedHash === currentHash) {
+      return;
+    }
+
+    // Only save if there is meaningful content
+    const hasTitleContent = titleForDraft !== 'Untitled Draft';
+    const hasOtherContent = this.hasFormContent(formData);
+    if (!(hasTitleContent || hasOtherContent)) {
+      return;
+    }
+
+    this.autosaveService.setAutosaving(true);
+    this.formStorageService.saveDraft(formData, titleForDraft);
+
+    // Mark as pristine after saving to avoid repeated autosaves without changes
+    this.onboardingForm.markAsPristine();
+
+    // Update last saved snapshot hash
+    this.lastSavedHash = currentHash;
+
+    // Hide autosaving indicator after a longer delay for visibility
+    setTimeout(() => {
+      this.autosaveService.setAutosaving(false);
+    }, 2000);
   }
 
   // Check if form has meaningful content (current form or provided data)
@@ -619,21 +656,37 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
 
   // Load form data into the form
   private loadFormData(formData: any, titleName?: string): void {
-    this.onboardingForm.patchValue(formData);
-    
-    // Set the form title if provided
-    if (titleName) {
-      this.onboardingForm.patchValue({ formTitle: titleName });
-    }
-    
-    // Handle environments array specially
-    if (formData.applicationInfo?.environments) {
-      const environmentsArray = this.onboardingForm.get('applicationInfo.environments') as FormArray;
-      environmentsArray.clear();
-      this.environmentOptions.forEach((env, index) => {
-        const isSelected = formData.applicationInfo.environments.includes(env);
-        environmentsArray.push(this.formBuilder.control(isSelected));
-      });
+    this.isApplyingDraft = true;
+    try {
+      // Apply values without emitting events to avoid triggering autosave
+      this.onboardingForm.patchValue(formData, { emitEvent: false });
+
+      // Set the form title if provided
+      if (titleName) {
+        this.onboardingForm.patchValue({ formTitle: titleName }, { emitEvent: false });
+      }
+
+      // Handle environments array specially
+      if (formData.applicationInfo?.environments) {
+        const environmentsArray = this.onboardingForm.get('applicationInfo.environments') as FormArray;
+        environmentsArray.clear();
+        this.environmentOptions.forEach((env) => {
+          const isSelected = formData.applicationInfo.environments.includes(env);
+          environmentsArray.push(this.formBuilder.control(isSelected));
+        });
+      }
+
+      // Ensure no valueChanges emission from validity recalculation
+      this.onboardingForm.updateValueAndValidity({ emitEvent: false });
+    } finally {
+      // After programmatic load, consider the form pristine
+      this.onboardingForm.markAsPristine();
+      this.isApplyingDraft = false;
+      // Sync lastSavedHash to the loaded draft snapshot so we won't immediately resave the same data
+      const formTitleRaw = this.onboardingForm.get('formTitle')?.value ?? '';
+      const titleForDraft = (typeof formTitleRaw === 'string' ? formTitleRaw : String(formTitleRaw)).trim() || 'Untitled Draft';
+      const dataSnapshot = this.getCompleteFormData();
+      this.lastSavedHash = JSON.stringify({ t: titleForDraft, d: dataSnapshot });
     }
   }
 
@@ -641,8 +694,16 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
   private subscribeToDraftChanges(): void {
     this.draftSubscription = this.formStorageService.currentDraft$.subscribe(draft => {
       if (draft) {
-        this.loadFormData(draft.formData, draft.name);
-        
+        // Avoid redundant reloads if the current form already matches the draft
+        const currentFormData = this.getCompleteFormData();
+        const currentTitleRaw = this.onboardingForm.get('formTitle')?.value ?? '';
+        const currentTitle = (typeof currentTitleRaw === 'string' ? currentTitleRaw : String(currentTitleRaw)).trim() || 'Untitled Draft';
+        const sameTitle = draft.name === currentTitle;
+        const sameData = JSON.stringify(draft.formData) === JSON.stringify(currentFormData);
+        if (!(sameTitle && sameData)) {
+          this.loadFormData(draft.formData, draft.name);
+        }
+
         // Only show message if we're actively loading a template
         if (this.isLoadingTemplate) {
           this.addMessage(`Template "${draft.name}" loaded successfully.`, false);
@@ -663,6 +724,8 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     const environmentsArray = this.onboardingForm.get('applicationInfo.environments') as FormArray;
     environmentsArray.clear();
     this.initializeEnvironmentsArray();
+    // Reset last saved snapshot so next edit can autosave
+    this.lastSavedHash = null;
   }
 
   // Refresh form from current draft
@@ -680,12 +743,16 @@ export class OnboardingComponent implements OnInit, OnDestroy, AfterViewChecked 
     // Don't set default title - let placeholder handle it
     this.onboardingForm.markAsPristine();
     this.addMessage('New form created. Previous draft cleared.', false);
+    // Reset last saved snapshot so first edit autosaves
+    this.lastSavedHash = null;
   }
 
   clearForm(): void {
     this.onboardingForm.reset();
     this.onboardingForm.markAsPristine();
     this.addMessage('Form cleared.', false);
+    // Reset last saved snapshot so next edit can autosave
+    this.lastSavedHash = null;
   }
 
   // Form validation getter
