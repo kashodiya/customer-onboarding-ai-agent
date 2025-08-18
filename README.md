@@ -22,17 +22,19 @@ git clone <repository-url>
 cd customer-onboarding-ai-agent
 ```
 
-### 2. Backend Setup
+### 2. Backend Setup (Required First)
 ```bash
 # Install Python dependencies
 pip install -r requirements.txt
 
 # Start the FastAPI server
-uvicorn main:app --reload
+python main.py
+# OR alternatively:
+# uvicorn main:app --reload
 ```
 The backend will be available at `http://localhost:8000`
 
-### 3. Frontend Setup
+### 3. Frontend Setup (In a new terminal)
 ```bash
 # Navigate to Angular client directory
 cd angular-client
@@ -45,20 +47,27 @@ npm start
 ```
 The frontend will be available at `http://localhost:4200`
 
+**Note**: Both backend and frontend must be running simultaneously for the application to work properly.
+
 ## Development Workflow
 
-1. Start the backend server first:
-   ```bash
-   uvicorn main:app --reload
-   ```
+### Terminal 1 - Backend Server
+```bash
+# From the project root directory
+python main.py
+```
 
-2. In a separate terminal, start the frontend:
-   ```bash
-   cd angular-client
-   npm start
-   ```
+### Terminal 2 - Frontend Development Server
+```bash
+# From the project root directory
+cd angular-client
+npm start
+```
 
-3. Open your browser to `http://localhost:4200`
+### Access the Application
+Open your browser to `http://localhost:4200`
+
+**Important**: Keep both terminals running while developing. The frontend depends on the backend API and WebSocket connections.
 
 ## Features
 
@@ -113,7 +122,28 @@ Build artifacts will be in `angular-client/dist/`
 
 ## Troubleshooting
 
+### Common Setup Issues
+
 - **CORS Issues**: Make sure both frontend (4200) and backend (8000) are running
 - **WebSocket Connection**: Verify backend is running before starting frontend
 - **Form Updates**: Check browser console for WebSocket connection status
 - **AI Responses**: Ensure AI agent is properly initialized via `/start-agent`
+
+### Dependency Issues
+
+- **Angular CLI Errors**: If you encounter `@angular-devkit/architect` errors, run:
+  ```bash
+  cd angular-client
+  rm -rf node_modules package-lock.json
+  npm install
+  ```
+
+- **Python Import Errors**: Ensure you're using Python 3.8+ and have installed all requirements:
+  ```bash
+  pip install -r requirements.txt
+  ```
+
+### Port Conflicts
+
+- **Backend Port 8000 in use**: Change the port in `main.py` or kill the process using port 8000
+- **Frontend Port 4200 in use**: Angular will automatically suggest an alternative port
